@@ -17,6 +17,7 @@
 
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
+import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.data.DsContext;
 import com.haulmont.cuba.gui.model.ScreenData;
@@ -191,12 +192,12 @@ public class ComponentLoaderContext implements ComponentLoader.Context {
     }
 
     @Override
-    public Class<?> getComponentClass() {
+    public Class<? extends Component> getComponentClass() {
         return null;
     }
 
     @Override
-    public void setComponentClass(Class<?> componentClass) {
+    public void setComponentClass(Class<? extends Component> componentClass) {
         throw new UnsupportedOperationException();
     }
 

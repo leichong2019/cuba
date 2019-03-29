@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
+import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.data.DsContext;
 import com.haulmont.cuba.gui.model.ScreenData;
@@ -26,7 +27,7 @@ import java.util.Map;
 
 public class CompositeComponentLoaderContext implements ComponentLoader.Context {
 
-    protected Class<?> componentClass;
+    protected Class<? extends Component> componentClass;
     protected String template;
 
     protected ComponentLoader.Context parent;
@@ -117,12 +118,12 @@ public class CompositeComponentLoaderContext implements ComponentLoader.Context 
     }
 
     @Override
-    public Class<?> getComponentClass() {
+    public Class<? extends Component> getComponentClass() {
         return componentClass;
     }
 
     @Override
-    public void setComponentClass(Class<?> componentClass) {
+    public void setComponentClass(Class<? extends Component> componentClass) {
         this.componentClass = componentClass;
     }
 

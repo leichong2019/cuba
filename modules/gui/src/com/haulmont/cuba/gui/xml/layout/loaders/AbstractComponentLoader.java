@@ -977,6 +977,10 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
 
     protected String getWindowId(Context context) {
         Frame frame = context.getFrame();
+        // FIXME: gg,
+        if (frame == null) {
+            return null;
+        }
         Screen screen = UiControllerUtils.getScreen(frame.getFrameOwner());
         return screen.getId();
     }

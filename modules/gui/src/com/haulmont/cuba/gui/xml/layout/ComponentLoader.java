@@ -62,8 +62,8 @@ public interface ComponentLoader<T extends Component> {
         String getCurrentFrameId();
         void setCurrentFrameId(String currentFrameId);
 
-        Class<?> getComponentClass();
-        void setComponentClass(Class<?> componentClass);
+        Class<? extends Component> getComponentClass();
+        void setComponentClass(Class<? extends Component> componentClass);
 
         // TODO: gg, remove?
         String getComponentTemplate();
