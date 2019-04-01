@@ -30,7 +30,7 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.DataGrid.Column;
 import com.haulmont.cuba.gui.components.data.DataGridItems;
 import com.haulmont.cuba.gui.components.data.datagrid.ContainerDataGridItems;
-import com.haulmont.cuba.gui.components.data.datagrid.EmptyContainerDataGridItems;
+import com.haulmont.cuba.gui.components.data.datagrid.EmptyDataGridItems;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.dynamicattributes.DynamicAttributesGuiTools;
@@ -156,7 +156,7 @@ public abstract class AbstractDataGridLoader<T extends DataGrid> extends Actions
         } else {
             String metaClassStr = element.attributeValue("metaClass");
             if (Strings.isNullOrEmpty(metaClassStr)) {
-                throw createGuiDevelopmentException("DataGrid element doesn't have metaClass information",
+                throw createGuiDevelopmentException("DataGrid doesn't have data binding",
                         context, true, "DataGrid ID", element.attributeValue("id"));
             }
 
@@ -185,7 +185,7 @@ public abstract class AbstractDataGridLoader<T extends DataGrid> extends Actions
         } else {
             addDynamicAttributes(resultComponent, metaClass, null, null, availableColumns);
             //noinspection unchecked
-            resultComponent.setItems(createEmptyContainerDataGridSource(metaClass));
+            resultComponent.setItems(createEmptyDataGridItems(metaClass));
         }
 
         loadSelectionMode(resultComponent, element);
@@ -206,8 +206,8 @@ public abstract class AbstractDataGridLoader<T extends DataGrid> extends Actions
         return new ContainerDataGridItems(container);
     }
 
-    protected DataGridItems createEmptyContainerDataGridSource(MetaClass metaClass) {
-        return new EmptyContainerDataGridItems(metaClass);
+    protected DataGridItems createEmptyDataGridItems(MetaClass metaClass) {
+        return new EmptyDataGridItems(metaClass);
     }
 
     protected void loadEditorEnabled(DataGrid component, Element element) {

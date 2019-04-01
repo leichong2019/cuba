@@ -28,12 +28,12 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public class EmptyContainerDataGridItems<E extends Entity>
+public class EmptyDataGridItems<E extends Entity>
         implements EntityDataGridItems<E> {
 
     protected MetaClass metaClass;
 
-    public EmptyContainerDataGridItems(MetaClass metaClass) {
+    public EmptyDataGridItems(MetaClass metaClass) {
         this.metaClass = metaClass;
     }
 

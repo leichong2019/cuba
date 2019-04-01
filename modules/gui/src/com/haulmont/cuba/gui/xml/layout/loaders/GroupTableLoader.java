@@ -18,11 +18,12 @@ package com.haulmont.cuba.gui.xml.layout.loaders;
 
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.core.global.View;
-import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.GroupTable;
 import com.haulmont.cuba.gui.components.Table;
+import com.haulmont.cuba.gui.components.data.TableItems;
 import com.haulmont.cuba.gui.components.data.table.ContainerTableItems;
 import com.haulmont.cuba.gui.components.data.table.ContainerGroupTableItems;
+import com.haulmont.cuba.gui.components.data.table.EmptyGroupTableItems;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
@@ -92,5 +93,10 @@ public class GroupTableLoader extends AbstractTableLoader<GroupTable> {
     @Override
     protected ContainerTableItems createContainerTableSource(CollectionContainer container) {
         return new ContainerGroupTableItems(container);
+    }
+
+    @Override
+    protected TableItems createEmptyTableItems(MetaClass metaClass) {
+        return new EmptyGroupTableItems(metaClass);
     }
 }
