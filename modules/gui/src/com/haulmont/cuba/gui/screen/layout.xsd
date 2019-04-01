@@ -2223,6 +2223,7 @@
                 </xs:all>
 
                 <xs:attribute name="stylename" type="tableStylename"/>
+                <xs:attribute name="metaClass" type="xs:string"/>
                 <xs:attributeGroup ref="isTableComponent"/>
                 <xs:attributeGroup ref="hasContextHelp"/>
             </xs:extension>
@@ -2245,6 +2246,7 @@
 
                 <xs:attribute name="hierarchyProperty" type="xs:string"/>
                 <xs:attribute name="stylename" type="tableStylename"/>
+                <xs:attribute name="metaClass" type="xs:string"/>
                 <xs:attributeGroup ref="isTableComponent"/>
                 <xs:attributeGroup ref="hasContextHelp"/>
             </xs:extension>
@@ -2270,6 +2272,7 @@
 
                 <xs:attribute name="stylename" type="tableStylename"/>
                 <xs:attribute name="fixedGrouping" type="xs:boolean"/>
+                <xs:attribute name="metaClass" type="xs:string"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -2315,6 +2318,7 @@
                 <xs:attribute name="contextMenuEnabled" type="xs:boolean"/>
                 <xs:attribute name="datasource" type="xs:string"/>
                 <xs:attribute name="dataContainer" type="xs:string"/>
+                <xs:attribute name="metaClass" type="xs:string"/>
                 <xs:attribute name="frozenColumnCount" type="xs:integer"/>
                 <xs:attribute name="headerVisible" type="xs:boolean"/>
                 <xs:attribute name="footerVisible" type="xs:boolean"/>
