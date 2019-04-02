@@ -19,13 +19,18 @@ package com.haulmont.cuba.web.gui.components;
 import com.google.common.base.Preconditions;
 import com.haulmont.bali.events.EventHub;
 import com.haulmont.cuba.gui.components.Component;
+import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.SizeUnit;
+import com.haulmont.cuba.gui.components.sys.FrameImplementation;
 
 import java.util.EventObject;
+import java.util.Objects;
 
-public class CompositeComponent<T extends Component> implements Component {
+public class CompositeComponent<T extends Component> implements Component, Component.BelongToFrame {
 
+    protected String id;
     protected T root;
+    protected Frame frame;
 
     // private, lazily initialized
     private EventHub eventHub = null;
@@ -57,12 +62,25 @@ public class CompositeComponent<T extends Component> implements Component {
 
     @Override
     public String getId() {
-        return getCompositionNN().getId();
+        return id;
     }
 
     @Override
     public void setId(String id) {
-        getCompositionNN().setId(id);
+        if (!Objects.equals(this.id, id)) {
+            if (frame != null) {
+                ((FrameImplementation) frame).unregisterComponent(this);
+            }
+
+            this.id = id;
+
+            // TODO: gg, setCubaId
+            // TODO: gg, assignDebugId
+
+            if (frame != null) {
+                ((FrameImplementation) frame).registerComponent(this);
+            }
+        }
     }
 
     @Override
@@ -183,6 +201,26 @@ public class CompositeComponent<T extends Component> implements Component {
     @Override
     public <X> X unwrapComposition(Class<X> internalCompositionClass) {
         return getCompositionNN().unwrapComposition(internalCompositionClass);
+    }
+
+    @Override
+    public Frame getFrame() {
+        return frame;
+    }
+
+    @Override
+    public void setFrame(Frame frame) {
+        this.frame = frame;
+
+        if (frame instanceof FrameImplementation) {
+            ((FrameImplementation) frame).registerComponent(this);
+        }
+
+        if (getComposition() instanceof BelongToFrame) {
+            ((BelongToFrame) getComposition()).setFrame(frame);
+        }
+
+        // TODO: gg, assignDebugId
     }
 
     public static class CreateEvent extends EventObject {

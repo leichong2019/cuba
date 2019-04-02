@@ -30,6 +30,8 @@ public class CompositeComponentLoaderContext implements ComponentLoader.Context 
     protected Class<? extends Component> componentClass;
     protected String template;
 
+    protected Frame frame;
+
     protected ComponentLoader.Context parent;
 
     @Override
@@ -89,12 +91,12 @@ public class CompositeComponentLoaderContext implements ComponentLoader.Context 
 
     @Override
     public Frame getFrame() {
-        return null;
+        return frame;
     }
 
     @Override
     public void setFrame(Frame frame) {
-
+        this.frame = frame;
     }
 
     @Override

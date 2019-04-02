@@ -265,7 +265,7 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
                                         List<Table.Column> availableColumns) {
         if (getMetadataTools().isPersistent(metaClass)) {
             String windowId = getWindowId(context);
-            // FIXME: gg,
+            // Man be no windowId, if a loader is used from a CompositeComponent
             if (windowId == null) {
                 return;
             }

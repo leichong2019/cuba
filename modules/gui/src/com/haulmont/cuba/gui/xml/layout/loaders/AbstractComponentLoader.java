@@ -975,9 +975,10 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
         }
     }
 
+    @Nullable
     protected String getWindowId(Context context) {
         Frame frame = context.getFrame();
-        // FIXME: gg,
+        // Man be no frame, if a loader is used from a CompositeComponent
         if (frame == null) {
             return null;
         }
