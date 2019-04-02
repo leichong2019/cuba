@@ -265,7 +265,10 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
                                         List<Table.Column> availableColumns) {
         if (getMetadataTools().isPersistent(metaClass)) {
             String windowId = getWindowId(context);
-
+            // FIXME: gg,
+            if (windowId == null) {
+                return;
+            }
             Set<CategoryAttribute> attributesToShow =
                     getDynamicAttributesGuiTools().getAttributesToShowOnTheScreen(metaClass,
                             windowId, component.getId());
