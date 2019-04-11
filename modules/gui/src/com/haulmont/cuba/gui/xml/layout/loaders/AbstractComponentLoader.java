@@ -129,7 +129,7 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
     }
 
     protected CompositeComponentContext getCompositeComponentContext() {
-        Preconditions.checkState(context instanceof ComponentContext,
+        Preconditions.checkState(context instanceof CompositeComponentContext,
                 "'context' must implement com.haulmont.cuba.gui.xml.layout.ComponentLoader.CompositeComponentContext");
 
         return (CompositeComponentContext) getContext();
@@ -1051,6 +1051,16 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
             }
             parent = parent.getParent();
         }
+        return null;
+    }
+
+    @Nullable
+    protected Component findComponent(String componentId) {
+        if (context instanceof ComponentContext) {
+            return getComponentContext().getFrame().getComponent(componentId);
+        }
+
+        // TODO: gg, implement search
         return null;
     }
 

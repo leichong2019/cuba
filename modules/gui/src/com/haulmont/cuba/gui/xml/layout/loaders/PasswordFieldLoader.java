@@ -23,8 +23,13 @@ import com.haulmont.cuba.gui.components.PasswordField;
 import com.haulmont.cuba.gui.components.TextInputField;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PasswordFieldLoader extends AbstractTextFieldLoader<PasswordField> {
+
+    private final Logger log = LoggerFactory.getLogger(PasswordFieldLoader.class);
+
     @Override
     public void createComponent() {
         resultComponent = factory.create(PasswordField.NAME);
@@ -47,13 +52,15 @@ public class PasswordFieldLoader extends AbstractTextFieldLoader<PasswordField> 
         String capsLockIndicator = element.attributeValue("capsLockIndicator");
         if (StringUtils.isNotEmpty(capsLockIndicator)) {
             if (component.getCapsLockIndicator() == null) {
-                Component bindComponent = component.getFrame().getComponent(capsLockIndicator);
-                if (!(bindComponent instanceof CapsLockIndicator)) {
-                    throw createGuiDevelopmentException("Specify 'capsLockIndicator' attribute: id of " +
-                            "CapsLockIndicator component", context, true, "componentId", component
-                            .getId());
+                Component bindComponent = findComponent(capsLockIndicator);
+                if (bindComponent instanceof CapsLockIndicator) {
+                    component.setCapsLockIndicator((CapsLockIndicator) bindComponent);
+                } else if (bindComponent != null) {
+                    throw createGuiDevelopmentException("Unsupported 'capsLockIndicator' component class",
+                            context, true, "componentId", component.getId());
+                } else {
+                    log.warn("Unable to find capsLockIndicator component with id: {}", capsLockIndicator);
                 }
-                component.setCapsLockIndicator((CapsLockIndicator) bindComponent);
             }
         }
     }

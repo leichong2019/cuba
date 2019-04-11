@@ -28,7 +28,7 @@ import java.util.HashSet;
 
 public class FileUploadFieldLoader extends AbstractFieldLoader<FileUploadField> {
 
-    private final Logger log = LoggerFactory.getLogger(AbstractUploadFieldLoader.class);
+    private final Logger log = LoggerFactory.getLogger(FileUploadFieldLoader.class);
 
     @Override
     public void loadComponent() {
@@ -187,16 +187,5 @@ public class FileUploadFieldLoader extends AbstractFieldLoader<FileUploadField> 
                 log.warn("Unable to find pasteZone component with id: {}", pasteZoneId);
             }
         }
-    }
-
-    // TODO: gg, move to AbstractComponentLoader
-    @Nullable
-    protected Component findComponent(String dropZoneId) {
-        if (context instanceof ComponentContext) {
-            return getComponentContext().getFrame().getComponent(dropZoneId);
-        }
-
-        // TODO: gg, implement
-        return null;
     }
 }

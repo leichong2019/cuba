@@ -114,15 +114,4 @@ public abstract class AbstractUploadFieldLoader<T extends UploadField> extends A
             }
         }
     }
-
-    // TODO: gg, move to AbstractComponentLoader
-    @Nullable
-    protected Component findComponent(String dropZoneId) {
-        if (context instanceof ComponentContext) {
-            return getComponentContext().getFrame().getComponent(dropZoneId);
-        }
-
-        // TODO: gg, implement
-        return null;
-    }
 }
