@@ -96,7 +96,7 @@ public class FilterLoader extends AbstractComponentLoader<Filter> {
 
         String dataLoaderId = element.attributeValue("dataLoader");
         if (!StringUtils.isBlank(dataLoaderId)) {
-            FrameOwner frameOwner = context.getFrame().getFrameOwner();
+            FrameOwner frameOwner = getComponentContext().getFrame().getFrameOwner();
             ScreenData screenData = UiControllerUtils.getScreenData(frameOwner);
             DataLoader dataLoader = screenData.getLoader(dataLoaderId);
             if (!(dataLoader instanceof CollectionLoader)) {
@@ -107,11 +107,11 @@ public class FilterLoader extends AbstractComponentLoader<Filter> {
         } else {
             String datasource = element.attributeValue("datasource");
             if (!StringUtils.isBlank(datasource)) {
-                if (context.getDsContext() == null) {
+                if (getComponentContext().getDsContext() == null) {
                     throw new IllegalStateException("'datasource' attribute can be used only in screens with 'dsContext' element. " +
                             "In a screen with 'data' element use 'dataContainer' attribute.");
                 }
-                CollectionDatasource ds = (CollectionDatasource) context.getDsContext().get(datasource);
+                CollectionDatasource ds = (CollectionDatasource) getComponentContext().getDsContext().get(datasource);
                 if (ds == null) {
                     throw createGuiDevelopmentException("Can't find datasource by name: " + datasource, context, false);
                 }
@@ -119,7 +119,7 @@ public class FilterLoader extends AbstractComponentLoader<Filter> {
             }
         }
 
-        Frame frame = context.getFrame();
+        Frame frame = getComponentContext().getFrame();
         String applyTo = element.attributeValue("applyTo");
         if (!StringUtils.isEmpty(applyTo)) {
             context.addPostInitTask((c, w) -> {

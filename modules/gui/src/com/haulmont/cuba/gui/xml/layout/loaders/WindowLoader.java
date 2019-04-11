@@ -112,7 +112,7 @@ public class WindowLoader extends ContainerLoader<Window> implements ComponentRo
                 companionStopWatch.stop();
 
                 if (companion != null) {
-                    getContext().addInjectTask((c, w) -> {
+                    getComponentContext().addInjectTask((c, w) -> {
                         CompanionDependencyInjector cdi =
                                 new CompanionDependencyInjector((LegacyFrame) controller, companion);
                         cdi.setBeanLocator(beanLocator);
@@ -294,7 +294,7 @@ public class WindowLoader extends ContainerLoader<Window> implements ComponentRo
             timer.start();
         }
 
-        timer.setFrame(context.getFrame());
+        timer.setFrame(getComponentContext().getFrame());
 
         component.addTimer(timer);
     }
@@ -319,7 +319,7 @@ public class WindowLoader extends ContainerLoader<Window> implements ComponentRo
     }
 
     protected void addInitTimerMethodTask(Timer timer, String timerMethodName) {
-        FrameOwner controller = context.getFrame().getFrameOwner();
+        FrameOwner controller = getComponentContext().getFrame().getFrameOwner();
         Class<? extends FrameOwner> windowClass = controller.getClass();
 
         Method timerMethod;

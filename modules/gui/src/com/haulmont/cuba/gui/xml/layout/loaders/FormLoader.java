@@ -85,7 +85,7 @@ public class FormLoader extends AbstractComponentLoader<Form> {
     protected void loadDataContainer(Form resultComponent, Element element) {
         String containerId = element.attributeValue("dataContainer");
         if (!Strings.isNullOrEmpty(containerId)) {
-            FrameOwner frameOwner = context.getFrame().getFrameOwner();
+            FrameOwner frameOwner = getComponentContext().getFrame().getFrameOwner();
             ScreenData screenData = UiControllerUtils.getScreenData(frameOwner);
             InstanceContainer container = screenData.getContainer(containerId);
             //noinspection unchecked

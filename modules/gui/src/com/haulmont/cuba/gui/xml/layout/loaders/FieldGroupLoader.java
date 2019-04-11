@@ -242,7 +242,7 @@ public class FieldGroupLoader extends AbstractComponentLoader<FieldGroup> {
     protected Datasource loadDatasource(Element element) {
         String datasource = element.attributeValue("datasource");
         if (!StringUtils.isBlank(datasource)) {
-            Datasource ds = context.getDsContext().get(datasource);
+            Datasource ds = getComponentContext().getDsContext().get(datasource);
             if (ds == null) {
                 throw createGuiDevelopmentException("Can't find datasource by name: " + datasource, context, true);
             }
@@ -325,7 +325,7 @@ public class FieldGroupLoader extends AbstractComponentLoader<FieldGroup> {
         CollectionDatasource optionsDs = null;
         String optDsName = element.attributeValue("optionsDatasource");
         if (StringUtils.isNotBlank(optDsName)) {
-            LegacyFrame frame = (LegacyFrame) getContext().getFrame().getFrameOwner();
+            LegacyFrame frame = (LegacyFrame) getComponentContext().getFrame().getFrameOwner();
             DsContext dsContext = frame.getDsContext();
             optionsDs = findDatasourceRecursively(dsContext, optDsName);
             if (optionsDs == null) {

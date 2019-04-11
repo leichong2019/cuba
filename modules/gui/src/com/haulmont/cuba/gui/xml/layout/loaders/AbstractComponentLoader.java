@@ -17,6 +17,7 @@
 
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.haulmont.bali.util.ParamsMap;
@@ -120,6 +121,20 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
         this.context = context;
     }
 
+    protected ComponentContext getComponentContext() {
+        Preconditions.checkState(context instanceof ComponentContext,
+                "'context' must implement com.haulmont.cuba.gui.xml.layout.ComponentLoader.ComponentContext");
+
+        return (ComponentContext) getContext();
+    }
+
+    protected CompositeComponentContext getCompositeComponentContext() {
+        Preconditions.checkState(context instanceof ComponentContext,
+                "'context' must implement com.haulmont.cuba.gui.xml.layout.ComponentLoader.CompositeComponentContext");
+
+        return (CompositeComponentContext) getContext();
+    }
+
     @Override
     public Locale getLocale() {
         return locale;
@@ -201,9 +216,8 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
     }
 
     protected boolean isLegacyFrame() {
-        // FIXME: gg, no frame?
-        return context.getFrame() != null
-                && context.getFrame().getFrameOwner() instanceof LegacyFrame;
+        return context instanceof ComponentContext
+                && getComponentContext().getFrame().getFrameOwner() instanceof LegacyFrame;
     }
 
     protected void loadId(Component component, Element element) {
@@ -462,23 +476,30 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
     }
 
     protected void assignFrame(final Component.BelongToFrame component) {
-        if (context.getFrame() != null) {
-            component.setFrame(context.getFrame());
+        if (context instanceof ComponentContext
+                && getComponentContext().getFrame() != null) {
+            component.setFrame(getComponentContext().getFrame());
         }
     }
 
     protected void loadAction(ActionOwner component, Element element) {
-        String actionId = element.attributeValue("action");
-        if (!StringUtils.isEmpty(actionId)) {
-            context.addPostInitTask(new ActionOwnerAssignActionPostInitTask(component, actionId, context.getFrame()));
+        if (context instanceof ComponentContext) {
+            String actionId = element.attributeValue("action");
+            if (!StringUtils.isEmpty(actionId)) {
+                getComponentContext().addPostInitTask(
+                        new ActionOwnerAssignActionPostInitTask(component, actionId, getComponentContext().getFrame())
+                );
+            }
         }
     }
 
     protected void loadPresentations(HasPresentations component, Element element) {
-        String presentations = element.attributeValue("presentations");
-        if (StringUtils.isNotEmpty(presentations)) {
-            component.usePresentations(Boolean.parseBoolean(presentations));
-            context.addPostInitTask(new LoadPresentationsPostInitTask(component));
+        if (context instanceof ComponentContext) {
+            String presentations = element.attributeValue("presentations");
+            if (StringUtils.isNotEmpty(presentations)) {
+                component.usePresentations(Boolean.parseBoolean(presentations));
+                getComponentContext().addPostInitTask(new LoadPresentationsPostInitTask(component));
+            }
         }
     }
 
@@ -944,9 +965,15 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
         try {
             loader = constructor.newInstance();
         } catch (InvocationTargetException | IllegalAccessException | InstantiationException e) {
-            throw new RuntimeException("Loader instantiate error in: " +
-                    (context.getComponentTemplate() != null
-                            ? context.getComponentTemplate() : context.getFullFrameId()), e);
+            String location = null;
+            if (context instanceof ComponentContext) {
+                location = getComponentContext().getFullFrameId();
+            }
+            if (context instanceof CompositeComponentContext) {
+                location = getCompositeComponentContext().getComponentTemplate();
+            }
+
+            throw new RuntimeException("Loader instantiate error in: " + location, e);
         }
 
         loader.setBeanLocator(beanLocator);
@@ -977,13 +1004,13 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
 
     @Nullable
     protected String getWindowId(Context context) {
-        Frame frame = context.getFrame();
-        // Man be no frame, if a loader is used from a CompositeComponent
-        if (frame == null) {
-            return null;
+        if (context instanceof ComponentContext) {
+            Frame frame = getComponentContext().getFrame();
+            Screen screen = UiControllerUtils.getScreen(frame.getFrameOwner());
+            return screen.getId();
         }
-        Screen screen = UiControllerUtils.getScreen(frame.getFrameOwner());
-        return screen.getId();
+
+        return null;
     }
 
     @SuppressWarnings("unchecked")
@@ -1005,7 +1032,8 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
                                 "attribute is not defined", containerId, component.getId()), context, true);
             }
 
-            FrameOwner frameOwner = context.getFrame().getFrameOwner();
+
+            FrameOwner frameOwner = getComponentContext().getFrame().getFrameOwner();
             ScreenData screenData = UiControllerUtils.getScreenData(frameOwner);
             InstanceContainer container = screenData.getContainer(containerId);
 
@@ -1038,11 +1066,17 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
 
     protected GuiDevelopmentException createGuiDevelopmentException(String message, ComponentLoader.Context context,
                                                                     boolean fullId, Map<String, Object> params) {
-        if (context.getComponentClass() != null) {
-            return new GuiDevelopmentException(message, context.getComponentClass(), params);
+        if (context instanceof ComponentContext) {
+            return new GuiDevelopmentException(message, fullId
+                    ? getComponentContext().getFullFrameId()
+                    : getComponentContext().getCurrentFrameId(),
+                    params);
+        } else if (context instanceof CompositeComponentContext) {
+            return new GuiDevelopmentException(message, getCompositeComponentContext().getComponentClass(), params);
         } else {
-            return new GuiDevelopmentException(message,
-                    fullId ? context.getFullFrameId() : context.getCurrentFrameId(), params);
+            throw new IllegalArgumentException("'context' must implement of the following types: " +
+                    "com.haulmont.cuba.gui.xml.layout.ComponentLoader.ComponentContext, " +
+                    "com.haulmont.cuba.gui.xml.layout.ComponentLoader.CompositeComponentContext");
         }
     }
 }

@@ -17,107 +17,19 @@
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
 import com.haulmont.cuba.gui.components.Component;
-import com.haulmont.cuba.gui.components.Frame;
-import com.haulmont.cuba.gui.data.DsContext;
-import com.haulmont.cuba.gui.model.ScreenData;
-import com.haulmont.cuba.gui.screen.ScreenOptions;
 import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
-public class CompositeComponentLoaderContext implements ComponentLoader.Context {
+public class CompositeComponentLoaderContext implements ComponentLoader.CompositeComponentContext {
 
     protected Class<? extends Component> componentClass;
     protected String template;
 
-    protected Frame frame;
-
-    protected ComponentLoader.Context parent;
-
-    @Override
-    public ScreenOptions getOptions() {
-        return null;
-    }
-
-    @Override
-    public ScreenData getScreenData() {
-        return null;
-    }
-
-    @Override
-    public Map<String, Object> getParams() {
-        return null;
-    }
-
-    @Override
-    public DsContext getDsContext() {
-        return null;
-    }
-
-    @Override
-    public void addPostInitTask(ComponentLoader.PostInitTask task) {
-
-    }
-
-    @Override
-    public void executePostInitTasks() {
-
-    }
-
-    @Override
-    public void addInjectTask(ComponentLoader.InjectTask task) {
-
-    }
-
-    @Override
-    public void executeInjectTasks() {
-
-    }
-
-    @Override
-    public void addInitTask(ComponentLoader.InitTask task) {
-
-    }
-
-    @Override
-    public void executeInitTasks() {
-
-    }
-
-    @Override
-    public Map<String, String> getAliasesMap() {
-        return null;
-    }
-
-    @Override
-    public Frame getFrame() {
-        return frame;
-    }
-
-    @Override
-    public void setFrame(Frame frame) {
-        this.frame = frame;
-    }
-
-    @Override
-    public String getFullFrameId() {
-        return null;
-    }
-
-    @Override
-    public void setFullFrameId(String frameId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getCurrentFrameId() {
-        return null;
-    }
-
-    @Override
-    public void setCurrentFrameId(String currentFrameId) {
-        throw new UnsupportedOperationException();
-    }
+    protected List<ComponentLoader.PostInitTask> postInitTasks = new ArrayList<>();
+    protected List<ComponentLoader.InjectTask> injectTasks = new ArrayList<>();
+    protected List<ComponentLoader.InitTask> initTasks = new ArrayList<>();
 
     @Override
     public Class<? extends Component> getComponentClass() {
@@ -140,12 +52,41 @@ public class CompositeComponentLoaderContext implements ComponentLoader.Context 
     }
 
     @Override
-    public ComponentLoader.Context getParent() {
-        return parent;
+    public void addPostInitTask(ComponentLoader.PostInitTask task) {
+        postInitTasks.add(task);
     }
 
     @Override
-    public void setParent(ComponentLoader.Context parent) {
-        this.parent = parent;
+    public void executePostInitTasks() {
+        for (ComponentLoader.PostInitTask postInitTask : postInitTasks) {
+            postInitTask.execute(this, null);
+        }
+        postInitTasks.clear();
+    }
+
+    @Override
+    public void addInjectTask(ComponentLoader.InjectTask task) {
+        injectTasks.add(task);
+    }
+
+    @Override
+    public void executeInjectTasks() {
+        for (ComponentLoader.InjectTask injectTask : injectTasks) {
+            injectTask.execute(this, null);
+        }
+        injectTasks.clear();
+    }
+
+    @Override
+    public void addInitTask(ComponentLoader.InitTask task) {
+        initTasks.add(task);
+    }
+
+    @Override
+    public void executeInitTasks() {
+        for (ComponentLoader.InitTask initTask : initTasks) {
+            initTask.execute(this, null);
+        }
+        initTasks.clear();
     }
 }

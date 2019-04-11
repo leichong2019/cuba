@@ -132,7 +132,7 @@ public abstract class AbstractDataGridLoader<T extends DataGrid> extends Actions
         String containerId = element.attributeValue("dataContainer");
         String datasourceId = element.attributeValue("datasource");
         if (!Strings.isNullOrEmpty(containerId)) {
-            FrameOwner frameOwner = context.getFrame().getFrameOwner();
+            FrameOwner frameOwner = getComponentContext().getFrame().getFrameOwner();
             ScreenData screenData = UiControllerUtils.getScreenData(frameOwner);
             InstanceContainer container = screenData.getContainer(containerId);
             if (container instanceof CollectionContainer) {
@@ -145,7 +145,7 @@ public abstract class AbstractDataGridLoader<T extends DataGrid> extends Actions
                 dataLoader = ((HasLoader) collectionContainer).getLoader();
             }
         } else if (!Strings.isNullOrEmpty(datasourceId)) {
-            datasource = context.getDsContext().get(datasourceId);
+            datasource = getComponentContext().getDsContext().get(datasourceId);
             if (datasource == null) {
                 throw createGuiDevelopmentException("Can't find datasource by name: " + datasourceId, context, false);
             }

@@ -108,7 +108,7 @@ public class LookupFieldLoader extends AbstractFieldLoader<LookupField> {
 
         String newOptionHandlerMethod = element.attributeValue("newOptionHandler");
         if (StringUtils.isNotEmpty(newOptionHandlerMethod)) {
-            FrameOwner controller = context.getFrame().getFrameOwner();
+            FrameOwner controller = getComponentContext().getFrame().getFrameOwner();
             Class<? extends FrameOwner> windowClass = controller.getClass();
 
             Method newOptionHandler;
@@ -141,7 +141,7 @@ public class LookupFieldLoader extends AbstractFieldLoader<LookupField> {
 
         String containerId = element.attributeValue("optionsContainer");
         if (containerId != null) {
-            FrameOwner frameOwner = context.getFrame().getFrameOwner();
+            FrameOwner frameOwner = getComponentContext().getFrame().getFrameOwner();
             ScreenData screenData = UiControllerUtils.getScreenData(frameOwner);
             InstanceContainer container = screenData.getContainer(containerId);
             if (!(container instanceof CollectionContainer)) {
@@ -157,7 +157,7 @@ public class LookupFieldLoader extends AbstractFieldLoader<LookupField> {
 
         String datasource = element.attributeValue("optionsDatasource");
         if (!StringUtils.isEmpty(datasource)) {
-            Datasource ds = context.getDsContext().get(datasource);
+            Datasource ds = getComponentContext().getDsContext().get(datasource);
             ((LookupField) component).setOptionsDatasource((CollectionDatasource) ds);
         }
     }

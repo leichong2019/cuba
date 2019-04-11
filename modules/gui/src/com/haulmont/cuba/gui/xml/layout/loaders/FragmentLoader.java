@@ -16,6 +16,7 @@
  */
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
+import com.google.common.base.Preconditions;
 import com.haulmont.cuba.core.global.BeanLocator;
 import com.haulmont.cuba.core.global.DevelopmentException;
 import com.haulmont.cuba.gui.AppConfig;
@@ -42,6 +43,7 @@ import com.haulmont.cuba.gui.sys.UiControllerDependencyInjector;
 import com.haulmont.cuba.gui.sys.UiControllerPropertyInjector;
 import com.haulmont.cuba.gui.sys.UiControllerProperty;
 import com.haulmont.cuba.gui.xml.data.DsContextLoader;
+import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
 import com.haulmont.cuba.gui.xml.layout.ComponentRootLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
@@ -105,7 +107,7 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
             getScreenViewsLoader().deployViews(element);
         }
 
-        if (context.getParent() == null) {
+        if (getComponentContext().getParent() == null) {
             throw new IllegalStateException("FragmentLoader is always called within parent ComponentLoaderContext");
         }
 
@@ -113,7 +115,8 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
 
         Element layoutElement = element.element("layout");
         if (layoutElement == null) {
-            throw new GuiDevelopmentException("Required 'layout' element is not found", context.getFullFrameId());
+            throw new GuiDevelopmentException("Required 'layout' element is not found",
+                    getComponentContext().getFullFrameId());
         }
 
         loadIcon(resultComponent, layoutElement);
@@ -140,7 +143,7 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
             loadDsContext(dsContextElement);
         }
 
-        ComponentLoaderContext parentContext = (ComponentLoaderContext) getContext().getParent();
+        ComponentLoaderContext parentContext = (ComponentLoaderContext) getComponentContext().getParent();
         ScreenOptions options = parentContext.getOptions();
 
         // add inject / init tasks before nested fragments
@@ -152,7 +155,7 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
 
     protected void loadScreenData(Element dataEl) {
         ScreenData hostScreenData = null;
-        Context parent = context.getParent();
+        ComponentContext parent = getComponentContext().getParent();
         while (hostScreenData == null && parent != null) {
             hostScreenData = parent.getScreenData();
             parent = parent.getParent();
@@ -167,18 +170,19 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
         DsContext dsContext = null;
         if (resultComponent.getFrameOwner() instanceof LegacyFrame) {
             DsContextLoader dsContextLoader;
-            DsContext parentDsContext = context.getParent().getDsContext();
+            DsContext parentDsContext = getComponentContext().getParent().getDsContext();
             if (parentDsContext != null){
                 dsContextLoader = new DsContextLoader(parentDsContext.getDataSupplier());
             } else {
                 dsContextLoader = new DsContextLoader(new GenericDataSupplier());
             }
 
-            dsContext = dsContextLoader.loadDatasources(dsContextElement, parentDsContext, getContext().getAliasesMap());
+            dsContext = dsContextLoader.loadDatasources(dsContextElement, parentDsContext,
+                    getComponentContext().getAliasesMap());
             ((ComponentLoaderContext) context).setDsContext(dsContext);
         }
         if (dsContext != null) {
-            FrameOwner frameOwner = getContext().getFrame().getFrameOwner();
+            FrameOwner frameOwner = getComponentContext().getFrame().getFrameOwner();
             if (frameOwner instanceof LegacyFrame) {
                 LegacyFrame frame = (LegacyFrame) frameOwner;
                 frame.setDsContext(dsContext);
@@ -213,7 +217,10 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
 
         @Override
         public void execute(Context context, Frame window) {
-            String loggingId = context.getFullFrameId();
+            Preconditions.checkArgument(context instanceof ComponentLoader.ComponentContext,
+                    "'context' must implement com.haulmont.cuba.gui.xml.layout.ComponentLoader.ComponentContext");
+
+            String loggingId = ((ComponentContext) context).getFullFrameId();
             try {
                 if (fragment.getFrameOwner() instanceof AbstractFrame) {
                     Element companionsElem = element.element("companions");

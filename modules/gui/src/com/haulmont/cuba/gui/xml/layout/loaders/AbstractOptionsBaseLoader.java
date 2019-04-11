@@ -17,7 +17,6 @@
 
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
-import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.CaptionMode;
 import com.haulmont.cuba.gui.components.DatasourceComponent;
 import com.haulmont.cuba.gui.components.OptionsField;
@@ -59,7 +58,7 @@ public abstract class AbstractOptionsBaseLoader<T extends OptionsField> extends 
     protected void loadDatasource(DatasourceComponent component, Element element) {
         String datasource = element.attributeValue("optionsDatasource");
         if (!StringUtils.isEmpty(datasource)) {
-            Datasource ds = context.getDsContext().get(datasource);
+            Datasource ds = getComponentContext().getDsContext().get(datasource);
             ((T) component).setOptionsDatasource((CollectionDatasource) ds);
         }
 
@@ -73,7 +72,7 @@ public abstract class AbstractOptionsBaseLoader<T extends OptionsField> extends 
 
         String containerId = element.attributeValue("optionsContainer");
         if (containerId != null) {
-            FrameOwner frameOwner = context.getFrame().getFrameOwner();
+            FrameOwner frameOwner = getComponentContext().getFrame().getFrameOwner();
             ScreenData screenData = UiControllerUtils.getScreenData(frameOwner);
             InstanceContainer container = screenData.getContainer(containerId);
             if (!(container instanceof CollectionContainer)) {

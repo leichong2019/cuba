@@ -25,6 +25,7 @@ import com.haulmont.cuba.gui.model.ScreenData;
 import com.haulmont.cuba.gui.screen.ScreenOptions;
 import org.dom4j.Element;
 
+import javax.annotation.Nullable;
 import java.util.Locale;
 import java.util.Map;
 
@@ -34,13 +35,6 @@ import java.util.Map;
 public interface ComponentLoader<T extends Component> {
 
     interface Context {
-        ScreenOptions getOptions();
-
-        ScreenData getScreenData();
-
-        Map<String, Object> getParams();
-        DsContext getDsContext();
-
         void addPostInitTask(PostInitTask task);
         void executePostInitTasks();
 
@@ -49,28 +43,37 @@ public interface ComponentLoader<T extends Component> {
 
         void addInitTask(InitTask task);
         void executeInitTasks();
+    }
+
+    interface ComponentContext extends Context {
+        ScreenOptions getOptions();
+
+        ScreenData getScreenData();
+
+        Map<String, Object> getParams();
+        DsContext getDsContext();
 
         Map<String, String> getAliasesMap();
 
         Frame getFrame();
         void setFrame(Frame frame);
 
-        // TODO: gg, nullable
         String getFullFrameId();
         void setFullFrameId(String frameId);
 
         String getCurrentFrameId();
         void setCurrentFrameId(String currentFrameId);
 
+        ComponentContext getParent();
+        void setParent(ComponentContext parent);
+    }
+
+    interface CompositeComponentContext extends Context {
         Class<? extends Component> getComponentClass();
         void setComponentClass(Class<? extends Component> componentClass);
 
-        // TODO: gg, remove?
         String getComponentTemplate();
         void setComponentTemplate(String template);
-
-        Context getParent();
-        void setParent(Context parent);
     }
 
     /**
@@ -83,7 +86,7 @@ public interface ComponentLoader<T extends Component> {
          * @param context loader context
          * @param window  top-most window
          */
-        void execute(Context context, Frame window);
+        void execute(Context context, @Nullable Frame window);
     }
 
     /**
@@ -96,7 +99,7 @@ public interface ComponentLoader<T extends Component> {
          * @param context top-most loader context
          * @param window top-most window
          */
-        void execute(Context context, Frame window);
+        void execute(Context context, @Nullable Frame window);
     }
 
     /**
@@ -109,7 +112,7 @@ public interface ComponentLoader<T extends Component> {
          * @param context loader context
          * @param window top-most window
          */
-        void execute(Context context, Frame window);
+        void execute(Context context, @Nullable Frame window);
     }
 
     Context getContext();

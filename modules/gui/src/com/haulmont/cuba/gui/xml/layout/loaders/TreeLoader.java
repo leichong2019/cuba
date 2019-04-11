@@ -87,7 +87,7 @@ public class TreeLoader extends ActionsHolderLoader<Tree> {
 
         String containerId = element.attributeValue("dataContainer");
         if (containerId != null) {
-            FrameOwner frameOwner = context.getFrame().getFrameOwner();
+            FrameOwner frameOwner = getComponentContext().getFrame().getFrameOwner();
             ScreenData screenData = UiControllerUtils.getScreenData(frameOwner);
             InstanceContainer container = screenData.getContainer(containerId);
             CollectionContainer collectionContainer;
@@ -110,7 +110,8 @@ public class TreeLoader extends ActionsHolderLoader<Tree> {
         } else if (itemsElem != null) {
             String datasource = itemsElem.attributeValue("datasource");
             if (!StringUtils.isBlank(datasource)) {
-                HierarchicalDatasource ds = (HierarchicalDatasource) context.getDsContext().get(datasource);
+                HierarchicalDatasource ds =
+                        (HierarchicalDatasource) getComponentContext().getDsContext().get(datasource);
                 resultComponent.setDatasource(ds);
             }
         }

@@ -17,7 +17,6 @@
 
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
-import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.data.DsContext;
 import com.haulmont.cuba.gui.model.ScreenData;
@@ -31,7 +30,7 @@ import com.haulmont.cuba.gui.xml.layout.ComponentLoader.PostInitTask;
 
 import java.util.*;
 
-public class ComponentLoaderContext implements ComponentLoader.Context {
+public class ComponentLoaderContext implements ComponentLoader.ComponentContext {
 
     protected ScreenOptions options;
 
@@ -49,7 +48,7 @@ public class ComponentLoaderContext implements ComponentLoader.Context {
     protected List<UiControllerProperty> properties = Collections.emptyList();
     protected Map<String, String> aliasesMap = new HashMap<>();
 
-    protected ComponentLoader.Context parent;
+    protected ComponentLoader.ComponentContext parent;
 
     public ComponentLoaderContext(ScreenOptions options) {
         this.options = options;
@@ -123,12 +122,12 @@ public class ComponentLoaderContext implements ComponentLoader.Context {
     }
 
     @Override
-    public ComponentLoader.Context getParent() {
+    public ComponentLoader.ComponentContext getParent() {
         return parent;
     }
 
     @Override
-    public void setParent(ComponentLoader.Context parent) {
+    public void setParent(ComponentLoader.ComponentContext parent) {
         this.parent = parent;
     }
 
@@ -186,28 +185,7 @@ public class ComponentLoaderContext implements ComponentLoader.Context {
         return initTasks;
     }
 
-    @Override
     public Map<String, String> getAliasesMap() {
         return aliasesMap;
-    }
-
-    @Override
-    public Class<? extends Component> getComponentClass() {
-        return null;
-    }
-
-    @Override
-    public void setComponentClass(Class<? extends Component> componentClass) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getComponentTemplate() {
-        return null;
-    }
-
-    @Override
-    public void setComponentTemplate(String template) {
-        throw new UnsupportedOperationException();
     }
 }

@@ -250,11 +250,8 @@ public class WebUiComponents implements UiComponents {
     }
 
     protected Component processCompositionTemplate(Class<? extends Component> componentClass, String template) {
-        ComponentLoader.Context context = new CompositeComponentLoaderContext();
+        ComponentLoader.CompositeComponentContext context = new CompositeComponentLoaderContext();
         context.setComponentClass(componentClass);
-        context.setComponentTemplate(template);
-        // TODO: gg, set some useful values
-//        context.setFrame(window);
 
         CompositeComponentLayoutLoader layoutLoader =
                 beanLocator.getPrototype(CompositeComponentLayoutLoader.NAME, context);

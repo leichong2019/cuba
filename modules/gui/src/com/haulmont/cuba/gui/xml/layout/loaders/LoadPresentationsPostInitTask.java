@@ -20,6 +20,8 @@ import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.HasPresentations;
 import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
 
+import javax.annotation.Nullable;
+
 public class LoadPresentationsPostInitTask implements ComponentLoader.PostInitTask {
 
     private HasPresentations component;
@@ -29,7 +31,7 @@ public class LoadPresentationsPostInitTask implements ComponentLoader.PostInitTa
     }
 
     @Override
-    public void execute(ComponentLoader.Context context, Frame window) {
+    public void execute(ComponentLoader.Context context, @Nullable Frame window) {
         if (component.isUsePresentations()) {
             component.loadPresentations();
         }

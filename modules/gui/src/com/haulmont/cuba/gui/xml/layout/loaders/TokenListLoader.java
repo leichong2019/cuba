@@ -178,7 +178,8 @@ public class TokenListLoader extends AbstractFieldLoader<TokenList> {
         if (component.getOptions() == null) {
             String optionsDatasource = lookupElement.attributeValue("optionsDatasource");
             if (!StringUtils.isEmpty(optionsDatasource)) {
-                CollectionDatasource ds = (CollectionDatasource) context.getDsContext().get(optionsDatasource);
+                CollectionDatasource ds =
+                        (CollectionDatasource) getComponentContext().getDsContext().get(optionsDatasource);
                 component.setOptionsDatasource(ds);
             }
         }
@@ -243,7 +244,7 @@ public class TokenListLoader extends AbstractFieldLoader<TokenList> {
     protected void loadDatasource(TokenList tokenList, Element element) {
         final String datasourceId = element.attributeValue("datasource");
         if (StringUtils.isNotEmpty(datasourceId)) {
-            Datasource datasource = context.getDsContext().get(datasourceId);
+            Datasource datasource = getComponentContext().getDsContext().get(datasourceId);
             if (datasource == null) {
                 throw createGuiDevelopmentException(String.format("Datasource '%s' is not defined", datasourceId),
                         context, true);
@@ -269,7 +270,7 @@ public class TokenListLoader extends AbstractFieldLoader<TokenList> {
     protected void loadOptionsContainer(TokenList component, Element element) {
         String containerId = element.attributeValue("optionsContainer");
         if (containerId != null) {
-            FrameOwner frameOwner = context.getFrame().getFrameOwner();
+            FrameOwner frameOwner = getComponentContext().getFrame().getFrameOwner();
             ScreenData screenData = UiControllerUtils.getScreenData(frameOwner);
             InstanceContainer container = screenData.getContainer(containerId);
             if (!(container instanceof CollectionContainer)) {

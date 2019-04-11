@@ -18,7 +18,6 @@ package com.haulmont.cuba.gui.xml.layout.loaders;
 
 import com.haulmont.cuba.core.global.DevelopmentException;
 import com.haulmont.cuba.gui.FrameContext;
-import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.AbstractFrame;
 import com.haulmont.cuba.gui.components.Fragment;
 import com.haulmont.cuba.gui.components.sys.FragmentImplementation;
@@ -130,7 +129,7 @@ public class FragmentComponentLoader extends ContainerLoader<Fragment> {
                 frameId = parentContext.getFullFrameId() + "." + frameId;
             }
 
-            innerContext = new ComponentLoaderContext(context.getOptions());
+            innerContext = new ComponentLoaderContext(getComponentContext().getOptions());
             innerContext.setCurrentFrameId(fragmentId);
             innerContext.setFullFrameId(frameId);
             innerContext.setFrame(fragment);
@@ -144,7 +143,7 @@ public class FragmentComponentLoader extends ContainerLoader<Fragment> {
             ScreenXmlLoader screenXmlLoader = beanLocator.get(ScreenXmlLoader.NAME);
 
             Element windowElement = screenXmlLoader.load(windowInfo.getTemplate(), windowInfo.getId(),
-                    getContext().getParams());
+                    getComponentContext().getParams());
 
             this.fragmentLoader = layoutLoader.createFragmentContent(fragment, windowElement, fragmentId);
         }
@@ -231,8 +230,8 @@ public class FragmentComponentLoader extends ContainerLoader<Fragment> {
     public void loadComponent() {
         loadAliases();
 
-        if (context.getFrame() != null) {
-            resultComponent.setFrame(context.getFrame());
+        if (getComponentContext().getFrame() != null) {
+            resultComponent.setFrame(getComponentContext().getFrame());
         }
 
         String src = element.attributeValue("src");
@@ -241,8 +240,8 @@ public class FragmentComponentLoader extends ContainerLoader<Fragment> {
         if (element.attributeValue("id") != null) {
             screenPath = element.attributeValue("id");
         }
-        if (context.getFrame() != null) {
-            String parentId = context.getFullFrameId();
+        if (getComponentContext().getFrame() != null) {
+            String parentId = getComponentContext().getFullFrameId();
             if (StringUtils.isNotEmpty(parentId)) {
                 screenPath = parentId + "." + screenPath;
             }

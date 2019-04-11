@@ -22,6 +22,7 @@ import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -158,7 +159,7 @@ public class FileUploadFieldLoader extends AbstractFieldLoader<FileUploadField> 
     protected void loadDropZone(UploadField uploadField, Element element) {
         String dropZoneId = element.attributeValue("dropZone");
         if (StringUtils.isNotEmpty(dropZoneId)) {
-            Component dropZone = context.getFrame().getComponent(dropZoneId);
+            Component dropZone = findComponent(dropZoneId);
             if (dropZone instanceof BoxLayout) {
                 uploadField.setDropZone(new UploadField.DropZone((BoxLayout) dropZone));
             } else if (dropZone != null) {
@@ -177,7 +178,7 @@ public class FileUploadFieldLoader extends AbstractFieldLoader<FileUploadField> 
     protected void loadPasteZone(UploadField uploadField, Element element) {
         String pasteZoneId = element.attributeValue("pasteZone");
         if (StringUtils.isNotEmpty(pasteZoneId)) {
-            Component pasteZone = context.getFrame().getComponent(pasteZoneId);
+            Component pasteZone = findComponent(pasteZoneId);
             if (pasteZone instanceof ComponentContainer) {
                 uploadField.setPasteZone((ComponentContainer) pasteZone);
             } else if (pasteZone != null) {
@@ -186,5 +187,16 @@ public class FileUploadFieldLoader extends AbstractFieldLoader<FileUploadField> 
                 log.warn("Unable to find pasteZone component with id: {}", pasteZoneId);
             }
         }
+    }
+
+    // TODO: gg, move to AbstractComponentLoader
+    @Nullable
+    protected Component findComponent(String dropZoneId) {
+        if (context instanceof ComponentContext) {
+            return getComponentContext().getFrame().getComponent(dropZoneId);
+        }
+
+        // TODO: gg, implement
+        return null;
     }
 }

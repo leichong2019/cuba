@@ -140,7 +140,7 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
 
         String containerId = element.attributeValue("dataContainer");
         if (containerId != null) {
-            FrameOwner frameOwner = context.getFrame().getFrameOwner();
+            FrameOwner frameOwner = getComponentContext().getFrame().getFrameOwner();
             ScreenData screenData = UiControllerUtils.getScreenData(frameOwner);
             InstanceContainer container = screenData.getContainer(containerId);
             if (container instanceof CollectionContainer) {
@@ -160,7 +160,7 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
                         context, false, "Table ID", element.attributeValue("id"));
             }
 
-            datasource = context.getDsContext().get(datasourceId);
+            datasource = getComponentContext().getDsContext().get(datasourceId);
             if (datasource == null) {
                 throw createGuiDevelopmentException("Can't find datasource by name: " + datasourceId, context, false);
             }

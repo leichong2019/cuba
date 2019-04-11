@@ -403,7 +403,11 @@ public class WebTabSheet extends WebAbstractComponent<CubaTabSheet>
             this.component.setCubaId(tabControl, name);
         }
 
-        tabContent.setFrame(context.getFrame());
+        if (context instanceof ComponentLoader.ComponentContext) {
+            tabContent.setFrame(((ComponentLoader.ComponentContext) context).getFrame());
+        } else {
+            // TODO: gg, throw an exception?
+        }
 
         return tab;
     }

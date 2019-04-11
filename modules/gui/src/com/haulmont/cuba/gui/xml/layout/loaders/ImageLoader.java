@@ -16,7 +16,6 @@
 
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
-import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.Image;
 import com.haulmont.cuba.gui.data.Datasource;
 import org.apache.commons.lang3.StringUtils;
@@ -54,7 +53,7 @@ public class ImageLoader extends AbstractResourceViewLoader<Image> {
     protected void loadDatasource(Image component, Element element) {
         final String datasource = element.attributeValue("datasource");
         if (!StringUtils.isEmpty(datasource)) {
-            Datasource ds = context.getDsContext().get(datasource);
+            Datasource ds = getComponentContext().getDsContext().get(datasource);
             if (ds == null) {
                 throw createGuiDevelopmentException(String.format("Datasource '%s' is not defined", datasource),
                         getContext(), true, "Component ID", component.getId());
