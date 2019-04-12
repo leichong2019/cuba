@@ -16,14 +16,12 @@
 
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
-import com.google.common.base.Preconditions;
 import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.sys.ValuePathHelper;
 import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
 import org.apache.commons.lang3.ArrayUtils;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 
 public abstract class AbstractAssignActionPostInitTask implements ComponentLoader.PostInitTask {
@@ -38,11 +36,7 @@ public abstract class AbstractAssignActionPostInitTask implements ComponentLoade
     }
 
     @Override
-    public void execute(ComponentLoader.Context context, @Nullable Frame window) {
-        Preconditions.checkArgument(context instanceof ComponentLoader.ComponentContext,
-                "'context' must implement com.haulmont.cuba.gui.xml.layout.ComponentLoader.ComponentContext");
-
-        ComponentLoader.ComponentContext componentContext = (ComponentLoader.ComponentContext) context;
+    public void execute(ComponentLoader.ComponentContext context, Frame window) {
         String[] elements = ValuePathHelper.parse(actionId);
         if (elements.length > 1) {
             String id = elements[elements.length - 1];
@@ -53,19 +47,19 @@ public abstract class AbstractAssignActionPostInitTask implements ComponentLoade
             if (holder == null) {
                 throw new GuiDevelopmentException(
                         "Can't find component: " + Arrays.toString(subPath) + " for action: " + actionId,
-                        componentContext.getFullFrameId(), "Component ID", Arrays.toString(subPath));
+                        context.getFullFrameId(), "Component ID", Arrays.toString(subPath));
             }
 
             if (!(holder instanceof ActionsHolder)) {
                 throw new GuiDevelopmentException(String.format(
-                        "Component '%s' can't contain actions", holder.getId()), componentContext.getFullFrameId(),
+                        "Component '%s' can't contain actions", holder.getId()), context.getFullFrameId(),
                         "Holder ID", holder.getId());
             }
 
             Action action = ((ActionsHolder) holder).getAction(id);
             if (action == null) {
                 throw new GuiDevelopmentException(String.format(
-                        "Can't find action '%s' in '%s'", id, holder.getId()), componentContext.getFullFrameId(),
+                        "Can't find action '%s' in '%s'", id, holder.getId()), context.getFullFrameId(),
                         "Holder ID", holder.getId());
             }
 
@@ -81,13 +75,13 @@ public abstract class AbstractAssignActionPostInitTask implements ComponentLoade
                         message += ". This may happen if you are opening an AbstractEditor-based screen by openWindow() method, " +
                                 "for example from the main menu. Use openEditor() method or give the screen a name ended " +
                                 "with '.edit' to open it as editor from the main menu.";
-                    throw new GuiDevelopmentException(message, componentContext.getFullFrameId());
+                    throw new GuiDevelopmentException(message, context.getFullFrameId());
                 }
             } else {
                 addAction(action);
             }
         } else {
-            throw new GuiDevelopmentException("Empty action name", componentContext.getFullFrameId());
+            throw new GuiDevelopmentException("Empty action name", context.getFullFrameId());
         }
     }
 

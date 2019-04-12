@@ -1058,9 +1058,18 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
     protected Component findComponent(String componentId) {
         if (context instanceof ComponentContext) {
             return getComponentContext().getFrame().getComponent(componentId);
+        } else if (context instanceof CompositeComponentContext) {
+            // We assume that CompositeComponent has only one root component
+            Component current = resultComponent;
+            while (current.getParent() != null) {
+                current = current.getParent();
+            }
+
+            if (current instanceof ComponentContainer) {
+                return ((ComponentContainer) current).getComponent(componentId);
+            }
         }
 
-        // TODO: gg, implement search
         return null;
     }
 

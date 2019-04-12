@@ -122,13 +122,15 @@ public class FilterLoader extends AbstractComponentLoader<Filter> {
         Frame frame = getComponentContext().getFrame();
         String applyTo = element.attributeValue("applyTo");
         if (!StringUtils.isEmpty(applyTo)) {
-            context.addPostInitTask((c, w) -> {
-                Component applyToComponent = frame.getComponent(applyTo);
-                if (c == null) {
-                    throw createGuiDevelopmentException("Can't apply component to component with ID: " + applyTo, context, true);
-                }
-                resultComponent.setApplyTo(applyToComponent);
-            });
+            if (context instanceof ComponentContext) {
+                getComponentContext().addPostInitTask((c, w) -> {
+                    Component applyToComponent = frame.getComponent(applyTo);
+                    if (c == null) {
+                        throw createGuiDevelopmentException("Can't apply component to component with ID: " + applyTo, context, true);
+                    }
+                    resultComponent.setApplyTo(applyToComponent);
+                });
+            }
         }
 
         String modeSwitchVisible = element.attributeValue("modeSwitchVisible");
@@ -136,13 +138,15 @@ public class FilterLoader extends AbstractComponentLoader<Filter> {
             resultComponent.setModeSwitchVisible(Boolean.parseBoolean(modeSwitchVisible));
         }
 
-        context.addPostInitTask((context1, window) -> {
-            ((FilterImplementation) resultComponent).loadFiltersAndApplyDefault();
-            String defaultMode = element.attributeValue("defaultMode");
-            if (FTS_MODE_VALUE.equals(defaultMode)) {
-                resultComponent.switchFilterMode(FilterDelegate.FilterMode.FTS_MODE);
-            }
-        });
+        if (context instanceof ComponentContext) {
+            getComponentContext().addPostInitTask((context1, window) -> {
+                ((FilterImplementation) resultComponent).loadFiltersAndApplyDefault();
+                String defaultMode = element.attributeValue("defaultMode");
+                if (FTS_MODE_VALUE.equals(defaultMode)) {
+                    resultComponent.switchFilterMode(FilterDelegate.FilterMode.FTS_MODE);
+                }
+            });
+        }
     }
 
     protected void loadBorderVisible(Filter resultComponent, Element element) {

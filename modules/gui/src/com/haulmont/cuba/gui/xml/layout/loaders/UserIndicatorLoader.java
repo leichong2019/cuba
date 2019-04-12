@@ -41,8 +41,10 @@ public class UserIndicatorLoader extends AbstractComponentLoader<UserIndicator> 
         loadEnable(resultComponent, element);
         loadVisible(resultComponent, element);
 
-        context.addPostInitTask((context1, window) ->
-                resultComponent.refreshUserSubstitutions()
-        );
+        if (context instanceof ComponentContext) {
+            getComponentContext().addPostInitTask((context1, window) ->
+                    resultComponent.refreshUserSubstitutions()
+            );
+        }
     }
 }

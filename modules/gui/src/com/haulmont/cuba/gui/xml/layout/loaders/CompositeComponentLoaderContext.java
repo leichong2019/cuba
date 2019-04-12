@@ -19,17 +19,10 @@ package com.haulmont.cuba.gui.xml.layout.loaders;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class CompositeComponentLoaderContext implements ComponentLoader.CompositeComponentContext {
 
     protected Class<? extends Component> componentClass;
     protected String template;
-
-    protected List<ComponentLoader.PostInitTask> postInitTasks = new ArrayList<>();
-    protected List<ComponentLoader.InjectTask> injectTasks = new ArrayList<>();
-    protected List<ComponentLoader.InitTask> initTasks = new ArrayList<>();
 
     @Override
     public Class<? extends Component> getComponentClass() {
@@ -49,44 +42,5 @@ public class CompositeComponentLoaderContext implements ComponentLoader.Composit
     @Override
     public void setComponentTemplate(String template) {
         this.template = template;
-    }
-
-    @Override
-    public void addPostInitTask(ComponentLoader.PostInitTask task) {
-        postInitTasks.add(task);
-    }
-
-    @Override
-    public void executePostInitTasks() {
-        for (ComponentLoader.PostInitTask postInitTask : postInitTasks) {
-            postInitTask.execute(this, null);
-        }
-        postInitTasks.clear();
-    }
-
-    @Override
-    public void addInjectTask(ComponentLoader.InjectTask task) {
-        injectTasks.add(task);
-    }
-
-    @Override
-    public void executeInjectTasks() {
-        for (ComponentLoader.InjectTask injectTask : injectTasks) {
-            injectTask.execute(this, null);
-        }
-        injectTasks.clear();
-    }
-
-    @Override
-    public void addInitTask(ComponentLoader.InitTask task) {
-        initTasks.add(task);
-    }
-
-    @Override
-    public void executeInitTasks() {
-        for (ComponentLoader.InitTask initTask : initTasks) {
-            initTask.execute(this, null);
-        }
-        initTasks.clear();
     }
 }

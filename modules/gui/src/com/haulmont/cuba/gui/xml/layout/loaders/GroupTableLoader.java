@@ -67,9 +67,11 @@ public class GroupTableLoader extends AbstractTableLoader<GroupTable> {
                     groupProperties.add(column.getId());
                 }
             }
-            context.addPostInitTask((context1, window) ->
-                    ((GroupTable) component).groupBy(groupProperties.toArray())
-            );
+            if (context instanceof ComponentContext) {
+                getComponentContext().addPostInitTask((context1, window) ->
+                        ((GroupTable) component).groupBy(groupProperties.toArray())
+                );
+            }
         }
 
         // check for duplicate

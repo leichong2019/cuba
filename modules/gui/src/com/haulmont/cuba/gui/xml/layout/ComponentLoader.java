@@ -25,7 +25,6 @@ import com.haulmont.cuba.gui.model.ScreenData;
 import com.haulmont.cuba.gui.screen.ScreenOptions;
 import org.dom4j.Element;
 
-import javax.annotation.Nullable;
 import java.util.Locale;
 import java.util.Map;
 
@@ -35,14 +34,6 @@ import java.util.Map;
 public interface ComponentLoader<T extends Component> {
 
     interface Context {
-        void addPostInitTask(PostInitTask task);
-        void executePostInitTasks();
-
-        void addInjectTask(InjectTask task);
-        void executeInjectTasks();
-
-        void addInitTask(InitTask task);
-        void executeInitTasks();
     }
 
     interface ComponentContext extends Context {
@@ -66,6 +57,15 @@ public interface ComponentLoader<T extends Component> {
 
         ComponentContext getParent();
         void setParent(ComponentContext parent);
+
+        void addPostInitTask(PostInitTask task);
+        void executePostInitTasks();
+
+        void addInjectTask(InjectTask task);
+        void executeInjectTasks();
+
+        void addInitTask(InitTask task);
+        void executeInitTasks();
     }
 
     interface CompositeComponentContext extends Context {
@@ -86,7 +86,7 @@ public interface ComponentLoader<T extends Component> {
          * @param context loader context
          * @param window  top-most window
          */
-        void execute(Context context, @Nullable Frame window);
+        void execute(ComponentContext context, Frame window);
     }
 
     /**
@@ -99,7 +99,7 @@ public interface ComponentLoader<T extends Component> {
          * @param context top-most loader context
          * @param window top-most window
          */
-        void execute(Context context, @Nullable Frame window);
+        void execute(ComponentContext context, Frame window);
     }
 
     /**
@@ -112,7 +112,7 @@ public interface ComponentLoader<T extends Component> {
          * @param context loader context
          * @param window top-most window
          */
-        void execute(Context context, @Nullable Frame window);
+        void execute(ComponentContext context, Frame window);
     }
 
     Context getContext();

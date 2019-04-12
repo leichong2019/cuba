@@ -16,7 +16,6 @@
  */
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
-import com.google.common.base.Preconditions;
 import com.haulmont.cuba.core.global.BeanLocator;
 import com.haulmont.cuba.core.global.DevelopmentException;
 import com.haulmont.cuba.gui.AppConfig;
@@ -43,7 +42,6 @@ import com.haulmont.cuba.gui.sys.UiControllerDependencyInjector;
 import com.haulmont.cuba.gui.sys.UiControllerPropertyInjector;
 import com.haulmont.cuba.gui.sys.UiControllerProperty;
 import com.haulmont.cuba.gui.xml.data.DsContextLoader;
-import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
 import com.haulmont.cuba.gui.xml.layout.ComponentRootLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
@@ -216,11 +214,8 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
         }
 
         @Override
-        public void execute(Context context, Frame window) {
-            Preconditions.checkArgument(context instanceof ComponentLoader.ComponentContext,
-                    "'context' must implement com.haulmont.cuba.gui.xml.layout.ComponentLoader.ComponentContext");
-
-            String loggingId = ((ComponentContext) context).getFullFrameId();
+        public void execute(ComponentContext context, Frame window) {
+            String loggingId = context.getFullFrameId();
             try {
                 if (fragment.getFrameOwner() instanceof AbstractFrame) {
                     Element companionsElem = element.element("companions");
@@ -262,7 +257,7 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
         }
 
         @Override
-        public void execute(Context context, Frame window) {
+        public void execute(ComponentContext context, Frame window) {
             String loggingId = ComponentsHelper.getFullFrameId(this.fragment);
 
             StopWatch stopWatch = createStopWatch(ScreenLifeCycle.INIT, loggingId);
