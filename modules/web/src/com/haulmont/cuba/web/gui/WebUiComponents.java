@@ -243,16 +243,17 @@ public class WebUiComponents implements UiComponents {
             return;
         }
 
+        CompositeComponent compositeComponent = (CompositeComponent) instance;
+
         CompositionTemplate template = componentClass.getAnnotation(CompositionTemplate.class);
         if (template != null) {
             Component root = processCompositionTemplate(componentClass, template.value());
-            CompositeComponent compositeComponent = (CompositeComponent) instance;
             WebComponentsHelper.setCompositeComponentRoot(compositeComponent, root);
-
-            CompositeComponent.CreateEvent event = new CompositeComponent.CreateEvent(compositeComponent);
-            WebComponentsHelper.fireCompositeComponentEvent(compositeComponent,
-                    CompositeComponent.CreateEvent.class, event);
         }
+
+        CompositeComponent.CreateEvent event = new CompositeComponent.CreateEvent(compositeComponent);
+        WebComponentsHelper.fireCompositeComponentEvent(compositeComponent,
+                CompositeComponent.CreateEvent.class, event);
     }
 
     protected Component processCompositionTemplate(Class<? extends Component> componentClass, String template) {
