@@ -41,7 +41,6 @@ public class CompositeComponentTemplateLoader {
     @Inject
     protected Resources resources;
 
-
     public Element load(String templateString) {
         String loadedTemplate = loadTemplate(templateString);
         String template = loadedTemplate != null ? loadedTemplate : templateString;

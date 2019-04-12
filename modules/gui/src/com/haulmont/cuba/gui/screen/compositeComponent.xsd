@@ -17,19 +17,18 @@
 <xs:schema targetNamespace="http://schemas.haulmont.com/cuba/screen/compositeComponent.xsd"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns="http://schemas.haulmont.com/cuba/screen/compositeComponent.xsd"
-           xmlns:layout="http://schemas.haulmont.com/cuba/screen/layout.xsd">
+           xmlns:layout="http://schemas.haulmont.com/cuba/screen/layout.xsd"
+           elementFormDefault="qualified">
 
     <xs:include schemaLocation="http://schemas.haulmont.com/cuba/screen/layout.xsd"/>
 
     <xs:element name="compositeComponent">
         <xs:complexType>
-            <!--<xs:group ref="layout:layoutOrComponent"/>-->
             <xs:sequence>
-                <xs:choice minOccurs="0" maxOccurs="unbounded">
-                    <xs:group ref="layout:standardComponent"/>
-                    <xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
-                </xs:choice>
+                <xs:group ref="layout:singleLayoutOrComponent"/>
             </xs:sequence>
+
+            <xs:attribute name="messagesPack" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 </xs:schema>

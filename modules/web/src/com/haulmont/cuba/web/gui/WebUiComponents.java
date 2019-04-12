@@ -16,10 +16,12 @@
 
 package com.haulmont.cuba.web.gui;
 
+import com.google.common.base.Strings;
 import com.google.common.reflect.TypeToken;
 import com.haulmont.chile.core.datatypes.DatatypeRegistry;
 import com.haulmont.cuba.core.global.BeanLocator;
 import com.haulmont.cuba.core.global.DevelopmentException;
+import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.mainwindow.*;
@@ -35,11 +37,13 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -52,6 +56,8 @@ public class WebUiComponents implements UiComponents {
     protected DatatypeRegistry datatypeRegistry;
     @Inject
     protected CompositeComponentTemplateLoader compositeComponentTemplateLoader;
+    @Inject
+    protected UserSessionSource userSessionSource;
     @Inject
     protected BeanLocator beanLocator;
 
@@ -253,11 +259,24 @@ public class WebUiComponents implements UiComponents {
         ComponentLoader.CompositeComponentContext context = new CompositeComponentLoaderContext();
         context.setComponentClass(componentClass);
 
+        Element element = compositeComponentTemplateLoader.load(template);
+
         CompositeComponentLayoutLoader layoutLoader =
                 beanLocator.getPrototype(CompositeComponentLayoutLoader.NAME, context);
+        layoutLoader.setLocale(getLocale());
+        layoutLoader.setMessagesPack(getMessagesPack(element));
 
-        Element element = compositeComponentTemplateLoader.load(template);
         return layoutLoader.createComponent(element);
+    }
+
+    protected Locale getLocale() {
+        return userSessionSource.getUserSession().getLocale();
+    }
+
+    @Nullable
+    protected String getMessagesPack(Element element) {
+        String messagesPack = element.attributeValue("messagesPack");
+        return Strings.isNullOrEmpty(messagesPack) ? null : messagesPack;
     }
 
     public void register(String name, Class<? extends Component> componentClass) {
