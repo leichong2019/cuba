@@ -48,7 +48,7 @@ public class ComponentLoaderContext implements ComponentLoader.ComponentContext 
     protected List<UiControllerProperty> properties = Collections.emptyList();
     protected Map<String, String> aliasesMap = new HashMap<>();
 
-    protected ComponentLoader.Context parent;
+    protected ComponentLoader.ComponentContext parent;
 
     public ComponentLoaderContext(ScreenOptions options) {
         this.options = options;
@@ -122,12 +122,12 @@ public class ComponentLoaderContext implements ComponentLoader.ComponentContext 
     }
 
     @Override
-    public ComponentLoader.Context getParent() {
+    public ComponentLoader.ComponentContext getParent() {
         return parent;
     }
 
     @Override
-    public void setParent(ComponentLoader.Context parent) {
+    public void setParent(ComponentLoader.ComponentContext parent) {
         this.parent = parent;
     }
 

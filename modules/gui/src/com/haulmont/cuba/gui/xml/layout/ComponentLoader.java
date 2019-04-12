@@ -64,8 +64,8 @@ public interface ComponentLoader<T extends Component> {
         String getCurrentFrameId();
         void setCurrentFrameId(String currentFrameId);
 
-        Context getParent();
-        void setParent(Context parent);
+        ComponentContext getParent();
+        void setParent(ComponentContext parent);
     }
 
     interface CompositeComponentContext extends Context {
