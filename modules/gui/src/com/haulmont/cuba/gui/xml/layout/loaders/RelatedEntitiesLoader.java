@@ -86,19 +86,17 @@ public class RelatedEntitiesLoader extends AbstractComponentLoader<RelatedEntiti
                     context, true, "componentId", resultComponent.getId());
         }
 
-        if (context instanceof ComponentContext) {
-            getComponentContext().addPostInitTask((context1, window) -> {
-                if (resultComponent.getListComponent() == null) {
-                    Component bindComponent = resultComponent.getFrame().getComponent(listComponent);
-                    if (!(bindComponent instanceof ListComponent)) {
-                        throw createGuiDevelopmentException("Specify 'for' attribute: id of table or tree",
-                                context1, true, "componentId", resultComponent.getId());
-                    }
-
-                    resultComponent.setListComponent((ListComponent) bindComponent);
+        getComponentContext().addPostInitTask((context1, window) -> {
+            if (resultComponent.getListComponent() == null) {
+                Component bindComponent = resultComponent.getFrame().getComponent(listComponent);
+                if (!(bindComponent instanceof ListComponent)) {
+                    throw createGuiDevelopmentException("Specify 'for' attribute: id of table or tree",
+                            context1, true, "componentId", resultComponent.getId());
                 }
-            });
-        }
+
+                resultComponent.setListComponent((ListComponent) bindComponent);
+            }
+        });
 
         loadFocusable(resultComponent, element);
         loadTabIndex(resultComponent, element);

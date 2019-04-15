@@ -133,19 +133,17 @@ public class BulkEditorLoader extends AbstractComponentLoader<BulkEditor> {
             resultComponent.setUseConfirmDialog(Boolean.parseBoolean(useConfirmDialog));
         }
 
-        if (context instanceof ComponentContext) {
-            getComponentContext().addPostInitTask((c, w) -> {
-                if (resultComponent.getListComponent() == null) {
-                    Component bindComponent = resultComponent.getFrame().getComponent(listComponent);
-                    if (!(bindComponent instanceof ListComponent)) {
-                        throw createGuiDevelopmentException("Specify 'for' attribute: id of table or tree",
-                                context, true, "componentId", resultComponent.getId());
-                    }
-
-                    resultComponent.setListComponent((ListComponent) bindComponent);
+        getComponentContext().addPostInitTask((c, w) -> {
+            if (resultComponent.getListComponent() == null) {
+                Component bindComponent = resultComponent.getFrame().getComponent(listComponent);
+                if (!(bindComponent instanceof ListComponent)) {
+                    throw createGuiDevelopmentException("Specify 'for' attribute: id of table or tree",
+                            context, true, "componentId", resultComponent.getId());
                 }
-            });
-        }
+
+                resultComponent.setListComponent((ListComponent) bindComponent);
+            }
+        });
 
         loadValidators(resultComponent, element);
 

@@ -408,7 +408,8 @@ public class WebAccordion extends WebAbstractComponent<CubaAccordion>
         if (context instanceof ComponentLoader.ComponentContext) {
             tabContent.setFrame(((ComponentLoader.ComponentContext) context).getFrame());
         } else {
-            // TODO: gg, throw an exception?
+            throw new IllegalStateException("'context' must implement " +
+                    "com.haulmont.cuba.gui.xml.layout.ComponentLoader.ComponentContext");
         }
 
         return tab;

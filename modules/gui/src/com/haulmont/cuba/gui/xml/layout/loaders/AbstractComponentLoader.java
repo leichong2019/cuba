@@ -483,23 +483,19 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
     }
 
     protected void loadAction(ActionOwner component, Element element) {
-        if (context instanceof ComponentContext) {
-            String actionId = element.attributeValue("action");
-            if (!StringUtils.isEmpty(actionId)) {
-                getComponentContext().addPostInitTask(
-                        new ActionOwnerAssignActionPostInitTask(component, actionId, getComponentContext().getFrame())
-                );
-            }
+        String actionId = element.attributeValue("action");
+        if (!StringUtils.isEmpty(actionId)) {
+            getComponentContext().addPostInitTask(
+                    new ActionOwnerAssignActionPostInitTask(component, actionId, getComponentContext().getFrame())
+            );
         }
     }
 
     protected void loadPresentations(HasPresentations component, Element element) {
-        if (context instanceof ComponentContext) {
-            String presentations = element.attributeValue("presentations");
-            if (StringUtils.isNotEmpty(presentations)) {
-                component.usePresentations(Boolean.parseBoolean(presentations));
-                getComponentContext().addPostInitTask(new LoadPresentationsPostInitTask(component));
-            }
+        String presentations = element.attributeValue("presentations");
+        if (StringUtils.isNotEmpty(presentations)) {
+            component.usePresentations(Boolean.parseBoolean(presentations));
+            getComponentContext().addPostInitTask(new LoadPresentationsPostInitTask(component));
         }
     }
 

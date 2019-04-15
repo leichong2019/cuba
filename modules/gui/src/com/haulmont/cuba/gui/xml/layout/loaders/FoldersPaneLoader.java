@@ -40,8 +40,6 @@ public class FoldersPaneLoader extends AbstractComponentLoader<FoldersPane> {
         loadVisible(resultComponent, element);
         loadCss(resultComponent, element);
 
-        if (context instanceof ComponentContext) {
-            getComponentContext().addPostInitTask((context1, window) -> resultComponent.loadFolders());
-        }
+        getComponentContext().addPostInitTask((context1, window) -> resultComponent.loadFolders());
     }
 }
