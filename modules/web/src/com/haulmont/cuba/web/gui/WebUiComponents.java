@@ -177,8 +177,8 @@ public class WebUiComponents implements UiComponents {
 
         try {
             Component instance = constructor.newInstance();
-            initCompositeComponent(instance, componentClass);
             autowireContext(instance);
+            initCompositeComponent(instance, componentClass);
             return (T) instance;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(String.format("Error creating the '%s' component instance", name), e);
