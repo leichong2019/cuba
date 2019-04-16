@@ -30,6 +30,7 @@ import com.haulmont.cuba.gui.components.HasDebugId;
 import com.haulmont.cuba.gui.components.HasHtmlCaption;
 import com.haulmont.cuba.gui.components.HasHtmlDescription;
 import com.haulmont.cuba.gui.components.SizeUnit;
+import com.haulmont.cuba.gui.components.Window;
 import com.haulmont.cuba.gui.components.sys.FrameImplementation;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.sys.TestIdManager;
@@ -45,7 +46,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 
 import javax.inject.Inject;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -71,8 +71,6 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
     protected Registration contextHelpIconClickListener;
 
     protected BeanLocator beanLocator;
-
-    protected boolean attached = false;
 
     // private, lazily initialized
     private EventHub eventHub = null;
@@ -202,14 +200,13 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
     @Override
     public void setParent(Component parent) {
         if (this.parent != parent) {
-            this.parent = parent;
-
             if (isAttached()) {
                 detach();
             }
 
-            if (parent != null
-                    && ComponentsHelper.isParentAttached(parent)) {
+            this.parent = parent;
+
+            if (isAttached()) {
                 attach();
             }
         }
@@ -217,19 +214,28 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
 
     @Override
     public boolean isAttached() {
-        return attached;
+        Component current = parent;
+        while (current != null) {
+            if (current instanceof Window) {
+                return true;
+            }
+            current = current.getParent();
+        }
+        return false;
     }
 
     @Override
     public void attach() {
-        attached = true;
-        getEventHub().publish(AttachEvent.class, new AttachEvent(this));
+        if (hasSubscriptions(AttachEvent.class)) {
+            publish(AttachEvent.class, new AttachEvent(this));
+        }
     }
 
     @Override
     public void detach() {
-        attached = false;
-        getEventHub().publish(DetachEvent.class, new DetachEvent(this));
+        if (hasSubscriptions(DetachEvent.class)) {
+            publish(DetachEvent.class, new DetachEvent(this));
+        }
     }
 
     @Override
@@ -240,22 +246,6 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
     @Override
     public Subscription addDetachListener(Consumer<DetachEvent> listener) {
         return getEventHub().subscribe(DetachEvent.class, listener);
-    }
-
-    protected void attachSubComponents(Collection<Component> components) {
-        for (Component component : components) {
-            if (component instanceof Attachable) {
-                ((Attachable) component).attach();
-            }
-        }
-    }
-
-    protected void detachSubComponents(Collection<Component> components) {
-        for (Component component : components) {
-            if (component instanceof Attachable) {
-                ((Attachable) component).detach();
-            }
-        }
     }
 
     @Override

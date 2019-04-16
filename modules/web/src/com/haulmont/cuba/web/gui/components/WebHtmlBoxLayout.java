@@ -18,6 +18,7 @@ package com.haulmont.cuba.web.gui.components;
 
 import com.haulmont.bali.util.Preconditions;
 import com.haulmont.cuba.gui.ComponentsHelper;
+import com.haulmont.cuba.gui.components.Attachable;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.HtmlBoxLayout;
@@ -158,13 +159,21 @@ public class WebHtmlBoxLayout extends WebAbstractComponent<CustomLayout> impleme
     public void attach() {
         super.attach();
 
-        attachSubComponents(getOwnComponents());
+        for (Component component : ownComponents) {
+            if (component instanceof Attachable) {
+                ((Attachable) component).attach();
+            }
+        }
     }
 
     @Override
     public void detach() {
         super.detach();
 
-        detachSubComponents(getOwnComponents());
+        for (Component component : ownComponents) {
+            if (component instanceof Attachable) {
+                ((Attachable) component).detach();
+            }
+        }
     }
 }

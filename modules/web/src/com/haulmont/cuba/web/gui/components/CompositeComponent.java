@@ -19,7 +19,6 @@ package com.haulmont.cuba.web.gui.components;
 import com.google.common.base.Preconditions;
 import com.haulmont.bali.events.EventHub;
 import com.haulmont.bali.events.Subscription;
-import com.haulmont.cuba.gui.ComponentsHelper;
 import com.haulmont.cuba.gui.components.AttachEvent;
 import com.haulmont.cuba.gui.components.Attachable;
 import com.haulmont.cuba.gui.components.Component;
@@ -100,14 +99,13 @@ public class CompositeComponent<T extends Component & Attachable>
     @Override
     public void setParent(Component parent) {
         if (getCompositionNN().getParent() != parent) {
-            getCompositionNN().setParent(parent);
-
             if (isAttached()) {
                 detach();
             }
 
-            if (parent != null
-                    && ComponentsHelper.isParentAttached(parent)) {
+            getCompositionNN().setParent(parent);
+
+            if (isAttached()) {
                 attach();
             }
         }
@@ -115,7 +113,14 @@ public class CompositeComponent<T extends Component & Attachable>
 
     @Override
     public boolean isAttached() {
-        return getCompositionNN().isAttached();
+        Component current = getCompositionNN().getParent();
+        while (current != null) {
+            if (current instanceof Window) {
+                return true;
+            }
+            current = current.getParent();
+        }
+        return false;
     }
 
     @Override

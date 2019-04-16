@@ -537,14 +537,22 @@ public class WebAccordion extends WebAbstractComponent<CubaAccordion>
     public void attach() {
         super.attach();
 
-        attachSubComponents(getOwnComponents());
+        getOwnComponentsStream().forEach(component -> {
+            if (component instanceof Attachable) {
+                ((Attachable) component).attach();
+            }
+        });
     }
 
     @Override
     public void detach() {
         super.detach();
 
-        detachSubComponents(getOwnComponents());
+        getOwnComponentsStream().forEach(component -> {
+            if (component instanceof Attachable) {
+                ((Attachable) component).detach();
+            }
+        });
     }
 
     protected class LazyTabChangeListener implements com.vaadin.ui.Accordion.SelectedTabChangeListener {

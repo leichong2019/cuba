@@ -797,14 +797,22 @@ public class WebFieldGroup extends WebAbstractComponent<CubaFieldGroupLayout> im
     public void attach() {
         super.attach();
 
-        attachSubComponents(getOwnComponents());
+        getOwnComponentsStream().forEach(component -> {
+            if (component instanceof Attachable) {
+                ((Attachable) component).attach();
+            }
+        });
     }
 
     @Override
     public void detach() {
         super.detach();
 
-        detachSubComponents(getOwnComponents());
+        getOwnComponentsStream().forEach(component -> {
+            if (component instanceof Attachable) {
+                ((Attachable) component).detach();
+            }
+        });
     }
 
     public class FieldConfigImpl implements FieldConfig, HasXmlDescriptor {

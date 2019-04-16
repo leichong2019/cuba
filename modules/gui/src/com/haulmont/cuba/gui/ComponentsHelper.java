@@ -66,20 +66,6 @@ public abstract class ComponentsHelper {
         return Collections.unmodifiableCollection(res);
     }
 
-
-    public static boolean isParentAttached(Component component) {
-        do {
-            if (component instanceof Window
-                    || component instanceof Attachable
-                    && ((Attachable) component).isAttached()) {
-                return true;
-            }
-            component = component.getParent();
-        } while (component != null);
-
-        return false;
-    }
-
     /**
      * Visit all components below the specified container.
      *
