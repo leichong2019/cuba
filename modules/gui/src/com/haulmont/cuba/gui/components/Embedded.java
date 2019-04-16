@@ -32,7 +32,7 @@ import java.util.Map;
  * @deprecated use {@link Image} and {@link BrowserFrame} instead
  */
 public interface Embedded extends Component, Component.BelongToFrame, Component.HasCaption,
-        Component.HasIcon, HasContextHelp, Attachable {
+        Component.HasIcon, HasContextHelp, AttachNotifier {
 
     String NAME = "embedded";
 

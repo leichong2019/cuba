@@ -413,23 +413,23 @@ public class WebGroupBox extends WebAbstractComponent<CubaGroupBox> implements G
     }
 
     @Override
-    public void attach() {
-        super.attach();
+    public void attached() {
+        super.attached();
 
         for (Component component : ownComponents) {
-            if (component instanceof Attachable) {
-                ((Attachable) component).attach();
+            if (component instanceof AttachNotifier) {
+                ((AttachNotifier) component).attached();
             }
         }
     }
 
     @Override
-    public void detach() {
-        super.detach();
+    public void detached() {
+        super.detached();
 
         for (Component component : ownComponents) {
-            if (component instanceof Attachable) {
-                ((Attachable) component).detach();
+            if (component instanceof AttachNotifier) {
+                ((AttachNotifier) component).detached();
             }
         }
     }

@@ -20,15 +20,39 @@ import com.haulmont.bali.events.Subscription;
 
 import java.util.function.Consumer;
 
-public interface Attachable extends Component {
+/**
+ * Component that fires {@link AttachEvent} and {@link DetachEvent} events.
+ */
+public interface AttachNotifier {
 
+    /**
+     * @return whether a component is attached to a window
+     */
     boolean isAttached();
 
-    void attach();
+    /**
+     * Notifies all listeners that component has been attached.
+     */
+    void attached();
 
-    void detach();
+    /**
+     * Notifies all listeners that component has been detached.
+     */
+    void detached();
 
+    /**
+     * Registers a new attached listener.
+     *
+     * @param listener a listener to add
+     * @return a registration object for removing an event listener added to a source
+     */
     Subscription addAttachListener(Consumer<AttachEvent> listener);
 
+    /**
+     * Registers a new detached listener.
+     *
+     * @param listener a listener to add
+     * @return a registration object for removing an event listener added to a source
+     */
     Subscription addDetachListener(Consumer<DetachEvent> listener);
 }

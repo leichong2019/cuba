@@ -534,12 +534,12 @@ public class TestTextField implements TextField<String> {
     }
 
     @Override
-    public void attach() {
+    public void attached() {
 
     }
 
     @Override
-    public void detach() {
+    public void detached() {
 
     }
 

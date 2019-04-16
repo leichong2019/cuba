@@ -21,7 +21,7 @@ import com.haulmont.bali.events.Subscription;
 import com.haulmont.cuba.core.global.BeanLocator;
 import com.haulmont.cuba.gui.ComponentsHelper;
 import com.haulmont.cuba.gui.components.AttachEvent;
-import com.haulmont.cuba.gui.components.Attachable;
+import com.haulmont.cuba.gui.components.AttachNotifier;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.DetachEvent;
 import com.haulmont.cuba.gui.components.Frame;
@@ -51,7 +51,7 @@ import java.util.function.Consumer;
 
 public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
         implements Component, Component.Wrapper, Component.HasXmlDescriptor, Component.BelongToFrame, Component.HasIcon,
-                   Component.HasCaption, HasDebugId, HasContextHelp, HasHtmlCaption, HasHtmlDescription, Attachable {
+                   Component.HasCaption, HasDebugId, HasContextHelp, HasHtmlCaption, HasHtmlDescription, AttachNotifier {
 
     public static final String ICON_STYLE = "icon";
 
@@ -201,13 +201,13 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
     public void setParent(Component parent) {
         if (this.parent != parent) {
             if (isAttached()) {
-                detach();
+                detached();
             }
 
             this.parent = parent;
 
             if (isAttached()) {
-                attach();
+                attached();
             }
         }
     }
@@ -225,14 +225,14 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
     }
 
     @Override
-    public void attach() {
+    public void attached() {
         if (hasSubscriptions(AttachEvent.class)) {
             publish(AttachEvent.class, new AttachEvent(this));
         }
     }
 
     @Override
-    public void detach() {
+    public void detached() {
         if (hasSubscriptions(DetachEvent.class)) {
             publish(DetachEvent.class, new DetachEvent(this));
         }

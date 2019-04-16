@@ -250,8 +250,8 @@ public class WebScreens implements Screens, WindowManager {
         componentLoaderContext.executePostInitTasks();
 
         for (Component component : window.getOwnComponents()) {
-            if (component instanceof Attachable) {
-                ((Attachable) component).attach();
+            if (component instanceof AttachNotifier) {
+                ((AttachNotifier) component).attached();
             }
         }
 

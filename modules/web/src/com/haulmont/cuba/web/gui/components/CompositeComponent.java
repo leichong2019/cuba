@@ -20,7 +20,7 @@ import com.google.common.base.Preconditions;
 import com.haulmont.bali.events.EventHub;
 import com.haulmont.bali.events.Subscription;
 import com.haulmont.cuba.gui.components.AttachEvent;
-import com.haulmont.cuba.gui.components.Attachable;
+import com.haulmont.cuba.gui.components.AttachNotifier;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.DetachEvent;
 import com.haulmont.cuba.gui.components.Frame;
@@ -32,8 +32,8 @@ import java.util.EventObject;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class CompositeComponent<T extends Component & Attachable>
-        implements Component, Component.BelongToFrame, Attachable {
+public class CompositeComponent<T extends Component & AttachNotifier>
+        implements Component, Component.BelongToFrame, AttachNotifier {
 
     protected String id;
     protected T root;
@@ -100,13 +100,13 @@ public class CompositeComponent<T extends Component & Attachable>
     public void setParent(Component parent) {
         if (getCompositionNN().getParent() != parent) {
             if (isAttached()) {
-                detach();
+                detached();
             }
 
             getCompositionNN().setParent(parent);
 
             if (isAttached()) {
-                attach();
+                attached();
             }
         }
     }
@@ -124,19 +124,19 @@ public class CompositeComponent<T extends Component & Attachable>
     }
 
     @Override
-    public void attach() {
+    public void attached() {
         attached = true;
 
-        getCompositionNN().attach();
+        getCompositionNN().attached();
 
         getEventHub().publish(AttachEvent.class, new AttachEvent(this));
     }
 
     @Override
-    public void detach() {
+    public void detached() {
         attached = false;
 
-        getCompositionNN().detach();
+        getCompositionNN().detached();
 
         getEventHub().publish(DetachEvent.class, new DetachEvent(this));
     }

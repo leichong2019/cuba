@@ -23,7 +23,7 @@ import java.util.EventObject;
 import java.util.function.Consumer;
 
 public interface SplitPanel extends ComponentContainer, Component.BelongToFrame, Component.HasIcon,
-        Component.HasCaption, HasContextHelp, HasSettings, HasHtmlCaption, HasHtmlDescription, Attachable {
+        Component.HasCaption, HasContextHelp, HasSettings, HasHtmlCaption, HasHtmlDescription, AttachNotifier {
 
     String NAME = "split";
 

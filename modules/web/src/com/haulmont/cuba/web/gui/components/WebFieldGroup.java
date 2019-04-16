@@ -794,23 +794,23 @@ public class WebFieldGroup extends WebAbstractComponent<CubaFieldGroupLayout> im
     }
 
     @Override
-    public void attach() {
-        super.attach();
+    public void attached() {
+        super.attached();
 
         getOwnComponentsStream().forEach(component -> {
-            if (component instanceof Attachable) {
-                ((Attachable) component).attach();
+            if (component instanceof AttachNotifier) {
+                ((AttachNotifier) component).attached();
             }
         });
     }
 
     @Override
-    public void detach() {
-        super.detach();
+    public void detached() {
+        super.detached();
 
         getOwnComponentsStream().forEach(component -> {
-            if (component instanceof Attachable) {
-                ((Attachable) component).detach();
+            if (component instanceof AttachNotifier) {
+                ((AttachNotifier) component).detached();
             }
         });
     }

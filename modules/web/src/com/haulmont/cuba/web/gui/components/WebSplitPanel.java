@@ -18,7 +18,7 @@ package com.haulmont.cuba.web.gui.components;
 
 import com.haulmont.bali.events.Subscription;
 import com.haulmont.cuba.gui.ComponentsHelper;
-import com.haulmont.cuba.gui.components.Attachable;
+import com.haulmont.cuba.gui.components.AttachNotifier;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.SizeUnit;
@@ -378,23 +378,23 @@ public class WebSplitPanel extends WebAbstractComponent<AbstractSplitPanel> impl
     }
 
     @Override
-    public void attach() {
-        super.attach();
+    public void attached() {
+        super.attached();
 
         for (Component component : ownComponents) {
-            if (component instanceof Attachable) {
-                ((Attachable) component).attach();
+            if (component instanceof AttachNotifier) {
+                ((AttachNotifier) component).attached();
             }
         }
     }
 
     @Override
-    public void detach() {
-        super.detach();
+    public void detached() {
+        super.detached();
 
         for (Component component : ownComponents) {
-            if (component instanceof Attachable) {
-                ((Attachable) component).detach();
+            if (component instanceof AttachNotifier) {
+                ((AttachNotifier) component).detached();
             }
         }
     }

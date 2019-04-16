@@ -16,7 +16,7 @@
 
 package com.haulmont.cuba.web.gui.components;
 
-import com.haulmont.cuba.gui.components.Attachable;
+import com.haulmont.cuba.gui.components.AttachNotifier;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.HasContextHelp;
 import elemental.json.JsonArray;
@@ -32,7 +32,7 @@ import java.util.function.Consumer;
  */
 public interface JavaScriptComponent extends Component,
         Component.HasCaption, Component.HasDescription, Component.HasIcon, Component.BelongToFrame,
-        HasContextHelp, Attachable {
+        HasContextHelp, AttachNotifier {
 
     String NAME = "jsComponent";
 

@@ -34,7 +34,7 @@ import java.util.TimeZone;
 import java.util.function.Consumer;
 
 public interface Calendar extends Component.BelongToFrame, Component.HasCaption, Component.HasIcon,
-        HasContextHelp, HasHtmlCaption, HasHtmlDescription, Attachable {
+        HasContextHelp, HasHtmlCaption, HasHtmlDescription, AttachNotifier {
 
     String NAME = "calendar";
 

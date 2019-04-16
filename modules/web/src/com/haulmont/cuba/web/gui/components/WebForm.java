@@ -21,7 +21,7 @@ import com.haulmont.bali.util.Preconditions;
 import com.haulmont.cuba.gui.ComponentsHelper;
 import com.haulmont.cuba.gui.app.security.role.edit.UiPermissionDescriptor;
 import com.haulmont.cuba.gui.app.security.role.edit.UiPermissionValue;
-import com.haulmont.cuba.gui.components.Attachable;
+import com.haulmont.cuba.gui.components.AttachNotifier;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.Form;
 import com.haulmont.cuba.gui.components.SecuredActionsHolder;
@@ -388,23 +388,23 @@ public class WebForm extends WebAbstractComponent<CubaFieldGroupLayout> implemen
     }
 
     @Override
-    public void attach() {
-        super.attach();
+    public void attached() {
+        super.attached();
 
         getOwnComponentsStream().forEach(component -> {
-            if (component instanceof Attachable) {
-                ((Attachable) component).attach();
+            if (component instanceof AttachNotifier) {
+                ((AttachNotifier) component).attached();
             }
         });
     }
 
     @Override
-    public void detach() {
-        super.detach();
+    public void detached() {
+        super.detached();
 
         getOwnComponentsStream().forEach(component -> {
-            if (component instanceof Attachable) {
-                ((Attachable) component).detach();
+            if (component instanceof AttachNotifier) {
+                ((AttachNotifier) component).detached();
             }
         });
     }

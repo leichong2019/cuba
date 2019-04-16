@@ -26,12 +26,12 @@ public class AttachEvent extends EventObject {
      * @param source the component on which the Event initially occurred.
      * @throws IllegalArgumentException if source is null.
      */
-    public AttachEvent(Attachable source) {
+    public AttachEvent(Component source) {
         super(source);
     }
 
     @Override
-    public Attachable getSource() {
-        return (Attachable) super.getSource();
+    public Component getSource() {
+        return (Component) super.getSource();
     }
 }
