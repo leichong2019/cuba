@@ -385,4 +385,18 @@ public class WebForm extends WebAbstractComponent<CubaFieldGroupLayout> implemen
             }
         }
     }
+
+    @Override
+    public void attach() {
+        super.attach();
+
+        attachSubComponents(getOwnComponents());
+    }
+
+    @Override
+    public void detach() {
+        super.detach();
+
+        detachSubComponents(getOwnComponents());
+    }
 }

@@ -375,4 +375,18 @@ public class WebSplitPanel extends WebAbstractComponent<AbstractSplitPanel> impl
     public void removeSplitPositionChangeListener(Consumer<SplitPositionChangeEvent> listener) {
         unsubscribe(SplitPositionChangeEvent.class, listener);
     }
+
+    @Override
+    public void attach() {
+        super.attach();
+
+        attachSubComponents(getOwnComponents());
+    }
+
+    @Override
+    public void detach() {
+        super.detach();
+
+        detachSubComponents(getOwnComponents());
+    }
 }

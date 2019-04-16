@@ -533,6 +533,20 @@ public class WebAccordion extends WebAbstractComponent<CubaAccordion>
         getEventHub().unsubscribe(SelectedTabChangeEvent.class, listener);
     }
 
+    @Override
+    public void attach() {
+        super.attach();
+
+        attachSubComponents(getOwnComponents());
+    }
+
+    @Override
+    public void detach() {
+        super.detach();
+
+        detachSubComponents(getOwnComponents());
+    }
+
     protected class LazyTabChangeListener implements com.vaadin.ui.Accordion.SelectedTabChangeListener {
         protected ComponentContainer tabContent;
         protected Element descriptor;

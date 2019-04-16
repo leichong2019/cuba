@@ -297,4 +297,18 @@ public abstract class WebAbstractBox<T extends AbstractOrderedLayout>
 
         return this.component.getExpandRatio(vComponent);
     }
+
+    @Override
+    public void attach() {
+        super.attach();
+
+        attachSubComponents(getOwnComponents());
+    }
+
+    @Override
+    public void detach() {
+        super.detach();
+
+        detachSubComponents(getOwnComponents());
+    }
 }

@@ -18,19 +18,28 @@ package com.haulmont.cuba.web.gui.components;
 
 import com.google.common.base.Preconditions;
 import com.haulmont.bali.events.EventHub;
+import com.haulmont.bali.events.Subscription;
+import com.haulmont.cuba.gui.ComponentsHelper;
+import com.haulmont.cuba.gui.components.AttachEvent;
+import com.haulmont.cuba.gui.components.Attachable;
 import com.haulmont.cuba.gui.components.Component;
+import com.haulmont.cuba.gui.components.DetachEvent;
 import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.SizeUnit;
+import com.haulmont.cuba.gui.components.Window;
 import com.haulmont.cuba.gui.components.sys.FrameImplementation;
 
 import java.util.EventObject;
 import java.util.Objects;
+import java.util.function.Consumer;
 
-public class CompositeComponent<T extends Component> implements Component, Component.BelongToFrame {
+public class CompositeComponent<T extends Component & Attachable>
+        implements Component, Component.BelongToFrame, Attachable {
 
     protected String id;
     protected T root;
     protected Frame frame;
+    protected boolean attached = false;
 
     // private, lazily initialized
     private EventHub eventHub = null;
@@ -90,7 +99,51 @@ public class CompositeComponent<T extends Component> implements Component, Compo
 
     @Override
     public void setParent(Component parent) {
-        getCompositionNN().setParent(parent);
+        if (getCompositionNN().getParent() != parent) {
+            getCompositionNN().setParent(parent);
+
+            if (isAttached()) {
+                detach();
+            }
+
+            if (parent != null
+                    && ComponentsHelper.isParentAttached(parent)) {
+                attach();
+            }
+        }
+    }
+
+    @Override
+    public boolean isAttached() {
+        return getCompositionNN().isAttached();
+    }
+
+    @Override
+    public void attach() {
+        attached = true;
+
+        getCompositionNN().attach();
+
+        getEventHub().publish(AttachEvent.class, new AttachEvent(this));
+    }
+
+    @Override
+    public void detach() {
+        attached = false;
+
+        getCompositionNN().detach();
+
+        getEventHub().publish(DetachEvent.class, new DetachEvent(this));
+    }
+
+    @Override
+    public Subscription addAttachListener(Consumer<AttachEvent> listener) {
+        return getEventHub().subscribe(AttachEvent.class, listener);
+    }
+
+    @Override
+    public Subscription addDetachListener(Consumer<DetachEvent> listener) {
+        return getEventHub().subscribe(DetachEvent.class, listener);
     }
 
     @Override

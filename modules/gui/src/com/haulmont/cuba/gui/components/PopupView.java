@@ -22,7 +22,7 @@ import java.util.EventObject;
 import java.util.function.Consumer;
 
 public interface PopupView extends Component.HasCaption, Component.BelongToFrame,
-        Component.HasIcon, HasContextHelp, HasHtmlCaption, HasHtmlDescription {
+        Component.HasIcon, HasContextHelp, HasHtmlCaption, HasHtmlDescription, Attachable {
     String NAME = "popupView";
 
     /**

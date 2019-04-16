@@ -411,4 +411,18 @@ public class WebGroupBox extends WebAbstractComponent<CubaGroupBox> implements G
         return new com.haulmont.cuba.gui.components.MarginInfo(vMargin.hasTop(), vMargin.hasRight(), vMargin.hasBottom(),
                 vMargin.hasLeft());
     }
+
+    @Override
+    public void attach() {
+        super.attach();
+
+        attachSubComponents(getOwnComponents());
+    }
+
+    @Override
+    public void detach() {
+        super.detach();
+
+        detachSubComponents(getOwnComponents());
+    }
 }

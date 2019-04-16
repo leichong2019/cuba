@@ -17,9 +17,13 @@
 package com.haulmont.cuba.web.gui.components;
 
 import com.haulmont.bali.events.EventHub;
+import com.haulmont.bali.events.Subscription;
 import com.haulmont.cuba.core.global.BeanLocator;
 import com.haulmont.cuba.gui.ComponentsHelper;
+import com.haulmont.cuba.gui.components.AttachEvent;
+import com.haulmont.cuba.gui.components.Attachable;
 import com.haulmont.cuba.gui.components.Component;
+import com.haulmont.cuba.gui.components.DetachEvent;
 import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.HasContextHelp;
 import com.haulmont.cuba.gui.components.HasDebugId;
@@ -38,16 +42,16 @@ import com.vaadin.shared.Registration;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Layout;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.dom4j.Element;
 
 import javax.inject.Inject;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Consumer;
 
 public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
         implements Component, Component.Wrapper, Component.HasXmlDescriptor, Component.BelongToFrame, Component.HasIcon,
-                   Component.HasCaption, HasDebugId, HasContextHelp, HasHtmlCaption, HasHtmlDescription {
+                   Component.HasCaption, HasDebugId, HasContextHelp, HasHtmlCaption, HasHtmlDescription, Attachable {
 
     public static final String ICON_STYLE = "icon";
 
@@ -67,6 +71,8 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
     protected Registration contextHelpIconClickListener;
 
     protected BeanLocator beanLocator;
+
+    protected boolean attached = false;
 
     // private, lazily initialized
     private EventHub eventHub = null;
@@ -195,7 +201,61 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
 
     @Override
     public void setParent(Component parent) {
-        this.parent = parent;
+        if (this.parent != parent) {
+            this.parent = parent;
+
+            if (isAttached()) {
+                detach();
+            }
+
+            if (parent != null
+                    && ComponentsHelper.isParentAttached(parent)) {
+                attach();
+            }
+        }
+    }
+
+    @Override
+    public boolean isAttached() {
+        return attached;
+    }
+
+    @Override
+    public void attach() {
+        attached = true;
+        getEventHub().publish(AttachEvent.class, new AttachEvent(this));
+    }
+
+    @Override
+    public void detach() {
+        attached = false;
+        getEventHub().publish(DetachEvent.class, new DetachEvent(this));
+    }
+
+    @Override
+    public Subscription addAttachListener(Consumer<AttachEvent> listener) {
+        return getEventHub().subscribe(AttachEvent.class, listener);
+    }
+
+    @Override
+    public Subscription addDetachListener(Consumer<DetachEvent> listener) {
+        return getEventHub().subscribe(DetachEvent.class, listener);
+    }
+
+    protected void attachSubComponents(Collection<Component> components) {
+        for (Component component : components) {
+            if (component instanceof Attachable) {
+                ((Attachable) component).attach();
+            }
+        }
+    }
+
+    protected void detachSubComponents(Collection<Component> components) {
+        for (Component component : components) {
+            if (component instanceof Attachable) {
+                ((Attachable) component).detach();
+            }
+        }
     }
 
     @Override

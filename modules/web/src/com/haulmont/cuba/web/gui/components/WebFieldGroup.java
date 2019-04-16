@@ -793,6 +793,20 @@ public class WebFieldGroup extends WebAbstractComponent<CubaFieldGroupLayout> im
         unsubscribe(EditableChangeEvent.class, listener);
     }
 
+    @Override
+    public void attach() {
+        super.attach();
+
+        attachSubComponents(getOwnComponents());
+    }
+
+    @Override
+    public void detach() {
+        super.detach();
+
+        detachSubComponents(getOwnComponents());
+    }
+
     public class FieldConfigImpl implements FieldConfig, HasXmlDescriptor {
         protected String id;
         protected Element xmlDescriptor;

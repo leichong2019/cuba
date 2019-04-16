@@ -578,6 +578,20 @@ public class WebTabSheet extends WebAbstractComponent<CubaTabSheet>
         unsubscribe(SelectedTabChangeEvent.class, listener);
     }
 
+    @Override
+    public void attach() {
+        super.attach();
+
+        attachSubComponents(getOwnComponents());
+    }
+
+    @Override
+    public void detach() {
+        super.detach();
+
+        detachSubComponents(getOwnComponents());
+    }
+
     protected void fireTabChanged(SelectedTabChangeEvent event) {
         publish(SelectedTabChangeEvent.class, event);
     }

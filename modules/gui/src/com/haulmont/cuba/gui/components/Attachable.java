@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2016 Haulmont.
+ * Copyright (c) 2008-2019 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,14 +12,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package com.haulmont.cuba.gui.components;
 
-public interface FlowBoxLayout extends OrderedContainer, Component.BelongToFrame, HasMargin,
-        HasSpacing, Component.HasCaption, Component.HasIcon, HasContextHelp,
-        LayoutClickNotifier, ShortcutNotifier, HasHtmlCaption, HasHtmlDescription, Attachable {
+import com.haulmont.bali.events.Subscription;
 
-    String NAME = "flowBox";
+import java.util.function.Consumer;
+
+public interface Attachable extends Component {
+
+    boolean isAttached();
+
+    void attach();
+
+    void detach();
+
+    Subscription addAttachListener(Consumer<AttachEvent> listener);
+
+    Subscription addDetachListener(Consumer<DetachEvent> listener);
 }

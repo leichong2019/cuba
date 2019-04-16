@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2016 Haulmont.
+ * Copyright (c) 2008-2019 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,23 +12,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
+
 package com.haulmont.cuba.gui.components;
 
-public interface BoxLayout extends ExpandingLayout, OrderedContainer, HasSpacing, HasMargin,
-                                   Component.BelongToFrame, Component.HasCaption, Component.HasIcon,
-                                   LayoutClickNotifier, ShortcutNotifier, SupportsExpandRatio,
-                                   HasContextHelp, HasHtmlCaption, HasHtmlDescription, Attachable {
-    /**
-     * @deprecated Use {@link VBoxLayout#NAME}
-     */
-    @Deprecated
-    String VBOX = "vbox";
+import java.util.EventObject;
+
+public class AttachEvent extends EventObject {
 
     /**
-     * @deprecated Use {@link HBoxLayout#NAME}
+     * Constructs an AttachEvent.
+     *
+     * @param source the component on which the Event initially occurred.
+     * @throws IllegalArgumentException if source is null.
      */
-    @Deprecated
-    String HBOX = "hbox";
+    public AttachEvent(Attachable source) {
+        super(source);
+    }
+
+    @Override
+    public Attachable getSource() {
+        return (Attachable) super.getSource();
+    }
 }

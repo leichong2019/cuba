@@ -308,4 +308,18 @@ public class WebGridLayout extends WebAbstractComponent<CubaGridLayout> implemen
             }
         }
     }
+
+    @Override
+    public void attach() {
+        super.attach();
+
+        attachSubComponents(getOwnComponents());
+    }
+
+    @Override
+    public void detach() {
+        super.detach();
+
+        detachSubComponents(getOwnComponents());
+    }
 }

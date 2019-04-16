@@ -230,4 +230,18 @@ public class WebAbstractOrderedLayout<T extends com.vaadin.ui.CssLayout> extends
             }
         }
     }
+
+    @Override
+    public void attach() {
+        super.attach();
+
+        attachSubComponents(getOwnComponents());
+    }
+
+    @Override
+    public void detach() {
+        super.detach();
+
+        detachSubComponents(getOwnComponents());
+    }
 }

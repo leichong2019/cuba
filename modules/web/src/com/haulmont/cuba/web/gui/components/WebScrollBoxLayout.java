@@ -393,4 +393,18 @@ public class WebScrollBoxLayout extends WebAbstractComponent<CubaScrollBoxLayout
             }
         }
     }
+
+    @Override
+    public void attach() {
+        super.attach();
+
+        attachSubComponents(getOwnComponents());
+    }
+
+    @Override
+    public void detach() {
+        super.detach();
+
+        detachSubComponents(getOwnComponents());
+    }
 }
