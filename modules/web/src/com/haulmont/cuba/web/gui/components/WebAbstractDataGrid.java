@@ -149,6 +149,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.haulmont.bali.util.Preconditions.checkNotNullArgument;
@@ -2458,9 +2459,14 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     protected ValueProvider<E, Object> createGeneratedColumnValueProvider(String columnId,
                                                                           ColumnGenerator<E, ?> generator) {
         return (ValueProvider<E, Object>) item -> {
-            ColumnGeneratorEvent<E> event = new ColumnGeneratorEvent<>(WebAbstractDataGrid.this, item, columnId);
+            ColumnGeneratorEvent<E> event = new ColumnGeneratorEvent<>(WebAbstractDataGrid.this,
+                    item, columnId, createInstanceContainerProvider(item));
             return generator.getValue(event);
         };
+    }
+
+    protected Supplier<InstanceContainer<E>> createInstanceContainerProvider(E item) {
+        return () -> createInstanceContainer(item);
     }
 
     @Override
