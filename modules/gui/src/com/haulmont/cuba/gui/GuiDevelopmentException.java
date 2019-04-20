@@ -23,52 +23,32 @@ import java.util.Map;
 
 public class GuiDevelopmentException extends DevelopmentException {
 
-    protected String frameId;
-    protected Class<?> componentClass;
+    protected Object contextId;
 
-    public GuiDevelopmentException(String message, String frameId) {
+    public GuiDevelopmentException(String message, Object contextId) {
         super(message);
-        this.frameId = frameId;
+        this.contextId = contextId;
     }
 
-    public GuiDevelopmentException(String message, Class<?> componentClass) {
-        super(message);
-        this.componentClass = componentClass;
-    }
-
-    public GuiDevelopmentException(String message, String frameId, String paramKey, Object paramValue) {
+    public GuiDevelopmentException(String message, Object contextId, String paramKey, Object paramValue) {
         super(message, paramKey, paramValue);
-        this.frameId = frameId;
+        this.contextId = contextId;
     }
 
-    public GuiDevelopmentException(String message, Class<?> componentClass, String paramKey, Object paramValue) {
-        super(message, paramKey, paramValue);
-        this.componentClass = componentClass;
-    }
-
-    public GuiDevelopmentException(String message, String frameId, Map<String, Object> params) {
+    public GuiDevelopmentException(String message, Object contextId, Map<String, Object> params) {
         super(message, params);
-        this.frameId = frameId;
+        this.contextId = contextId;
     }
 
-    public GuiDevelopmentException(String message, Class<?> componentClass, Map<String, Object> params) {
-        super(message, params);
-        this.componentClass = componentClass;
-    }
-
-    public String getFrameId() {
-        return frameId;
-    }
-
-    public Class<?> getComponentClass() {
-        return componentClass;
+    public Object getContextId() {
+        return contextId;
     }
 
     @Override
     public String toString() {
         return super.toString() +
-                (frameId != null ? ", frameId=" + frameId
-                : componentClass != null ? ", componentClass=" + componentClass
+                (contextId instanceof String ? ", frameId=" + contextId
+                : contextId instanceof Class ? ", componentClass=" + contextId
                 : "");
     }
 }

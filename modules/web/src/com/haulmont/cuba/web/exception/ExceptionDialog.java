@@ -273,20 +273,22 @@ public class ExceptionDialog extends CubaWindow {
                 Map<String, Object> params = new LinkedHashMap<>();
                 if (rootCause instanceof GuiDevelopmentException) {
                     GuiDevelopmentException guiDevException = (GuiDevelopmentException) rootCause;
-                    Class<?> componentClass = guiDevException.getComponentClass();
-                    if (componentClass != null) {
+                    Object contextId = guiDevException.getContextId();
+                    if (contextId instanceof Class) {
+                        Class<?> componentClass = (Class<?>) contextId;
                         params.put("Component Class", componentClass);
                         CompositionTemplate template = componentClass.getAnnotation(CompositionTemplate.class);
                         if (template != null) {
                             params.put("XML template", template.value());
                         }
-                    } else if (guiDevException.getFrameId() != null) {
-                        params.put("Frame ID", guiDevException.getFrameId());
+                    } else if (contextId instanceof String) {
+                        String frameId = (String) contextId;
+                        params.put("Frame ID", frameId);
                         try {
                             params.put("XML descriptor",
-                                    windowConfig.getWindowInfo(guiDevException.getFrameId()).getTemplate());
+                                    windowConfig.getWindowInfo(frameId).getTemplate());
                         } catch (Exception e) {
-                            params.put("XML descriptor", "not found for " + guiDevException.getFrameId());
+                            params.put("XML descriptor", "not found for " + frameId);
                         }
                     }
                 }
