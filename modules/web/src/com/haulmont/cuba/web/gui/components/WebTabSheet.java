@@ -583,9 +583,7 @@ public class WebTabSheet extends WebAbstractComponent<CubaTabSheet>
         super.attached();
 
         getOwnComponentsStream().forEach(component -> {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).attached();
-            }
+            ((AttachNotifier) component).attached();
         });
     }
 
@@ -594,9 +592,7 @@ public class WebTabSheet extends WebAbstractComponent<CubaTabSheet>
         super.detached();
 
         getOwnComponentsStream().forEach(component -> {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).detached();
-            }
+            ((AttachNotifier) component).detached();
         });
     }
 

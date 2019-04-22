@@ -32,8 +32,7 @@ import java.util.EventObject;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class CompositeComponent<T extends Component & AttachNotifier>
-        implements Component, Component.BelongToFrame, AttachNotifier {
+public class CompositeComponent<T extends Component> implements Component, Component.BelongToFrame, AttachNotifier {
 
     protected String id;
     protected T root;
@@ -127,7 +126,7 @@ public class CompositeComponent<T extends Component & AttachNotifier>
     public void attached() {
         attached = true;
 
-        getCompositionNN().attached();
+        ((AttachNotifier) getCompositionNN()).attached();
 
         getEventHub().publish(AttachEvent.class, new AttachEvent(this));
     }
@@ -136,7 +135,7 @@ public class CompositeComponent<T extends Component & AttachNotifier>
     public void detached() {
         attached = false;
 
-        getCompositionNN().detached();
+        ((AttachNotifier) getCompositionNN()).detached();
 
         getEventHub().publish(DetachEvent.class, new DetachEvent(this));
     }

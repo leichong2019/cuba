@@ -32,7 +32,7 @@ import java.util.function.Consumer;
  */
 public interface JavaScriptComponent extends Component,
         Component.HasCaption, Component.HasDescription, Component.HasIcon, Component.BelongToFrame,
-        HasContextHelp, AttachNotifier {
+        HasContextHelp {
 
     String NAME = "jsComponent";
 

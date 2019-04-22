@@ -417,9 +417,7 @@ public class WebGroupBox extends WebAbstractComponent<CubaGroupBox> implements G
         super.attached();
 
         for (Component component : ownComponents) {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).attached();
-            }
+            ((AttachNotifier) component).attached();
         }
     }
 
@@ -428,9 +426,7 @@ public class WebGroupBox extends WebAbstractComponent<CubaGroupBox> implements G
         super.detached();
 
         for (Component component : ownComponents) {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).detached();
-            }
+            ((AttachNotifier) component).detached();
         }
     }
 }

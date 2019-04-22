@@ -21,7 +21,7 @@ public interface GroupBoxLayout
                 OrderedContainer,
                 Component.HasIcon, Component.HasCaption, HasBorder, HasSpacing, HasOuterMargin, HasOrientation,
                 Collapsable, Component.BelongToFrame, HasSettings, ShortcutNotifier, HasContextHelp,
-                HasHtmlCaption, HasHtmlDescription, AttachNotifier {
+                HasHtmlCaption, HasHtmlDescription {
 
     String NAME = "groupBox";
 

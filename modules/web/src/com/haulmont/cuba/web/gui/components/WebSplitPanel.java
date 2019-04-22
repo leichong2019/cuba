@@ -382,9 +382,7 @@ public class WebSplitPanel extends WebAbstractComponent<AbstractSplitPanel> impl
         super.attached();
 
         for (Component component : ownComponents) {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).attached();
-            }
+            ((AttachNotifier) component).attached();
         }
     }
 
@@ -393,9 +391,7 @@ public class WebSplitPanel extends WebAbstractComponent<AbstractSplitPanel> impl
         super.detached();
 
         for (Component component : ownComponents) {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).detached();
-            }
+            ((AttachNotifier) component).detached();
         }
     }
 }

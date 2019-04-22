@@ -399,9 +399,7 @@ public class WebScrollBoxLayout extends WebAbstractComponent<CubaScrollBoxLayout
         super.attached();
 
         for (Component component : ownComponents) {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).attached();
-            }
+            ((AttachNotifier) component).attached();
         }
     }
 
@@ -410,9 +408,7 @@ public class WebScrollBoxLayout extends WebAbstractComponent<CubaScrollBoxLayout
         super.detached();
 
         for (Component component : ownComponents) {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).detached();
-            }
+            ((AttachNotifier) component).detached();
         }
     }
 }

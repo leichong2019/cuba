@@ -27,7 +27,7 @@ import com.haulmont.cuba.gui.components.data.HasValueSource;
  */
 public interface ProgressBar extends Component, Component.BelongToFrame,
         HasValue<Double>, HasValueSource<Double>, DatasourceComponent<Double>,
-        Component.HasIcon, Component.HasCaption, HasContextHelp, HasHtmlCaption, HasHtmlDescription, AttachNotifier {
+        Component.HasIcon, Component.HasCaption, HasContextHelp, HasHtmlCaption, HasHtmlDescription {
 
     String NAME = "progressBar";
 

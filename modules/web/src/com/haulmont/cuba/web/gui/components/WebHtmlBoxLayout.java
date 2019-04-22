@@ -160,9 +160,7 @@ public class WebHtmlBoxLayout extends WebAbstractComponent<CustomLayout> impleme
         super.attached();
 
         for (Component component : ownComponents) {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).attached();
-            }
+            ((AttachNotifier) component).attached();
         }
     }
 
@@ -171,9 +169,7 @@ public class WebHtmlBoxLayout extends WebAbstractComponent<CustomLayout> impleme
         super.detached();
 
         for (Component component : ownComponents) {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).detached();
-            }
+            ((AttachNotifier) component).detached();
         }
     }
 }

@@ -19,7 +19,7 @@ package com.haulmont.cuba.gui.components;
 
 public interface FlowBoxLayout extends OrderedContainer, Component.BelongToFrame, HasMargin,
         HasSpacing, Component.HasCaption, Component.HasIcon, HasContextHelp,
-        LayoutClickNotifier, ShortcutNotifier, HasHtmlCaption, HasHtmlDescription, AttachNotifier {
+        LayoutClickNotifier, ShortcutNotifier, HasHtmlCaption, HasHtmlDescription {
 
     String NAME = "flowBox";
 }

@@ -314,9 +314,7 @@ public class WebGridLayout extends WebAbstractComponent<CubaGridLayout> implemen
         super.attached();
 
         for (Component component : ownComponents) {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).attached();
-            }
+            ((AttachNotifier) component).attached();
         }
     }
 
@@ -325,9 +323,7 @@ public class WebGridLayout extends WebAbstractComponent<CubaGridLayout> implemen
         super.detached();
 
         for (Component component : ownComponents) {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).detached();
-            }
+            ((AttachNotifier) component).detached();
         }
     }
 }

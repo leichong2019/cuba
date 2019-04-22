@@ -303,9 +303,7 @@ public abstract class WebAbstractBox<T extends AbstractOrderedLayout>
         super.attached();
 
         for (Component component : ownComponents) {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).attached();
-            }
+            ((AttachNotifier) component).attached();
         }
     }
 
@@ -314,9 +312,7 @@ public abstract class WebAbstractBox<T extends AbstractOrderedLayout>
         super.detached();
 
         for (Component component : ownComponents) {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).detached();
-            }
+            ((AttachNotifier) component).detached();
         }
     }
 }

@@ -236,9 +236,7 @@ public class WebAbstractOrderedLayout<T extends com.vaadin.ui.CssLayout> extends
         super.attached();
 
         for (Component component : ownComponents) {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).attached();
-            }
+            ((AttachNotifier) component).attached();
         }
     }
 
@@ -247,9 +245,7 @@ public class WebAbstractOrderedLayout<T extends com.vaadin.ui.CssLayout> extends
         super.detached();
 
         for (Component component : ownComponents) {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).detached();
-            }
+            ((AttachNotifier) component).detached();
         }
     }
 }

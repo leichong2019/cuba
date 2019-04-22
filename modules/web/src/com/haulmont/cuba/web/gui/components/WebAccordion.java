@@ -538,9 +538,7 @@ public class WebAccordion extends WebAbstractComponent<CubaAccordion>
         super.attached();
 
         getOwnComponentsStream().forEach(component -> {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).attached();
-            }
+            ((AttachNotifier) component).attached();
         });
     }
 
@@ -549,9 +547,7 @@ public class WebAccordion extends WebAbstractComponent<CubaAccordion>
         super.detached();
 
         getOwnComponentsStream().forEach(component -> {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).detached();
-            }
+            ((AttachNotifier) component).detached();
         });
     }
 

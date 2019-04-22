@@ -798,9 +798,7 @@ public class WebFieldGroup extends WebAbstractComponent<CubaFieldGroupLayout> im
         super.attached();
 
         getOwnComponentsStream().forEach(component -> {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).attached();
-            }
+            ((AttachNotifier) component).attached();
         });
     }
 
@@ -809,9 +807,7 @@ public class WebFieldGroup extends WebAbstractComponent<CubaFieldGroupLayout> im
         super.detached();
 
         getOwnComponentsStream().forEach(component -> {
-            if (component instanceof AttachNotifier) {
-                ((AttachNotifier) component).detached();
-            }
+            ((AttachNotifier) component).detached();
         });
     }
 
