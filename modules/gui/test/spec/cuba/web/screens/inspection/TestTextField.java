@@ -18,9 +18,7 @@ package spec.cuba.web.screens.inspection;
 
 import com.haulmont.bali.events.Subscription;
 import com.haulmont.chile.core.datatypes.Datatype;
-import com.haulmont.cuba.gui.components.AttachEvent;
 import com.haulmont.cuba.gui.components.Component;
-import com.haulmont.cuba.gui.components.DetachEvent;
 import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.SizeUnit;
 import com.haulmont.cuba.gui.components.TextField;
@@ -525,31 +523,6 @@ public class TestTextField implements TextField<String> {
 
     @Override
     public String getConversionErrorMessage() {
-        return null;
-    }
-
-    @Override
-    public boolean isAttached() {
-        return false;
-    }
-
-    @Override
-    public void attached() {
-
-    }
-
-    @Override
-    public void detached() {
-
-    }
-
-    @Override
-    public Subscription addAttachListener(Consumer<AttachEvent> listener) {
-        return null;
-    }
-
-    @Override
-    public Subscription addDetachListener(Consumer<DetachEvent> listener) {
         return null;
     }
 }
