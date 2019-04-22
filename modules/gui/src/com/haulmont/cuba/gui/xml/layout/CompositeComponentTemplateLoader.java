@@ -17,6 +17,8 @@
 package com.haulmont.cuba.gui.xml.layout;
 
 import com.google.common.base.Strings;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.haulmont.bali.util.Dom4j;
 import com.haulmont.cuba.core.global.DevelopmentException;
 import com.haulmont.cuba.core.global.Resources;
@@ -35,8 +37,9 @@ public class CompositeComponentTemplateLoader {
 
     public static final String NAME = "cuba_CompositeComponentTemplateLoader";
 
-    @Inject
-    protected CompositeComponentTemplateDocumentCache documentCache;
+    protected static final int CACHE_DESCRIPTORS_COUNT = 20;
+
+    protected Cache<String, Document> cache;
 
     @Inject
     protected Resources resources;
@@ -61,11 +64,18 @@ public class CompositeComponentTemplateLoader {
     }
 
     protected Document getDocument(String template) {
-        Document document = documentCache.get(template);
+        if (cache == null) {
+            cache = CacheBuilder.newBuilder()
+                    .maximumSize(CACHE_DESCRIPTORS_COUNT)
+                    .build();
+        }
+
+        Document document = cache.getIfPresent(template);
         if (document == null) {
             document = createDocument(template);
-            documentCache.put(template, document);
+            cache.put(template, document);
         }
+
         return document;
     }
 
