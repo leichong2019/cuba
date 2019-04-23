@@ -680,24 +680,9 @@ public class ExcelExporter {
     }
 
     protected Supplier<InstanceContainer<Entity>> createInstanceContainerProvider(DataGrid dataGrid, Entity item) {
-        return () -> createInstanceContainer(dataGrid, item);
-    }
-
-    protected InstanceContainer<Entity> createInstanceContainer(DataGrid dataGrid, Entity item) {
-        if (!(dataGrid.getItems() instanceof EntityDataUnit)) {
-            throw new IllegalStateException("DataGridItems must implement EntityDataUnit");
-        }
-
-        EntityDataUnit dataUnit = (EntityDataUnit) dataGrid.getItems();
-        DataComponents factory = AppBeans.get(DataComponents.class);
-        ViewRepository viewRepository = AppBeans.get(ViewRepository.NAME);
-        MetaClass metaClass = dataUnit.getEntityMetaClass();
-
-        InstanceContainer<Entity> instanceContainer = factory.createInstanceContainer(metaClass.getJavaClass());
-        instanceContainer.setView(viewRepository.getView(metaClass, View.LOCAL));
-        instanceContainer.setItem(item);
-
-        return instanceContainer;
+        return () -> {
+            throw new UnsupportedOperationException("ExcelExporter doesn't provide instance container");
+        };
     }
 
     protected String createSpaceString(int level) {

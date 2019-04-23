@@ -232,7 +232,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     protected DataGridDataProvider<E> dataBinding;
 
-    protected Map<E, InstanceContainer<E>> itemContainers; // lazily initialized WeakHashMap;
+    protected Map<E, Object> itemDatasources; // lazily initialized WeakHashMap;
 
     static {
         ImmutableMap.Builder<Class<? extends Renderer>, Class<? extends Renderer>> builder =
@@ -875,6 +875,8 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
             this.dataBinding.unbind();
             this.dataBinding = null;
 
+            clearFieldDatasources();
+
             this.component.setDataProvider(createEmptyDataProvider());
         }
 
@@ -1337,31 +1339,40 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     }
 
     protected Datasource createItemDatasource(E item) {
-        EntityDataGridItems<E> items = getEntityDataGridItemsNN();
+        if (itemDatasources == null) {
+            itemDatasources = new WeakHashMap<>();
+        }
 
-        Datasource fieldDatasource = DsBuilder.create()
+        Object fieldDatasource = itemDatasources.get(item);
+        if (fieldDatasource instanceof Datasource) {
+            return (Datasource) fieldDatasource;
+        }
+
+        EntityDataGridItems<E> items = getEntityDataGridItemsNN();
+        Datasource datasource = DsBuilder.create()
                 .setAllowCommit(false)
                 .setMetaClass(items.getEntityMetaClass())
                 .setRefreshMode(CollectionDatasource.RefreshMode.NEVER)
                 .setViewName(View.LOCAL)
                 .buildDatasource();
 
-        ((DatasourceImplementation) fieldDatasource).valid();
+        ((DatasourceImplementation) datasource).valid();
 
         //noinspection unchecked
-        fieldDatasource.setItem(item);
+        datasource.setItem(item);
 
-        return fieldDatasource;
+        return datasource;
     }
 
     protected InstanceContainer<E> createInstanceContainer(E item) {
-        if (itemContainers == null) {
-            itemContainers = new WeakHashMap<>();
+        if (itemDatasources == null) {
+            itemDatasources = new WeakHashMap<>();
         }
 
-        InstanceContainer<E> container = itemContainers.get(item);
-        if (container != null) {
-            return container;
+        Object container = itemDatasources.get(item);
+        if (container instanceof InstanceContainer) {
+            //noinspection unchecked
+            return (InstanceContainer<E>) container;
         }
 
         EntityDataGridItems<E> items = getEntityDataGridItemsNN();
@@ -1373,9 +1384,33 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
         instanceContainer.setView(viewRepository.getView(metaClass, View.LOCAL));
         instanceContainer.setItem(item);
 
-        itemContainers.put(item, instanceContainer);
+        itemDatasources.put(item, instanceContainer);
 
         return instanceContainer;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void clearFieldDatasources() {
+        if (itemDatasources == null) {
+            return;
+        }
+
+        // detach instance containers from entities explicitly
+        for (Map.Entry<E, Object> entry : itemDatasources.entrySet()) {
+            if (entry.getValue() instanceof InstanceContainer) {
+                InstanceContainer<E> container = (InstanceContainer<E>) entry.getValue();
+
+                container.setItem(null);
+            }
+
+            if (entry.getValue() instanceof Datasource) {
+                Datasource<E> datasource = (Datasource<E>) entry.getValue();
+
+                datasource.setItem(null);
+            }
+        }
+
+        itemDatasources.clear();
     }
 
     protected ValueSourceProvider createValueSourceProvider(E item) {
