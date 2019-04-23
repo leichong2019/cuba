@@ -14,15 +14,15 @@
   ~ limitations under the License.
   -->
 
-<xs:schema targetNamespace="http://schemas.haulmont.com/cuba/screen/compositeComponent.xsd"
+<xs:schema targetNamespace="http://schemas.haulmont.com/cuba/screen/composite.xsd"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           xmlns="http://schemas.haulmont.com/cuba/screen/compositeComponent.xsd"
+           xmlns="http://schemas.haulmont.com/cuba/screen/composite.xsd"
            xmlns:layout="http://schemas.haulmont.com/cuba/screen/layout.xsd"
            elementFormDefault="qualified">
 
     <xs:include schemaLocation="http://schemas.haulmont.com/cuba/screen/layout.xsd"/>
 
-    <xs:element name="compositeComponent">
+    <xs:element name="composite">
         <xs:complexType>
             <xs:sequence>
                 <xs:group ref="layout:singleLayoutOrComponent"/>
