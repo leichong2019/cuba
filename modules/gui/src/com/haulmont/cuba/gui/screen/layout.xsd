@@ -2721,6 +2721,7 @@
 
                 <xs:attribute name="stylename" type="layoutStylename"/>
                 <xs:attribute name="template" type="xs:string"/>
+                <xs:attribute name="requiredIndicatorVisible" type="xs:boolean"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -2737,6 +2738,7 @@
 
                 <xs:attribute name="stylename" type="boxLayoutStylename"/>
                 <xs:attribute name="expand" type="xs:string"/>
+                <xs:attribute name="requiredIndicatorVisible" type="xs:boolean"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -2748,6 +2750,8 @@
                 <xs:group ref="layoutOrComponent"/>
 
                 <xs:attribute name="stylename" type="layoutStylename"/>
+                <xs:attribute name="requiredIndicatorVisible" type="xs:boolean"/>
+
                 <xs:attributeGroup ref="hasSpacingMargin"/>
                 <xs:attributeGroup ref="hasContextHelp"/>
             </xs:extension>
@@ -2761,6 +2765,8 @@
                 <xs:group ref="layoutOrComponent"/>
 
                 <xs:attribute name="stylename" type="csslayoutStylename"/>
+                <xs:attribute name="requiredIndicatorVisible" type="xs:boolean"/>
+
                 <xs:attributeGroup ref="hasResponsive"/>
                 <xs:attributeGroup ref="hasContextHelp"/>
             </xs:extension>
@@ -2788,6 +2794,8 @@
 
                 <xs:attribute name="contentMaxHeight" type="componentSize"/>
                 <xs:attribute name="contentMaxWidth" type="componentSize"/>
+
+                <xs:attribute name="requiredIndicatorVisible" type="xs:boolean"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -2921,6 +2929,8 @@
                     </xs:element>
                 </xs:sequence>
 
+                <xs:attribute name="requiredIndicatorVisible" type="xs:boolean"/>
+
                 <xs:attributeGroup ref="hasSpacingMargin"/>
                 <xs:attributeGroup ref="hasContextHelp"/>
             </xs:extension>
@@ -2944,6 +2954,7 @@
                 <xs:attribute name="collapsed" type="xs:boolean"/>
                 <xs:attribute name="orientation" type="orientation"/>
                 <xs:attribute name="showAsPanel" type="xs:boolean"/>
+                <xs:attribute name="requiredIndicatorVisible" type="xs:boolean"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>

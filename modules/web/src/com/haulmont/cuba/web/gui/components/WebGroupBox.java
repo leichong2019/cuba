@@ -411,4 +411,14 @@ public class WebGroupBox extends WebAbstractComponent<CubaGroupBox> implements G
         return new com.haulmont.cuba.gui.components.MarginInfo(vMargin.hasTop(), vMargin.hasRight(), vMargin.hasBottom(),
                 vMargin.hasLeft());
     }
+
+    @Override
+    public boolean isRequiredIndicatorVisible() {
+        return component.isRequiredIndicatorVisible();
+    }
+
+    @Override
+    public void setRequiredIndicatorVisible(boolean visible) {
+        component.setRequiredIndicatorVisible(visible);
+    }
 }
