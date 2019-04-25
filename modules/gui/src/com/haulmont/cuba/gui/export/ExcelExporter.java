@@ -28,10 +28,8 @@ import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.data.*;
 import com.haulmont.cuba.gui.components.data.meta.EntityDataGridItems;
-import com.haulmont.cuba.gui.components.data.meta.EntityDataUnit;
 import com.haulmont.cuba.gui.components.data.meta.EntityTableItems;
 import com.haulmont.cuba.gui.data.GroupInfo;
-import com.haulmont.cuba.gui.model.DataComponents;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -48,7 +46,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.*;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -679,8 +677,8 @@ public class ExcelExporter {
         }
     }
 
-    protected Supplier<InstanceContainer<Entity>> createInstanceContainerProvider(DataGrid dataGrid, Entity item) {
-        return () -> {
+    protected Function<Entity, InstanceContainer<Entity>> createInstanceContainerProvider(DataGrid dataGrid, Entity item) {
+        return entity -> {
             throw new UnsupportedOperationException("ExcelExporter doesn't provide instance container");
         };
     }

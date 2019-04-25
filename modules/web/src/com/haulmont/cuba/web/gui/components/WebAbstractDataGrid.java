@@ -149,7 +149,6 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.haulmont.bali.util.Preconditions.checkNotNullArgument;
@@ -1399,13 +1398,9 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
         for (Map.Entry<E, Object> entry : itemDatasources.entrySet()) {
             if (entry.getValue() instanceof InstanceContainer) {
                 InstanceContainer<E> container = (InstanceContainer<E>) entry.getValue();
-
                 container.setItem(null);
-            }
-
-            if (entry.getValue() instanceof Datasource) {
+            } else if (entry.getValue() instanceof Datasource) {
                 Datasource<E> datasource = (Datasource<E>) entry.getValue();
-
                 datasource.setItem(null);
             }
         }
@@ -2495,13 +2490,9 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
                                                                           ColumnGenerator<E, ?> generator) {
         return (ValueProvider<E, Object>) item -> {
             ColumnGeneratorEvent<E> event = new ColumnGeneratorEvent<>(WebAbstractDataGrid.this,
-                    item, columnId, createInstanceContainerProvider(item));
+                    item, columnId, this::createInstanceContainer);
             return generator.getValue(event);
         };
-    }
-
-    protected Supplier<InstanceContainer<E>> createInstanceContainerProvider(E item) {
-        return () -> createInstanceContainer(item);
     }
 
     @Override

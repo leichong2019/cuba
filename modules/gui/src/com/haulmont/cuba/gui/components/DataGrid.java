@@ -38,7 +38,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static com.haulmont.cuba.gui.components.MouseEventDetails.MouseButton;
 
@@ -1124,7 +1123,7 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
         protected E item;
         protected String columnId;
         protected InstanceContainer<E> container;
-        protected Supplier<InstanceContainer<E>> containerProvider;
+        protected Function<E, InstanceContainer<E>> containerProvider;
 
         /**
          * Constructor for a column generator event
@@ -1135,7 +1134,7 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
          * @param containerProvider a provider that returns an instance container associated with the item
          */
         public ColumnGeneratorEvent(DataGrid component, E item, String columnId,
-                                    Supplier<InstanceContainer<E>> containerProvider) {
+                                    Function<E, InstanceContainer<E>> containerProvider) {
             super(component);
 
             this.item = item;
@@ -1162,7 +1161,7 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
          */
         public InstanceContainer<E> getContainer() {
             if (container == null) {
-                container = containerProvider.get();
+                container = containerProvider.apply(item);
             }
 
             return container;
