@@ -346,6 +346,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
         this.applicationContext = applicationContext;
     }
 
+    @SuppressWarnings("unchecked")
     protected void initComponent(Grid<E> component) {
         setSelectionMode(SelectionMode.SINGLE);
 
@@ -360,8 +361,12 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
         component.setStyleGenerator(this::getGeneratedRowStyle);
 
-        //noinspection unchecked
         ((CubaEnhancedGrid<E>) component).setCubaEditorFieldFactory(createEditorFieldFactory());
+        ((CubaEnhancedGrid<E>) component).setBeforeRefreshHandler(this::onBeforeRefreshGridData);
+    }
+
+    protected void onBeforeRefreshGridData(E item) {
+        clearFieldDatasources(item);
     }
 
     protected CubaGridEditorFieldFactory<E> createEditorFieldFactory() {
@@ -874,7 +879,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
             this.dataBinding.unbind();
             this.dataBinding = null;
 
-            clearFieldDatasources();
+            clearFieldDatasources(null);
 
             this.component.setDataProvider(createEmptyDataProvider());
         }
@@ -1388,24 +1393,35 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
         return instanceContainer;
     }
 
-    @SuppressWarnings("unchecked")
-    protected void clearFieldDatasources() {
+    protected void clearFieldDatasources(E item) {
         if (itemDatasources == null) {
             return;
         }
 
-        // detach instance containers from entities explicitly
-        for (Map.Entry<E, Object> entry : itemDatasources.entrySet()) {
-            if (entry.getValue() instanceof InstanceContainer) {
-                InstanceContainer<E> container = (InstanceContainer<E>) entry.getValue();
-                container.setItem(null);
-            } else if (entry.getValue() instanceof Datasource) {
-                Datasource<E> datasource = (Datasource<E>) entry.getValue();
-                datasource.setItem(null);
+        if (item != null) {
+            Object removed = itemDatasources.remove(item);
+            if (removed != null) {
+                detachItemContainer(removed);
             }
-        }
+        } else {
+            // detach instance containers from entities explicitly
+            for (Map.Entry<E, Object> entry : itemDatasources.entrySet()) {
+                detachItemContainer(entry.getValue());
+            }
 
-        itemDatasources.clear();
+            itemDatasources.clear();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void detachItemContainer(Object container) {
+        if (container instanceof InstanceContainer) {
+            InstanceContainer<E> instanceContainer = (InstanceContainer<E>) container;
+            instanceContainer.setItem(null);
+        } else if (container instanceof Datasource) {
+            Datasource<E> datasource = (Datasource<E>) container;
+            datasource.setItem(null);
+        }
     }
 
     protected ValueSourceProvider createValueSourceProvider(E item) {
