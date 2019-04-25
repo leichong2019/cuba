@@ -36,7 +36,7 @@ import com.haulmont.cuba.web.App;
 import com.haulmont.cuba.web.AppUI;
 import com.haulmont.cuba.web.Connection;
 import com.haulmont.cuba.web.controllers.ControllerUtils;
-import com.haulmont.cuba.web.gui.components.CompositionTemplate;
+import com.haulmont.cuba.web.gui.components.CompositeDescriptor;
 import com.haulmont.cuba.web.widgets.CubaButton;
 import com.haulmont.cuba.web.widgets.CubaCopyButtonExtension;
 import com.haulmont.cuba.web.widgets.CubaWindow;
@@ -279,7 +279,7 @@ public class ExceptionDialog extends CubaWindow {
                     if (context instanceof CompositeComponentContext) {
                         Class<?> componentClass = ((CompositeComponentContext) context).getComponentClass();
                         params.put("Component Class", componentClass);
-                        CompositionTemplate template = componentClass.getAnnotation(CompositionTemplate.class);
+                        CompositeDescriptor template = componentClass.getAnnotation(CompositeDescriptor.class);
                         if (template != null) {
                             params.put("XML descriptor", template.value());
                         }

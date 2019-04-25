@@ -27,8 +27,6 @@
             <xs:sequence>
                 <xs:group ref="layout:singleLayoutOrComponent"/>
             </xs:sequence>
-
-            <xs:attribute name="messagesPack" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 </xs:schema>

@@ -22,17 +22,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Specifies a string value which can be either a file path or a xml template
+ * Specifies a string value that is a file path to an xml descriptor
  * that can be used for a {@link CompositeComponent} initialization.
- *
- * TODO: gg, examples
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface CompositionTemplate {
+public @interface CompositeDescriptor {
 
     /**
-     * @return a string value which can be either a file path or a xml template
+     * @return a file path to an xml descriptor
      */
     String value();
 }

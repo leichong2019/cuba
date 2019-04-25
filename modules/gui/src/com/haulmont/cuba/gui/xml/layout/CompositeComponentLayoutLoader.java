@@ -37,7 +37,7 @@ public class CompositeComponentLayoutLoader {
 
     public static final String NAME = "cuba_CompositeComponentLayoutLoader";
 
-    public static final String COMPOSITE_COMPONENT_ELEMENT_NAME = "compositeComponent";
+    public static final String COMPOSITE_COMPONENT_ELEMENT_NAME = "composite";
 
     protected ComponentLoader.Context context;
     protected UiComponents factory;

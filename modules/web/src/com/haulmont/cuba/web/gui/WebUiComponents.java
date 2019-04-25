@@ -16,7 +16,6 @@
 
 package com.haulmont.cuba.web.gui;
 
-import com.google.common.base.Strings;
 import com.google.common.reflect.TypeToken;
 import com.haulmont.chile.core.datatypes.DatatypeRegistry;
 import com.haulmont.cuba.core.global.BeanLocator;
@@ -27,17 +26,17 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.mainwindow.*;
 import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
 import com.haulmont.cuba.gui.xml.layout.CompositeComponentLayoutLoader;
-import com.haulmont.cuba.gui.xml.layout.CompositeComponentTemplateLoader;
+import com.haulmont.cuba.gui.xml.layout.CompositeDescriptorLoader;
 import com.haulmont.cuba.gui.xml.layout.loaders.CompositeComponentLoaderContext;
 import com.haulmont.cuba.web.gui.components.*;
 import com.haulmont.cuba.web.gui.components.mainwindow.*;
+import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -55,7 +54,7 @@ public class WebUiComponents implements UiComponents {
     @Inject
     protected DatatypeRegistry datatypeRegistry;
     @Inject
-    protected CompositeComponentTemplateLoader compositeComponentTemplateLoader;
+    protected CompositeDescriptorLoader compositeDescriptorLoader;
     @Inject
     protected UserSessionSource userSessionSource;
     @Inject
@@ -245,9 +244,9 @@ public class WebUiComponents implements UiComponents {
 
         CompositeComponent compositeComponent = (CompositeComponent) instance;
 
-        CompositionTemplate template = componentClass.getAnnotation(CompositionTemplate.class);
-        if (template != null) {
-            Component root = processCompositionTemplate(componentClass, template.value());
+        CompositeDescriptor descriptor = componentClass.getAnnotation(CompositeDescriptor.class);
+        if (descriptor != null) {
+            Component root = processCompositeDescriptor(componentClass, descriptor.value());
             WebComponentsHelper.setCompositeComponentRoot(compositeComponent, root);
         }
 
@@ -256,16 +255,16 @@ public class WebUiComponents implements UiComponents {
                 CompositeComponent.CreateEvent.class, event);
     }
 
-    protected Component processCompositionTemplate(Class<? extends Component> componentClass, String template) {
+    protected Component processCompositeDescriptor(Class<? extends Component> componentClass, String descriptorPath) {
         ComponentLoader.CompositeComponentContext context = new CompositeComponentLoaderContext();
         context.setComponentClass(componentClass);
 
-        Element element = compositeComponentTemplateLoader.load(template);
+        Element element = compositeDescriptorLoader.load(descriptorPath);
 
         CompositeComponentLayoutLoader layoutLoader =
                 beanLocator.getPrototype(CompositeComponentLayoutLoader.NAME, context);
         layoutLoader.setLocale(getLocale());
-        layoutLoader.setMessagesPack(getMessagesPack(element));
+        layoutLoader.setMessagesPack(getMessagePack(descriptorPath));
 
         return layoutLoader.createComponent(element);
     }
@@ -274,10 +273,15 @@ public class WebUiComponents implements UiComponents {
         return userSessionSource.getUserSession().getLocale();
     }
 
-    @Nullable
-    protected String getMessagesPack(Element element) {
-        String messagesPack = element.attributeValue("messagesPack");
-        return Strings.isNullOrEmpty(messagesPack) ? null : messagesPack;
+    protected String getMessagePack(String descriptorPath) {
+        if (descriptorPath.contains("/")) {
+            descriptorPath = StringUtils.substring(descriptorPath, 0, descriptorPath.lastIndexOf("/"));
+        }
+
+        String messagesPack = descriptorPath.replaceAll("/", ".");
+        int start = messagesPack.startsWith(".") ? 1 : 0;
+        messagesPack = messagesPack.substring(start);
+        return messagesPack;
     }
 
     public void register(String name, Class<? extends Component> componentClass) {

@@ -16,7 +16,6 @@
 
 package com.haulmont.cuba.gui.xml.layout;
 
-import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.haulmont.bali.util.Dom4j;
@@ -26,16 +25,15 @@ import org.apache.commons.io.IOUtils;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-@org.springframework.stereotype.Component(CompositeComponentTemplateLoader.NAME)
-public class CompositeComponentTemplateLoader {
+@org.springframework.stereotype.Component(CompositeDescriptorLoader.NAME)
+public class CompositeDescriptorLoader {
 
-    public static final String NAME = "cuba_CompositeComponentTemplateLoader";
+    public static final String NAME = "cuba_CompositeDescriptorLoader";
 
     protected static final int CACHE_DESCRIPTORS_COUNT = 20;
 
@@ -44,42 +42,40 @@ public class CompositeComponentTemplateLoader {
     @Inject
     protected Resources resources;
 
-    public Element load(String templateString) {
-        String loadedTemplate = loadTemplate(templateString);
-        String template = loadedTemplate != null ? loadedTemplate : templateString;
-        if (Strings.isNullOrEmpty(template)) {
-            throw new DevelopmentException("Template is not found or empty");
-        }
-        Document document = getDocument(template);
+    public Element load(String path) {
+        String descriptor = loadDescriptor(path);
+        Document document = getDocument(descriptor);
         return document.getRootElement();
     }
 
-    @Nullable
-    protected String loadTemplate(String resourcePath) {
+    protected String loadDescriptor(String resourcePath) {
         try (InputStream stream = resources.getResourceAsStream(resourcePath)) {
-            return stream != null ? IOUtils.toString(stream, StandardCharsets.UTF_8) : null;
+            if (stream == null) {
+                throw new DevelopmentException("Descriptor is not found " + resourcePath, "Path", resourcePath);
+            }
+            return IOUtils.toString(stream, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new RuntimeException("Unable to read component template");
+            throw new RuntimeException("Unable to read component descriptor");
         }
     }
 
-    protected Document getDocument(String template) {
+    protected Document getDocument(String descriptor) {
         if (cache == null) {
             cache = CacheBuilder.newBuilder()
                     .maximumSize(CACHE_DESCRIPTORS_COUNT)
                     .build();
         }
 
-        Document document = cache.getIfPresent(template);
+        Document document = cache.getIfPresent(descriptor);
         if (document == null) {
-            document = createDocument(template);
-            cache.put(template, document);
+            document = createDocument(descriptor);
+            cache.put(descriptor, document);
         }
 
         return document;
     }
 
-    protected Document createDocument(String template) {
-        return Dom4j.readDocument(template);
+    protected Document createDocument(String descriptor) {
+        return Dom4j.readDocument(descriptor);
     }
 }
