@@ -22,7 +22,7 @@ import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
 public class CompositeComponentLoaderContext implements ComponentLoader.CompositeComponentContext {
 
     protected Class<? extends Component> componentClass;
-    protected String template;
+    protected String descriptorPath;
 
     @Override
     public Class<? extends Component> getComponentClass() {
@@ -35,12 +35,12 @@ public class CompositeComponentLoaderContext implements ComponentLoader.Composit
     }
 
     @Override
-    public String getComponentTemplate() {
-        return template;
+    public String getDescriptorPath() {
+        return descriptorPath;
     }
 
     @Override
-    public void setComponentTemplate(String template) {
-        this.template = template;
+    public void setDescriptorPath(String descriptorPath) {
+        this.descriptorPath = descriptorPath;
     }
 }

@@ -72,8 +72,8 @@ public interface ComponentLoader<T extends Component> {
         Class<? extends Component> getComponentClass();
         void setComponentClass(Class<? extends Component> componentClass);
 
-        String getComponentTemplate();
-        void setComponentTemplate(String template);
+        String getDescriptorPath();
+        void setDescriptorPath(String template);
     }
 
     /**

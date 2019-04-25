@@ -961,7 +961,7 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
                 location = getComponentContext().getFullFrameId();
             }
             if (context instanceof CompositeComponentContext) {
-                location = getCompositeComponentContext().getComponentTemplate();
+                location = getCompositeComponentContext().getDescriptorPath();
             }
 
             throw new RuntimeException("Loader instantiate error in: " + location, e);

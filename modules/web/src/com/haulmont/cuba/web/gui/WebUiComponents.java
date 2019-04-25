@@ -258,6 +258,7 @@ public class WebUiComponents implements UiComponents {
     protected Component processCompositeDescriptor(Class<? extends Component> componentClass, String descriptorPath) {
         ComponentLoader.CompositeComponentContext context = new CompositeComponentLoaderContext();
         context.setComponentClass(componentClass);
+        context.setDescriptorPath(descriptorPath);
 
         Element element = compositeDescriptorLoader.load(descriptorPath);
 
