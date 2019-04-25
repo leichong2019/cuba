@@ -33,7 +33,7 @@ public class WebHtmlBoxLayout extends WebAbstractComponent<CubaCustomLayout> imp
     protected List<Component> ownComponents = new ArrayList<>();
 
     public WebHtmlBoxLayout() {
-        component = new CubaCustomLayout("");
+        component = new CubaCustomLayout();
     }
 
     @Override

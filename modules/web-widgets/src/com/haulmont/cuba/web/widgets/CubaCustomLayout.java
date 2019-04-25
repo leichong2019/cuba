@@ -24,15 +24,7 @@ import java.io.InputStream;
 public class CubaCustomLayout extends CustomLayout {
 
     public CubaCustomLayout() {
-        super();
-    }
-
-    public CubaCustomLayout(InputStream templateStream) throws IOException {
-        super(templateStream);
-    }
-
-    public CubaCustomLayout(String template) {
-        super(template);
+        super("");
     }
 
     @Override
