@@ -16,6 +16,7 @@
  */
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
+import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.ScrollBoxLayout;
 import org.dom4j.Element;
 
@@ -76,7 +77,7 @@ public class ScrollBoxLayoutLoader extends ContainerLoader<ScrollBoxLayout> {
         } else if ("none".equalsIgnoreCase(scrollBars)) {
             component.setScrollBarPolicy(ScrollBoxLayout.ScrollBarPolicy.NONE);
         } else {
-            throw createGuiDevelopmentException("Invalid scrollBox 'scrollBars' value: " + scrollBars, context, true);
+            throw new GuiDevelopmentException("Invalid scrollBox 'scrollBars' value: " + scrollBars, context);
         }
     }
 

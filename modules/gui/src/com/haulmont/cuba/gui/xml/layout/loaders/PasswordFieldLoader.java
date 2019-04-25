@@ -17,18 +17,15 @@
 
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
+import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.CapsLockIndicator;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.PasswordField;
 import com.haulmont.cuba.gui.components.TextInputField;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PasswordFieldLoader extends AbstractTextFieldLoader<PasswordField> {
-
-    private final Logger log = LoggerFactory.getLogger(PasswordFieldLoader.class);
 
     @Override
     public void createComponent() {
@@ -56,10 +53,11 @@ public class PasswordFieldLoader extends AbstractTextFieldLoader<PasswordField> 
                 if (bindComponent instanceof CapsLockIndicator) {
                     component.setCapsLockIndicator((CapsLockIndicator) bindComponent);
                 } else if (bindComponent != null) {
-                    throw createGuiDevelopmentException("Unsupported 'capsLockIndicator' component class",
-                            context, true, "componentId", component.getId());
+                    throw new GuiDevelopmentException("Unsupported 'capsLockIndicator' component class",
+                            context, "componentId", component.getId());
                 } else {
-                    log.warn("Unable to find capsLockIndicator component with id: {}", capsLockIndicator);
+                    throw new GuiDevelopmentException("Unable to find capsLockIndicator component with id: " +
+                            capsLockIndicator, context);
                 }
             }
         }

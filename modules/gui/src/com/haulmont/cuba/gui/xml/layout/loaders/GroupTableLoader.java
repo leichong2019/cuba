@@ -18,6 +18,7 @@ package com.haulmont.cuba.gui.xml.layout.loaders;
 
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.core.global.View;
+import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.GroupTable;
 import com.haulmont.cuba.gui.components.Table;
 import com.haulmont.cuba.gui.components.data.TableItems;
@@ -60,7 +61,7 @@ public class GroupTableLoader extends AbstractTableLoader<GroupTable> {
             for (Table.Column column : columns) {
                 if (column.isCollapsed()) {
                     String msg = String.format("Can't group by collapsed column: %s", column.getId());
-                    throw createGuiDevelopmentException(msg, context, true);
+                    throw new GuiDevelopmentException(msg, context);
                 }
 
                 if (column.isGroupAllowed()) {

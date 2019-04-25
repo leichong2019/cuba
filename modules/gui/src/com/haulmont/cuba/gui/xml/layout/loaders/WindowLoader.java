@@ -20,6 +20,7 @@ import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.core.global.DevelopmentException;
 import com.haulmont.cuba.gui.AppConfig;
 import com.haulmont.cuba.gui.DialogOptions;
+import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.AbstractWindow;
 import com.haulmont.cuba.gui.components.Timer;
@@ -79,7 +80,7 @@ public class WindowLoader extends ContainerLoader<Window> implements ComponentRo
 
         Element layoutElement = element.element("layout");
         if (layoutElement == null) {
-            throw createGuiDevelopmentException("Required 'layout' element is not found", context, true);
+            throw new GuiDevelopmentException("Required 'layout' element is not found", context);
         }
 
         loadSpacing(resultComponent, layoutElement);
@@ -254,7 +255,7 @@ public class WindowLoader extends ContainerLoader<Window> implements ComponentRo
 
         String delay = element.attributeValue("delay");
         if (StringUtils.isEmpty(delay)) {
-            throw createGuiDevelopmentException("Timer 'delay' can't be empty", context, false,
+            throw new GuiDevelopmentException("Timer 'delay' can't be empty", context,
                     "Timer ID", timer.getId());
         }
 
@@ -262,7 +263,7 @@ public class WindowLoader extends ContainerLoader<Window> implements ComponentRo
         try {
             value = Integer.parseInt(delay);
         } catch (NumberFormatException e) {
-            throw createGuiDevelopmentException("Timer 'delay' must be numeric", context, true,
+            throw new GuiDevelopmentException("Timer 'delay' must be numeric", context,
                     ParamsMap.of(
                             "Timer delay", delay,
                             "Timer ID", timer.getId()
@@ -270,8 +271,8 @@ public class WindowLoader extends ContainerLoader<Window> implements ComponentRo
         }
 
         if (value <= 0) {
-            throw createGuiDevelopmentException("Timer 'delay' must be greater than 0", context, true,
-                    "Timer ID", timer.getId());
+            throw new GuiDevelopmentException("Timer 'delay' must be greater than 0",
+                    context, "Timer ID", timer.getId());
         }
 
         timer.setDelay(value);
@@ -312,8 +313,8 @@ public class WindowLoader extends ContainerLoader<Window> implements ComponentRo
                 Window.Editor editor = (Window.Editor) window.getFrameOwner();
                 editor.setCrossFieldValidate(Boolean.parseBoolean(crossFieldValidate));
             } else {
-                throw createGuiDevelopmentException("Window should extend Window.Editor to use crossFieldValidate attribute",
-                        context, false);
+                throw new GuiDevelopmentException("Window should extend Window.Editor to use crossFieldValidate attribute",
+                        context);
             }
         }
     }
@@ -326,8 +327,7 @@ public class WindowLoader extends ContainerLoader<Window> implements ComponentRo
         try {
             timerMethod = windowClass.getMethod(timerMethodName, Timer.class);
         } catch (NoSuchMethodException e) {
-            throw createGuiDevelopmentException("Unable to find invoke method for timer",
-                    context, true,
+            throw new GuiDevelopmentException("Unable to find invoke method for timer", context,
                     ParamsMap.of(
                             "Timer Id", timer.getId(),
                             "Method name", timerMethodName));

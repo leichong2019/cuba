@@ -17,6 +17,7 @@
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
 import com.haulmont.bali.util.ParamsMap;
+import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.CaptionMode;
 import com.haulmont.cuba.gui.components.DatasourceComponent;
 import com.haulmont.cuba.gui.components.LookupField;
@@ -120,8 +121,8 @@ public class LookupFieldLoader extends AbstractFieldLoader<LookupField> {
                         "Method name", newOptionHandlerMethod
                 );
 
-                throw createGuiDevelopmentException("Unable to find new option handler method for lookup field",
-                        context, true, params);
+                throw new GuiDevelopmentException("Unable to find new option handler method for lookup field",
+                        context, params);
             }
 
             component.setNewOptionHandler(caption -> {
@@ -145,7 +146,7 @@ public class LookupFieldLoader extends AbstractFieldLoader<LookupField> {
             ScreenData screenData = UiControllerUtils.getScreenData(frameOwner);
             InstanceContainer container = screenData.getContainer(containerId);
             if (!(container instanceof CollectionContainer)) {
-                throw createGuiDevelopmentException("Not a CollectionContainer: " + containerId, context, false);
+                throw new GuiDevelopmentException("Not a CollectionContainer: " + containerId, context);
             }
             component.setOptions(new ContainerOptions((CollectionContainer) container));
         }

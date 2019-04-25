@@ -16,6 +16,7 @@
  */
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
+import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.DatasourceComponent;
 import com.haulmont.cuba.gui.data.Datasource;
 import org.apache.commons.lang3.StringUtils;
@@ -32,15 +33,14 @@ public abstract class AbstractDatasourceComponentLoader<T extends DatasourceComp
             }
             Datasource ds = getComponentContext().getDsContext().get(datasource);
             if (ds == null) {
-                throw createGuiDevelopmentException(String.format("Datasource '%s' is not defined", datasource),
-                        getContext(), true, "Component ID", component.getId());
+                throw new GuiDevelopmentException(String.format("Datasource '%s' is not defined", datasource),
+                        getContext(), "Component ID", component.getId());
             }
             String property = element.attributeValue("property");
             if (StringUtils.isEmpty(property)) {
-                throw createGuiDevelopmentException(
+                throw new GuiDevelopmentException(
                         String.format("Can't set datasource '%s' for component '%s' because 'property' " +
-                                "attribute is not defined", datasource, component.getId()),
-                        context, true);
+                                "attribute is not defined", datasource, component.getId()), context);
             }
 
             component.setDatasource(ds, property);

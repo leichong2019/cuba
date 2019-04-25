@@ -18,7 +18,6 @@ package com.haulmont.cuba.gui.xml.layout;
 
 import com.google.common.base.Preconditions;
 import com.haulmont.cuba.core.global.BeanLocator;
-import com.haulmont.cuba.core.global.DevelopmentException;
 import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.Component;
@@ -94,7 +93,7 @@ public class CompositeComponentLayoutLoader {
 
         Class<? extends ComponentLoader> loaderClass = config.getLoader(element.getName());
         if (loaderClass == null) {
-            throw createDevelopmentException("Unknown component: " + element.getName(), context);
+            throw new GuiDevelopmentException("Unknown component: " + element.getName(), context);
         }
 
         return initLoader(element, loaderClass);
@@ -107,13 +106,13 @@ public class CompositeComponentLayoutLoader {
         try {
             constructor = loaderClass.getConstructor();
         } catch (NoSuchMethodException e) {
-            throw createDevelopmentException("Unable to get constructor for loader: " + e, context);
+            throw new GuiDevelopmentException("Unable to get constructor for loader: " + e, context);
         }
 
         try {
             loader = constructor.newInstance();
         } catch (InvocationTargetException | IllegalAccessException | InstantiationException e) {
-            throw createDevelopmentException("Loader instantiation error: " + e, context);
+            throw new GuiDevelopmentException("Loader instantiation error: " + e, context);
         }
 
         loader.setBeanLocator(beanLocator);
@@ -134,17 +133,5 @@ public class CompositeComponentLayoutLoader {
         loader.createComponent();
         loader.loadComponent();
         return loader.getResultComponent();
-    }
-
-    protected DevelopmentException createDevelopmentException(String message, ComponentLoader.Context context) {
-        if (context instanceof ComponentLoader.ComponentContext) {
-            return new GuiDevelopmentException(message,
-                    ((ComponentLoader.ComponentContext) context).getFullFrameId());
-        } else if (context instanceof ComponentLoader.CompositeComponentContext) {
-            return new GuiDevelopmentException(message,
-                    ((ComponentLoader.CompositeComponentContext) context).getComponentClass());
-        } else {
-            return new DevelopmentException(message);
-        }
     }
 }

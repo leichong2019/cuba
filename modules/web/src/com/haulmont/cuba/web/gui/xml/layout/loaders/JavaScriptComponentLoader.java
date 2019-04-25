@@ -86,8 +86,7 @@ public class JavaScriptComponentLoader extends AbstractComponentLoader<JavaScrip
         for (Element dependency : dependenciesElement.elements("dependency")) {
             String path = dependency.attributeValue("path");
             if (Strings.isNullOrEmpty(path)) {
-                throw createGuiDevelopmentException("No path provided for a JavaScriptComponent dependency",
-                        context, true);
+                throw new GuiDevelopmentException("No path provided for a JavaScriptComponent dependency", context);
             }
 
             String type = dependency.attributeValue("type");

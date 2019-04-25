@@ -45,8 +45,8 @@ public class SearchFieldLoader extends LookupFieldLoader {
             try {
                 mode = SearchField.Mode.valueOf(StringUtils.upperCase(modeString));
             } catch (IllegalArgumentException e) {
-                throw createGuiDevelopmentException("Unable to parse mode for search",
-                        context, true, "mode", modeString);
+                throw new GuiDevelopmentException("Unable to parse mode for search",
+                        context, "mode", modeString);
             }
             searchField.setMode(mode);
         }

@@ -17,6 +17,7 @@
 
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
+import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.CaptionMode;
 import com.haulmont.cuba.gui.components.DatasourceComponent;
 import com.haulmont.cuba.gui.components.OptionsField;
@@ -76,7 +77,7 @@ public abstract class AbstractOptionsBaseLoader<T extends OptionsField> extends 
             ScreenData screenData = UiControllerUtils.getScreenData(frameOwner);
             InstanceContainer container = screenData.getContainer(containerId);
             if (!(container instanceof CollectionContainer)) {
-                throw createGuiDevelopmentException("Not a CollectionContainer: " + containerId, context, false);
+                throw new GuiDevelopmentException("Not a CollectionContainer: " + containerId, context);
             }
             component.setOptions(new ContainerOptions((CollectionContainer) container));
         }

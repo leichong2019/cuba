@@ -17,6 +17,7 @@
 
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
+import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.WindowManager;
 import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.Actions;
@@ -33,7 +34,7 @@ public abstract class ActionsHolderLoader<T extends ActionsHolder> extends Abstr
     protected Action loadDeclarativeAction(ActionsHolder actionsHolder, Element element) {
         String id = element.attributeValue("id");
         if (StringUtils.isEmpty(id)) {
-            throw createGuiDevelopmentException("No action id provided", context, true,
+            throw new GuiDevelopmentException("No action id provided", context,
                     "ActionsHolder ID", actionsHolder.getId());
         }
 
@@ -119,9 +120,9 @@ public abstract class ActionsHolderLoader<T extends ActionsHolder> extends Abstr
                 try {
                     openType = WindowManager.OpenType.valueOf(openTypeString);
                 } catch (IllegalArgumentException e) {
-                    throw createGuiDevelopmentException(
+                    throw new GuiDevelopmentException(
                             String.format("Unknown open type: '%s' for action: '%s'", openTypeString, action.getId()),
-                            context, true);
+                            context);
                 }
 
                 ((Action.HasOpenType) action).setOpenType(openType);

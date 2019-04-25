@@ -16,6 +16,7 @@
  */
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
+import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.WindowManager.OpenType;
 import com.haulmont.cuba.gui.components.CaptionMode;
 import com.haulmont.cuba.gui.components.LookupField;
@@ -170,7 +171,7 @@ public class TokenListLoader extends AbstractFieldLoader<TokenList> {
     protected void loadLookup(TokenList component, Element element) {
         Element lookupElement = element.element("lookup");
         if (lookupElement == null) {
-            throw createGuiDevelopmentException("'tokenList' must contain 'lookup' element", context, true,
+            throw new GuiDevelopmentException("'tokenList' must contain 'lookup' element", context,
                     "TokenList ID", element.attributeValue("id"));
         }
 
@@ -246,14 +247,14 @@ public class TokenListLoader extends AbstractFieldLoader<TokenList> {
         if (StringUtils.isNotEmpty(datasourceId)) {
             Datasource datasource = getComponentContext().getDsContext().get(datasourceId);
             if (datasource == null) {
-                throw createGuiDevelopmentException(String.format("Datasource '%s' is not defined", datasourceId),
-                        context, true);
+                throw new GuiDevelopmentException(String.format("Datasource '%s' is not defined", datasourceId),
+                        context);
             }
 
             if (!(datasource instanceof CollectionDatasource)) {
-                throw createGuiDevelopmentException(
+                throw new GuiDevelopmentException(
                         String.format("Can't set datasource '%s' for TokenList because it supports only CollectionDatasources",
-                                datasourceId), context, true);
+                                datasourceId), context);
             }
 
             tokenList.setValueSource(new LegacyCollectionDsValueSource((CollectionDatasource) datasource));
@@ -274,7 +275,7 @@ public class TokenListLoader extends AbstractFieldLoader<TokenList> {
             ScreenData screenData = UiControllerUtils.getScreenData(frameOwner);
             InstanceContainer container = screenData.getContainer(containerId);
             if (!(container instanceof CollectionContainer)) {
-                throw createGuiDevelopmentException("Not a CollectionContainer: " + containerId, context, false);
+                throw new GuiDevelopmentException("Not a CollectionContainer: " + containerId, context);
             }
             //noinspection unchecked
             component.setOptions(new ContainerOptions((CollectionContainer) container));

@@ -17,6 +17,7 @@
 
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
+import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.WindowManager.OpenType;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.ListComponent;
@@ -62,8 +63,8 @@ public class RelatedEntitiesLoader extends AbstractComponentLoader<RelatedEntiti
 
             String property = routeElement.attributeValue("name");
             if (StringUtils.isEmpty(property)) {
-                throw createGuiDevelopmentException("Name attribute for related entities property is not specified",
-                        context, true, "componentId", resultComponent.getId());
+                throw new GuiDevelopmentException("Name attribute for related entities property is not specified",
+                        context, "componentId", resultComponent.getId());
             }
 
             String caption = loadResourceString(routeElement.attributeValue("caption"));
@@ -72,8 +73,8 @@ public class RelatedEntitiesLoader extends AbstractComponentLoader<RelatedEntiti
 
             if (StringUtils.isNotEmpty(screen)) {
                 if (getWindowConfig().findWindowInfo(screen) == null) {
-                    throw createGuiDevelopmentException("Screen for custom route in related entities not found",
-                            context, true, "componentId", resultComponent.getId());
+                    throw new GuiDevelopmentException("Screen for custom route in related entities not found",
+                            context, "componentId", resultComponent.getId());
                 }
             }
 
@@ -82,16 +83,16 @@ public class RelatedEntitiesLoader extends AbstractComponentLoader<RelatedEntiti
 
         String listComponent = element.attributeValue("for");
         if (StringUtils.isEmpty(listComponent)) {
-            throw createGuiDevelopmentException("'for' attribute of related entities is not specified",
-                    context, true, "componentId", resultComponent.getId());
+            throw new GuiDevelopmentException("'for' attribute of related entities is not specified",
+                    context, "componentId", resultComponent.getId());
         }
 
         getComponentContext().addPostInitTask((context1, window) -> {
             if (resultComponent.getListComponent() == null) {
                 Component bindComponent = resultComponent.getFrame().getComponent(listComponent);
                 if (!(bindComponent instanceof ListComponent)) {
-                    throw createGuiDevelopmentException("Specify 'for' attribute: id of table or tree",
-                            context1, true, "componentId", resultComponent.getId());
+                    throw new GuiDevelopmentException("Specify 'for' attribute: id of table or tree",
+                            context1, "componentId", resultComponent.getId());
                 }
 
                 resultComponent.setListComponent((ListComponent) bindComponent);

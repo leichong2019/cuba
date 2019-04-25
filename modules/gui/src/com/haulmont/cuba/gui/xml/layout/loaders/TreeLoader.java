@@ -17,6 +17,7 @@
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
 import com.google.common.base.Strings;
+import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.ButtonsPanel;
 import com.haulmont.cuba.gui.components.CaptionMode;
 import com.haulmont.cuba.gui.components.Tree;
@@ -94,7 +95,7 @@ public class TreeLoader extends ActionsHolderLoader<Tree> {
             if (container instanceof CollectionContainer) {
                 collectionContainer = (CollectionContainer) container;
             } else {
-                throw createGuiDevelopmentException("Not a CollectionContainer: " + containerId, context, false);
+                throw new GuiDevelopmentException("Not a CollectionContainer: " + containerId, context);
             }
             String hierarchyProperty = element.attributeValue("hierarchyProperty");
             if (hierarchyProperty == null && itemsElem != null) {
@@ -103,8 +104,8 @@ public class TreeLoader extends ActionsHolderLoader<Tree> {
             }
 
             if (Strings.isNullOrEmpty(hierarchyProperty)) {
-                throw createGuiDevelopmentException("Tree doesn't have 'hierarchyProperty' attribute of the 'treechildren' element", context, false,
-                        "Tree ID", element.attributeValue("id"));
+                throw new GuiDevelopmentException("Tree doesn't have 'hierarchyProperty' attribute of the 'treechildren' element",
+                        context, "Tree ID", element.attributeValue("id"));
             }
             resultComponent.setItems(new ContainerTreeItems(collectionContainer, hierarchyProperty));
         } else if (itemsElem != null) {

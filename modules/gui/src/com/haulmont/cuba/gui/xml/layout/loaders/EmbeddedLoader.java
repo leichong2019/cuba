@@ -17,6 +17,7 @@
 
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
+import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.Embedded;
 import org.apache.commons.lang3.StringUtils;
 
@@ -55,8 +56,8 @@ public class EmbeddedLoader extends AbstractComponentLoader<Embedded> {
                 try {
                     targetUrl = new URL(src);
                 } catch (MalformedURLException e) {
-                    throw createGuiDevelopmentException("Incorrect URL in Embedded src attribute", context, true,
-                            "src", srcAttr);
+                    throw new GuiDevelopmentException("Incorrect URL in Embedded src attribute",
+                            context, "src", srcAttr);
                 }
 
                 resultComponent.setType(Embedded.Type.BROWSER);
@@ -69,8 +70,8 @@ public class EmbeddedLoader extends AbstractComponentLoader<Embedded> {
                 resultComponent.setType(Embedded.Type.OBJECT);
                 resultComponent.setSource(src);
             } else {
-                throw createGuiDevelopmentException("Illegal src attribute value. 'url://' or 'file://' or theme:// prefix expected",
-                        context, true, "src", srcAttr);
+                throw new GuiDevelopmentException("Illegal src attribute value. 'url://' or 'file://' or theme:// prefix expected",
+                        context, "src", srcAttr);
             }
         }
 

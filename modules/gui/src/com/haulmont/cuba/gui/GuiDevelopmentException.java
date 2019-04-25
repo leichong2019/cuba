@@ -18,37 +18,79 @@
 package com.haulmont.cuba.gui;
 
 import com.haulmont.cuba.core.global.DevelopmentException;
+import com.haulmont.cuba.gui.xml.layout.ComponentLoader.ComponentContext;
+import com.haulmont.cuba.gui.xml.layout.ComponentLoader.CompositeComponentContext;
+import com.haulmont.cuba.gui.xml.layout.ComponentLoader.Context;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 public class GuiDevelopmentException extends DevelopmentException {
 
-    protected Object contextId;
+    protected String frameId;
+    protected Context context;
 
-    public GuiDevelopmentException(String message, Object contextId) {
+    public GuiDevelopmentException(String message, String frameId) {
         super(message);
-        this.contextId = contextId;
+        this.frameId = frameId;
     }
 
-    public GuiDevelopmentException(String message, Object contextId, String paramKey, Object paramValue) {
+    /**
+     * @deprecated Use {@link #GuiDevelopmentException(String, Context, String, Object)} instead
+     */
+    @Deprecated
+    public GuiDevelopmentException(String message, String frameId, String paramKey, Object paramValue) {
         super(message, paramKey, paramValue);
-        this.contextId = contextId;
+        this.frameId = frameId;
     }
 
-    public GuiDevelopmentException(String message, Object contextId, Map<String, Object> params) {
+    /**
+     * @deprecated Use {@link #GuiDevelopmentException(String, Context, Map)} instead
+     */
+    @Deprecated
+    public GuiDevelopmentException(String message, String frameId, Map<String, Object> params) {
         super(message, params);
-        this.contextId = contextId;
+        this.frameId = frameId;
     }
 
-    public Object getContextId() {
-        return contextId;
+    public GuiDevelopmentException(String message, Context context) {
+        super(message);
+        this.context = context;
+    }
+
+    public GuiDevelopmentException(String message, Context context, String paramKey, Object paramValue) {
+        super(message, paramKey, paramValue);
+        this.context = context;
+    }
+
+    public GuiDevelopmentException(String message, Context context, Map<String, Object> params) {
+        super(message, params);
+        this.context = context;
+    }
+
+    @Nullable
+    public String getFrameId() {
+        if (frameId != null) {
+            return frameId;
+        } else if (context instanceof ComponentContext) {
+            return ((ComponentContext) context).getFullFrameId();
+        } else {
+            return null;
+        }
+    }
+
+    @Nullable
+    public Context getContext() {
+        return context;
     }
 
     @Override
     public String toString() {
         return super.toString() +
-                (contextId instanceof String ? ", frameId=" + contextId
-                : contextId instanceof Class ? ", componentClass=" + contextId
-                : "");
+                (getFrameId() != null
+                        ? ", frameId=" + getFrameId()
+                        : context instanceof CompositeComponentContext
+                        ? "componentClass=" + ((CompositeComponentContext) context).getComponentClass()
+                        : "");
     }
 }

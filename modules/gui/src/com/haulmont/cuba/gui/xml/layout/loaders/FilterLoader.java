@@ -17,6 +17,7 @@
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
 import com.google.common.base.Strings;
+import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.Filter;
 import com.haulmont.cuba.gui.components.FilterImplementation;
@@ -113,7 +114,7 @@ public class FilterLoader extends AbstractComponentLoader<Filter> {
                 }
                 CollectionDatasource ds = (CollectionDatasource) getComponentContext().getDsContext().get(datasource);
                 if (ds == null) {
-                    throw createGuiDevelopmentException("Can't find datasource by name: " + datasource, context, false);
+                    throw new GuiDevelopmentException("Can't find datasource by name: " + datasource, context);
                 }
                 resultComponent.setDatasource(ds);
             }
@@ -125,7 +126,7 @@ public class FilterLoader extends AbstractComponentLoader<Filter> {
             getComponentContext().addPostInitTask((c, w) -> {
                 Component applyToComponent = frame.getComponent(applyTo);
                 if (c == null) {
-                    throw createGuiDevelopmentException("Can't apply component to component with ID: " + applyTo, context, true);
+                    throw new GuiDevelopmentException("Can't apply component to component with ID: " + applyTo, context);
                 }
                 resultComponent.setApplyTo(applyToComponent);
             });

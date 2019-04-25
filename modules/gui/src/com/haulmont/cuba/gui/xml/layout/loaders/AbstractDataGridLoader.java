@@ -26,6 +26,7 @@ import com.haulmont.cuba.core.app.dynamicattributes.DynamicAttributesUtils;
 import com.haulmont.cuba.core.entity.CategoryAttribute;
 import com.haulmont.cuba.core.entity.LocaleHelper;
 import com.haulmont.cuba.core.global.*;
+import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.DataGrid.Column;
 import com.haulmont.cuba.gui.components.data.DataGridItems;
@@ -138,7 +139,7 @@ public abstract class AbstractDataGridLoader<T extends DataGrid> extends Actions
             if (container instanceof CollectionContainer) {
                 collectionContainer = (CollectionContainer) container;
             } else {
-                throw createGuiDevelopmentException("Not a CollectionContainer: " + containerId, context, false);
+                throw new GuiDevelopmentException("Not a CollectionContainer: " + containerId, context);
             }
             metaClass = collectionContainer.getEntityMetaClass();
             if (collectionContainer instanceof HasLoader) {
@@ -147,17 +148,17 @@ public abstract class AbstractDataGridLoader<T extends DataGrid> extends Actions
         } else if (!Strings.isNullOrEmpty(datasourceId)) {
             datasource = getComponentContext().getDsContext().get(datasourceId);
             if (datasource == null) {
-                throw createGuiDevelopmentException("Can't find datasource by name: " + datasourceId, context, false);
+                throw new GuiDevelopmentException("Can't find datasource by name: " + datasourceId, context);
             }
             if (!(datasource instanceof CollectionDatasource)) {
-                throw createGuiDevelopmentException("Not a CollectionDatasource: " + datasource, context, false);
+                throw new GuiDevelopmentException("Not a CollectionDatasource: " + datasource, context);
             }
             metaClass = datasource.getMetaClass();
         } else {
             String metaClassStr = element.attributeValue("metaClass");
             if (Strings.isNullOrEmpty(metaClassStr)) {
-                throw createGuiDevelopmentException("DataGrid doesn't have data binding",
-                        context, true, "DataGrid ID", element.attributeValue("id"));
+                throw new GuiDevelopmentException("DataGrid doesn't have data binding",
+                        context, "DataGrid ID", element.attributeValue("id"));
             }
 
             metaClass = getMetadata().getClassNN(metaClassStr);
@@ -394,8 +395,8 @@ public abstract class AbstractDataGridLoader<T extends DataGrid> extends Actions
         String includeAll = columnsElement.attributeValue("includeAll");
 
         if (StringUtils.isNotBlank(includeByView) && StringUtils.isNotBlank(includeAll)) {
-            throw createGuiDevelopmentException("'includeByView' and 'includeAll' attributes cannot be defined simultaneously",
-                    getContext(), true);
+            throw new GuiDevelopmentException(
+                    "'includeByView' and 'includeAll' attributes cannot be defined simultaneously", getContext());
         }
 
         if (StringUtils.isNotBlank(includeByView)) {
@@ -425,8 +426,8 @@ public abstract class AbstractDataGridLoader<T extends DataGrid> extends Actions
             if (property != null) {
                 id = property;
             } else {
-                throw createGuiDevelopmentException("A column must have whether id or property specified",
-                        context, false, "DataGrid ID", component.getId());
+                throw new GuiDevelopmentException("A column must have whether id or property specified",
+                        context, "DataGrid ID", component.getId());
             }
         }
 
@@ -548,8 +549,8 @@ public abstract class AbstractDataGridLoader<T extends DataGrid> extends Actions
                 // Only integer allowed in XML
                 return Integer.parseInt(value);
             } catch (NumberFormatException e) {
-                throw createGuiDevelopmentException("Property '" + propertyName + "' must contain only numeric value",
-                        context, false, propertyName, element.attributeValue(propertyName));
+                throw new GuiDevelopmentException("Property '" + propertyName + "' must contain only numeric value",
+                        context, propertyName, element.attributeValue(propertyName));
             }
         }
         return null;

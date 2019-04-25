@@ -19,6 +19,7 @@ package com.haulmont.cuba.gui.xml.layout.loaders;
 
 import com.google.common.base.Strings;
 import com.haulmont.chile.core.model.MetaClass;
+import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.TreeTable;
 import com.haulmont.cuba.gui.components.data.TableItems;
 import com.haulmont.cuba.gui.components.data.table.ContainerTableItems;
@@ -45,7 +46,7 @@ public class TreeTableLoader extends AbstractTableLoader<TreeTable> {
         }
 
         if (Strings.isNullOrEmpty(hierarchyProperty)) {
-            throw createGuiDevelopmentException("TreeTable doesn't have 'hierarchyProperty' attribute", context, false,
+            throw new GuiDevelopmentException("TreeTable doesn't have 'hierarchyProperty' attribute", context,
                     "TreeTable ID", element.attributeValue("id"));
         }
         return new ContainerTreeTableItems(container, hierarchyProperty);

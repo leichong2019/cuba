@@ -29,6 +29,8 @@ import com.haulmont.cuba.gui.components.KeyCombination;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.config.WindowConfig;
 import com.haulmont.cuba.gui.theme.ThemeConstants;
+import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
+import com.haulmont.cuba.gui.xml.layout.ComponentLoader.CompositeComponentContext;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.web.App;
 import com.haulmont.cuba.web.AppUI;
@@ -273,16 +275,16 @@ public class ExceptionDialog extends CubaWindow {
                 Map<String, Object> params = new LinkedHashMap<>();
                 if (rootCause instanceof GuiDevelopmentException) {
                     GuiDevelopmentException guiDevException = (GuiDevelopmentException) rootCause;
-                    Object contextId = guiDevException.getContextId();
-                    if (contextId instanceof Class) {
-                        Class<?> componentClass = (Class<?>) contextId;
+                    ComponentLoader.Context context = guiDevException.getContext();
+                    if (context instanceof CompositeComponentContext) {
+                        Class<?> componentClass = ((CompositeComponentContext) context).getComponentClass();
                         params.put("Component Class", componentClass);
                         CompositionTemplate template = componentClass.getAnnotation(CompositionTemplate.class);
                         if (template != null) {
-                            params.put("XML template", template.value());
+                            params.put("XML descriptor", template.value());
                         }
-                    } else if (contextId instanceof String) {
-                        String frameId = (String) contextId;
+                    } else if (guiDevException.getFrameId() != null) {
+                        String frameId = guiDevException.getFrameId();
                         params.put("Frame ID", frameId);
                         try {
                             params.put("XML descriptor",
