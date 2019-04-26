@@ -16,15 +16,19 @@
 
 package com.haulmont.cuba.web.gui.components;
 
-public class CompositeComponentUtils {
+public final class CompositeComponentUtils {
+
+    private CompositeComponentUtils() {
+    }
+
     @SuppressWarnings("unchecked")
     public static void setRoot(CompositeComponent compositeComponent,
-                                                 com.haulmont.cuba.gui.components.Component root) {
+                               com.haulmont.cuba.gui.components.Component root) {
         compositeComponent.setComposition(root);
     }
 
     public static <E> void fireEvent(CompositeComponent compositeComponent,
-                                                       Class<E> eventType, E event) {
+                                     Class<E> eventType, E event) {
         compositeComponent.fireEvent(eventType, event);
     }
 }
