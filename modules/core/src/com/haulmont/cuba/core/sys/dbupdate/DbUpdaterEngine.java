@@ -17,6 +17,7 @@
 
 package com.haulmont.cuba.core.sys.dbupdate;
 
+import com.google.common.collect.ImmutableList;
 import com.haulmont.bali.db.DbUtils;
 import com.haulmont.bali.db.QueryRunner;
 import com.haulmont.cuba.core.sys.DbInitializationException;
@@ -48,6 +49,10 @@ public class DbUpdaterEngine implements DbUpdater {
 
     private static final String GROOVY_EXTENSION = "groovy";
     protected static final String UPGRADE_GROOVY_EXTENSION = "upgrade.groovy";
+
+    protected static final Pattern RESTAPI_REGEX = Pattern.compile("^\\d+-restapi.*$");
+
+    protected static final List<Pattern> EXCLUDED_ADDONS = ImmutableList.of(RESTAPI_REGEX);
 
     protected static final String ERROR = "\n" +
                         "=================================================\n" +
@@ -105,7 +110,7 @@ public class DbUpdaterEngine implements DbUpdater {
                 Set<String> scripts = getExecutedScripts();
                 for (ScriptResource file : files) {
                     String name = getScriptName(file);
-                    if (!scripts.contains(name)) {
+                    if (!containsIgnoringPrefix(scripts, name)) {
                         list.add(name);
                     }
                 }
@@ -159,9 +164,11 @@ public class DbUpdaterEngine implements DbUpdater {
             DatabaseMetaData dbMetaData = connection.getMetaData();
             DbProperties dbProperties = new DbProperties(getConnectionUrl(connection));
             boolean isSchemaByUser = DbmsSpecificFactory.getDbmsFeatures().isSchemaByUser();
+            boolean isRequiresCatalog = DbmsSpecificFactory.getDbmsFeatures().isRequiresDbCatalogName();
             String schemaName = isSchemaByUser ?
                     dbMetaData.getUserName() : dbProperties.getCurrentSchemaProperty();
-            ResultSet tables = dbMetaData.getTables(null, schemaName, "%", null);
+            String catalogName = isRequiresCatalog ? connection.getCatalog() : null;
+            ResultSet tables = dbMetaData.getTables(catalogName, schemaName, "%", null);
             boolean found = false;
             while (tables.next()) {
                 String tableName = tables.getString("TABLE_NAME");
@@ -242,7 +249,11 @@ public class DbUpdaterEngine implements DbUpdater {
         if (dirs.size() > 1) {
             // check all db folders except the last because it is the folder of the app and we need only components
             for (String dirName : dirs.subList(0, dirs.size() - 1)) {
-                List<ScriptResource> initScripts = getInitScripts(dirName);
+                List<ScriptResource> initScripts = getInitScripts(dirName)
+                        .stream()
+                        .filter(this::filterInitScript)
+                        .collect(Collectors.toList());
+
                 if (!initScripts.isEmpty()) {
                     boolean anInitScriptHasBeenExecuted = false;
                     for (ScriptResource initScript : initScripts) {
@@ -269,6 +280,12 @@ public class DbUpdaterEngine implements DbUpdater {
                 }
             }
         }
+    }
+
+    protected boolean filterInitScript(ScriptResource scriptResource) {
+        return EXCLUDED_ADDONS.stream()
+                .noneMatch(pattern ->
+                        pattern.matcher(getScriptName(scriptResource)).matches());
     }
 
     protected boolean initializedByOwnScript(Set<String> executedScripts, String dirName) {

@@ -181,6 +181,9 @@ public class FormLoader extends AbstractComponentLoader<Form> {
                     ((Component.HasCaption) component).setCaption(categoryAttribute != null
                             ? categoryAttribute.getLocaleName()
                             : propertyName);
+                    ((Component.HasCaption) component).setDescription(categoryAttribute != null
+                            ? categoryAttribute.getLocaleDescription()
+                            : null);
                 } else {
                     MetaClass propertyMetaClass = getMetadataTools().getPropertyEnclosingMetaClass(metaPropertyPath);
                     String propertyCaption = getMessageTools().getPropertyCaption(propertyMetaClass, propertyName);
@@ -202,8 +205,8 @@ public class FormLoader extends AbstractComponentLoader<Form> {
             InstanceContainer instanceContainer = ((ContainerValueSourceProvider) provider).getContainer();
             MetaClass metaClass = instanceContainer.getEntityMetaClass();
 
-            Set<CategoryAttribute> attributesToShow =
-                    getDynamicAttributesGuiTools().getAttributesToShowOnTheScreen(
+            List<CategoryAttribute> attributesToShow =
+                    getDynamicAttributesGuiTools().getSortedAttributesToShowOnTheScreen(
                             metaClass, windowId, resultComponent.getId());
 
             if (!attributesToShow.isEmpty()) {
@@ -230,6 +233,7 @@ public class FormLoader extends AbstractComponentLoader<Form> {
 
                     if (dynamicAttrComponent instanceof Component.HasCaption) {
                         ((Component.HasCaption) dynamicAttrComponent).setCaption(attribute.getLocaleName());
+                        ((Component.HasCaption) dynamicAttrComponent).setDescription(attribute.getLocaleDescription());
                     }
                     if (dynamicAttrComponent instanceof HasValueSource) {
                         //noinspection unchecked

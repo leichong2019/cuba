@@ -1063,4 +1063,11 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
 
         return null;
     }
+
+    protected void loadRequiredIndicatorVisible(HasRequiredIndicator component, Element element) {
+        String requiredIndicatorVisible = element.attributeValue("requiredIndicatorVisible");
+        if (!Strings.isNullOrEmpty(requiredIndicatorVisible)) {
+            component.setRequiredIndicatorVisible(Boolean.parseBoolean(requiredIndicatorVisible));
+        }
+    }
 }

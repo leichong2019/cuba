@@ -26,6 +26,7 @@ create table SYS_ATTR_VALUE (
     INTEGER_VALUE integer,
     DOUBLE_VALUE numeric(36,6),
     DATE_VALUE timestamp,
+    DATE_WO_TIME_VALUE date,
     BOOLEAN_VALUE char(1),
     ENTITY_VALUE varchar2(32),
     STRING_ENTITY_VALUE varchar2(255),
@@ -72,6 +73,7 @@ create table SYS_CATEGORY_ATTR (
     CATEGORY_ENTITY_TYPE varchar(4000),
     NAME varchar2(255),
     CODE varchar2(100) not null,
+    DESCRIPTION varchar2(1000),
     CATEGORY_ID varchar2(32) not null,
     ENTITY_CLASS varchar2(500),
     DATA_TYPE varchar2(200),
@@ -79,6 +81,7 @@ create table SYS_CATEGORY_ATTR (
     DEFAULT_INT integer,
     DEFAULT_DOUBLE numeric(36,6),
     DEFAULT_DATE timestamp,
+    DEFAULT_DATE_WO_TIME date,
     DEFAULT_DATE_IS_CURRENT char(1),
     DEFAULT_BOOLEAN char(1),
     DEFAULT_ENTITY_VALUE varchar2(32),
@@ -99,6 +102,7 @@ create table SYS_CATEGORY_ATTR (
     FILTER_XML clob,
     LOCALE_NAMES varchar2(1000),
     ENUMERATION_LOCALES clob,
+    LOCALE_DESCRIPTIONS varchar2(4000),
 
     primary key(ID)
 )^
@@ -290,7 +294,7 @@ create table SYS_SCHEDULED_TASK (
     USER_NAME varchar2(50),
     IS_SINGLETON char(1),
     IS_ACTIVE char(1),
-    PERIOD integer,
+    PERIOD_ integer,
     TIMEOUT integer,
     START_DATE timestamp,
     TIME_FRAME integer,
@@ -424,6 +428,7 @@ create table SEC_ENTITY_LOG (
     USER_ID varchar2(32),
     CHANGE_TYPE char(1),
     ENTITY varchar2(100),
+    ENTITY_INSTANCE_NAME varchar2(1000),
     ENTITY_ID varchar2(32),
     STRING_ENTITY_ID varchar2(255),
     INT_ENTITY_ID integer,

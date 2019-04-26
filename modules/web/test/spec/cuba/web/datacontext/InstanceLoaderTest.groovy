@@ -29,6 +29,8 @@ import org.junit.ClassRule
 import spock.lang.Shared
 import spock.lang.Specification
 
+import java.util.function.Consumer
+
 import static com.haulmont.cuba.client.testsupport.TestSupport.reserialize
 
 class InstanceLoaderTest extends Specification {
@@ -54,6 +56,12 @@ class InstanceLoaderTest extends Specification {
         InstanceLoader<Foo> loader = factory.createInstanceLoader()
         InstanceContainer<Foo> container = factory.createInstanceContainer(Foo)
 
+        Consumer preLoadListener = Mock()
+        loader.addPreLoadListener(preLoadListener)
+
+        Consumer postLoadListener = Mock()
+        loader.addPostLoadListener(postLoadListener)
+
         Foo foo = new Foo()
 
         TestServiceProxy.mock(DataService, Mock(DataService) {
@@ -69,5 +77,33 @@ class InstanceLoaderTest extends Specification {
         then:
 
         container.getItem() == foo
+
+        1 * preLoadListener.accept(_)
+        1 * postLoadListener.accept(_)
+    }
+
+    def "prevent load by PreLoadEvent"() {
+        InstanceLoader<Foo> loader = factory.createInstanceLoader()
+        InstanceContainer<Foo> container = factory.createInstanceContainer(Foo)
+
+        Consumer preLoadListener = { InstanceLoader.PreLoadEvent e -> e.preventLoad() }
+        loader.addPreLoadListener(preLoadListener)
+
+        Consumer postLoadListener = Mock()
+        loader.addPostLoadListener(postLoadListener)
+
+        Foo foo = new Foo()
+
+        when:
+
+        loader.setContainer(container)
+        loader.setEntityId(foo.id)
+        loader.load()
+
+        then:
+
+        container.getItemOrNull() == null
+
+        0 * postLoadListener.accept(_)
     }
 }

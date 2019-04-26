@@ -191,9 +191,7 @@ public class CubaSuggestionFieldWidget extends Composite implements HasEnabled, 
             return;
         }
 
-        if (!query.equals(value)) {
-            addStyleName(MODIFIED_STYLENAME);
-        }
+        addStyleName(MODIFIED_STYLENAME);
 
         if (query.length() >= minSearchStringLength) {
             scheduleQuery(query);
@@ -258,11 +256,11 @@ public class CubaSuggestionFieldWidget extends Composite implements HasEnabled, 
 
     public void setValue(String value, boolean fireEvents) {
         this.value = value;
-        textField.setValue(value, fireEvents);
+        resetComponentState();
     }
 
     public String getValue() {
-        return textField.getValue();
+        return value;
     }
 
     protected void handleEnterKeyPressed(KeyCodeEvent event) {
@@ -270,7 +268,7 @@ public class CubaSuggestionFieldWidget extends Composite implements HasEnabled, 
                 && suggestionsContainer.getSelectedItem() != null) {
             selectSuggestion(suggestionsContainer.getSelectedItem().getSuggestion());
         } else {
-            if (enterActionHandler != null) {
+            if (isActive() && enterActionHandler != null) {
                 enterActionHandler.accept(textField.getText().trim());
             }
         }
@@ -289,10 +287,14 @@ public class CubaSuggestionFieldWidget extends Composite implements HasEnabled, 
             suggestionsContainer.selectNextItem();
             preventEvent(event);
         } else {
-            if (arrowDownActionHandler != null) {
+            if (isActive() && arrowDownActionHandler != null) {
                 arrowDownActionHandler.accept(textField.getText().trim());
             }
         }
+    }
+
+    protected boolean isActive() {
+        return !isReadonly() && isEnabled();
     }
 
     protected void handleOnBlur(BlurEvent event) {
@@ -416,7 +418,7 @@ public class CubaSuggestionFieldWidget extends Composite implements HasEnabled, 
         }
 
         public void showPopup() {
-            final int x = textField.getAbsoluteLeft();
+            int x = textField.getAbsoluteLeft();
             topPosition = textField.getAbsoluteTop() + textField.getOffsetHeight();
 
             setPopupPosition(x, topPosition);
@@ -427,6 +429,8 @@ public class CubaSuggestionFieldWidget extends Composite implements HasEnabled, 
 
         @Override
         public void setPosition(int offsetWidth, int offsetHeight) {
+            // CAUTION: offsetWidth and offsetHeight are ignored because we measure width/height after show
+
             offsetHeight = getOffsetHeight();
 
             if (popupOuterPadding == -1) {

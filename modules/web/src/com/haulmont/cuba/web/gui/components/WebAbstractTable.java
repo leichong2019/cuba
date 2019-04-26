@@ -81,6 +81,7 @@ import com.vaadin.server.Resource;
 import com.vaadin.server.Sizeable;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -473,6 +474,10 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
         setColumnHeader(columnId, getColumnCaption(columnId, column));
 
         component.setColumnCaptionAsHtml(columnId, column.getCaptionAsHtml());
+
+        if (column.getExpandRatio() != null) {
+            component.setColumnExpandRatio(columnId, column.getExpandRatio());
+        }
 
         column.setOwner(this);
 
@@ -1025,6 +1030,9 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
             }
         });
 
+        component.setAfterUnregisterComponentHandler(this::onAfterUnregisterComponent);
+        component.setBeforeRefreshRowCacheHandler(this::onBeforeRefreshRowCache);
+
         component.setSelectable(true);
         component.setTableFieldFactory(createFieldFactory());
         component.setColumnCollapsingAllowed(true);
@@ -1045,6 +1053,22 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
         componentComposition.setWidthUndefined();
 
         setClientCaching();
+    }
+
+    protected void onAfterUnregisterComponent(Component component) {
+        Object data = ((AbstractComponent) component).getData();
+        if (data instanceof HasValueSource) {
+            HasValueSource<?> hasValueSource = (HasValueSource) data;
+
+            // if it supports value binding and bound to ValueSource, we need to unsubscribe it
+            if (hasValueSource.getValueSource() != null) {
+                hasValueSource.setValueSource(null);
+            }
+        }
+    }
+
+    protected void onBeforeRefreshRowCache() {
+        clearFieldDatasources();
     }
 
     protected void tableSelectionChanged(@SuppressWarnings("unused") Property.ValueChangeEvent event) {
@@ -1505,8 +1529,6 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
 
     @Override
     public void tableSourceItemSetChanged(TableItems.ItemSetChangeEvent<E> event) {
-        clearFieldDatasources();
-
         // replacement for collectionChangeSelectionListener
         // #PL-2035, reload selection from ds
         Set<Object> selectedItemIds = getSelectedItemIds();
@@ -1550,11 +1572,12 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
 
         // detach instance containers from entities explicitly
         for (Map.Entry<Entity, Object> entry : fieldDatasources.entrySet()) {
-            if (entry.getKey() instanceof InstanceContainer) {
-                InstanceContainer container = (InstanceContainer) entry.getKey();
-
-                container.mute();
+            if (entry.getValue() instanceof InstanceContainer) {
+                InstanceContainer container = (InstanceContainer) entry.getValue();
                 container.setItem(null);
+            } else if (entry.getValue() instanceof Datasource) {
+                Datasource datasource = (Datasource) entry.getValue();
+                datasource.setItem(null);
             }
         }
 
@@ -2312,17 +2335,11 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
                         }
                         component.setParent(WebAbstractTable.this);
 
-                        com.vaadin.ui.Component vComponent = component.unwrapComposition(Component.class);
+                        AbstractComponent vComponent = component.unwrapComposition(AbstractComponent.class);
 
                         if (component instanceof HasValueSource) {
                             HasValueSource<?> hasValueSource = (HasValueSource) component;
-
-                            // if it supports value binding and bound to ValueSource, we need to unsubscribe it on detach
-                            if (hasValueSource.getValueSource() != null) {
-                                vComponent.addDetachListener(event ->
-                                        hasValueSource.setValueSource(null)
-                                );
-                            }
+                            vComponent.setData(hasValueSource);
                         }
 
                         // vaadin8 rework
@@ -2665,8 +2682,6 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
     }
 
     protected boolean handleSpecificVariables(Map<String, Object> variables) {
-        boolean needReload = false;
-
         if (isUsePresentations() && presentations != null) {
             Presentations p = getPresentations();
 
@@ -2677,8 +2692,7 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
             }
         }
 
-        //noinspection ConstantConditions
-        return needReload;
+        return false;
     }
 
     protected boolean needUpdatePresentation(Map<String, Object> variables) {
@@ -2892,6 +2906,20 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
     @Override
     public void setShowSelection(boolean showSelection) {
         component.setSelectable(showSelection);
+    }
+
+    @Override
+    public void setColumnExpandRatio(Column column, float ratio) {
+        checkNotNullArgument(column, "Column must be non null");
+
+        component.setColumnExpandRatio(column.getId(), ratio);
+    }
+
+    @Override
+    public float getColumnExpandRatio(Column column) {
+        checkNotNullArgument(column, "Column must be non null");
+
+        return component.getColumnExpandRatio(column.getId());
     }
 
     protected String generateCellStyle(Object itemId, Object propertyId) {
@@ -3111,7 +3139,7 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
             try {
                 return generateCellStyle(itemId, propertyId);
             } catch (Exception e) {
-                LoggerFactory.getLogger(WebAbstractTable.class).error("Uncautch exception in Table StyleProvider", e);
+                LoggerFactory.getLogger(WebAbstractTable.class).error("Uncaught exception in Table StyleProvider", e);
                 this.exceptionHandled = true;
                 return null;
             }

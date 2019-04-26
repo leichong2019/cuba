@@ -88,9 +88,9 @@ public class EntityChangedEventManager {
                         log.warn("Cannot publish EntityChangedEvent for {} because it is not a BaseGenericIdEntity", entity);
                     } else {
                         return new PublishingInfo(
-                                (boolean) attrMap.get("created"),
-                                (boolean) attrMap.get("updated"),
-                                (boolean) attrMap.get("deleted"));
+                                Boolean.TRUE.equals(attrMap.get("created")),
+                                Boolean.TRUE.equals(attrMap.get("updated")),
+                                Boolean.TRUE.equals(attrMap.get("deleted")));
                     }
                 }
                 return new PublishingInfo();
@@ -197,6 +197,9 @@ public class EntityChangedEventManager {
                             case BOOLEAN:
                                 oldValue = cav.getBooleanValue();
                                 break;
+                            case DATE_WITHOUT_TIME:
+                                oldValue = cav.getDateWithoutTimeValue();
+                                break;
                             case DATE:
                                 oldValue = cav.getDateValue();
                                 break;
@@ -222,6 +225,7 @@ public class EntityChangedEventManager {
                                     case "intValue":
                                     case "doubleValue":
                                     case "booleanValue":
+                                    case "dateWithoutTimeValue":
                                     case "dateValue":
                                         oldValue = changeRecord.getOldValue();
                                         changed = true;

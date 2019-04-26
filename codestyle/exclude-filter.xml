@@ -243,6 +243,11 @@
     </Match>
 
     <Match>
+        <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD"/>
+        <Class name="com.haulmont.cuba.gui.components.AbstractMainWindow"/>
+    </Match>
+
+    <Match>
         <Bug pattern="CN_IDIOM_NO_SUPER_CALL"/>
         <Class name="com.haulmont.cuba.core.sys.persistence.DescriptorEventManagerWrapper"/>
     </Match>
@@ -342,6 +347,11 @@
     <Match>
         <Bug pattern="MS_PKGPROTECT"/>
         <Class name="com.haulmont.cuba.web.sys.navigation.CrockfordUuidEncoder"/>
+    </Match>
+
+    <Match>
+        <Bug pattern="RV_RETURN_VALUE_IGNORED"/>
+        <Class name="com.haulmont.cuba.core.app.TestingServiceBean"/>
     </Match>
 
 </FindBugsFilter>

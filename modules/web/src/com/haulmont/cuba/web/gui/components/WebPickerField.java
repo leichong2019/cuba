@@ -35,6 +35,7 @@ import com.haulmont.cuba.gui.components.security.ActionsPermissions;
 import com.haulmont.cuba.gui.sys.TestIdManager;
 import com.haulmont.cuba.web.AppUI;
 import com.haulmont.cuba.web.gui.components.valueproviders.EntityNameValueProvider;
+import com.haulmont.cuba.web.theme.HaloTheme;
 import com.haulmont.cuba.web.widgets.CubaButton;
 import com.haulmont.cuba.web.widgets.CubaPickerField;
 import com.vaadin.data.ValueProvider;
@@ -42,6 +43,7 @@ import com.vaadin.event.ShortcutAction;
 import com.vaadin.server.Resource;
 import com.vaadin.shared.Registration;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import javax.annotation.Nullable;
@@ -72,6 +74,7 @@ public class WebPickerField<V extends Entity> extends WebV8AbstractField<CubaPic
 
     protected Consumer<PropertyChangeEvent> actionPropertyChangeListener = this::actionPropertyChanged;
     protected Function<? super V, String> optionCaptionProvider;
+    protected Function<? super V, String> iconProvider;
 
     public WebPickerField() {
         component = createComponent();
@@ -90,7 +93,16 @@ public class WebPickerField<V extends Entity> extends WebV8AbstractField<CubaPic
     }
 
     @Override
+    public void setValue(V value) {
+        checkValueType(value);
+
+        super.setValue(value);
+    }
+
+    @Override
     public void setValueFromUser(V value) {
+        checkValueType(value);
+
         setValueToPresentation(convertToPresentation(value));
 
         V oldValue = internalValue;
@@ -99,6 +111,25 @@ public class WebPickerField<V extends Entity> extends WebV8AbstractField<CubaPic
         if (!fieldValueEquals(value, oldValue)) {
             ValueChangeEvent<V> event = new ValueChangeEvent<>(this, oldValue, value, true);
             publish(ValueChangeEvent.class, event);
+        }
+    }
+
+    protected void checkValueType(V value) {
+        if (value != null) {
+            MetaClass metaClass = getMetaClass();
+            if (metaClass == null) {
+                throw new IllegalStateException("Neither metaClass nor valueSource is set for PickerField");
+            }
+
+            Class<?> fieldClass = metaClass.getJavaClass();
+            Class<?> valueClass = value.getClass();
+            if (!fieldClass.isAssignableFrom(valueClass)) {
+                throw new IllegalArgumentException(
+                        String.format("Could not set value with class %s to field with class %s",
+                                fieldClass.getCanonicalName(),
+                                valueClass.getCanonicalName())
+                );
+            }
         }
     }
 
@@ -186,6 +217,40 @@ public class WebPickerField<V extends Entity> extends WebV8AbstractField<CubaPic
     @Override
     public Function<? super V, String> getOptionCaptionProvider() {
         return optionCaptionProvider;
+    }
+
+    @Override
+    public void setOptionIconProvider(Function<? super V, String> optionIconProvider) {
+        if (this.iconProvider != optionIconProvider) {
+            this.iconProvider = optionIconProvider;
+
+            component.setStyleName("c-has-field-icon", optionIconProvider != null);
+            component.getField().setStyleName(HaloTheme.TEXTFIELD_INLINE_ICON, optionIconProvider != null);
+
+            component.setIconGenerator(this::generateOptionIcon);
+        }
+    }
+
+    protected Resource generateOptionIcon(V item) {
+        if (iconProvider == null) {
+            return null;
+        }
+
+        String resourceId;
+        try {
+            resourceId = iconProvider.apply(item);
+        } catch (Exception e) {
+            LoggerFactory.getLogger(WebPickerField.class)
+                    .warn("Error invoking optionIconProvider apply method", e);
+            return null;
+        }
+
+        return getIconResource(resourceId);
+    }
+
+    @Override
+    public Function<? super V, String> getOptionIconProvider() {
+        return iconProvider;
     }
 
     @Override
@@ -353,7 +418,7 @@ public class WebPickerField<V extends Entity> extends WebV8AbstractField<CubaPic
         return getEventHub().subscribe(FieldValueChangeEvent.class, (Consumer) listener);
     }
 
-    protected void onFieldValueChange(CubaPickerField.FieldValueChangeEvent <V> e) {
+    protected void onFieldValueChange(CubaPickerField.FieldValueChangeEvent<V> e) {
         FieldValueChangeEvent<V> event = new FieldValueChangeEvent<>(this, e.getText(), e.getPrevValue());
         publish(FieldValueChangeEvent.class, event);
     }

@@ -113,9 +113,6 @@
                             <properties include=".*"/>
                         </filter>
                         <table id="entityLogTable" width="100%">
-                            <buttonsPanel id="logTablePanel">
-                                <button visible="false"/>
-                            </buttonsPanel>
                             <columns>
                                 <column id="eventTs" caption="msg://when">
                                     <formatter class="com.haulmont.cuba.gui.components.formatters.DateFormatter"
@@ -125,6 +122,7 @@
                                 <column id="type" caption="msg://changeType"/>
                                 <column id="entity" caption="msg://entity"/>
                                 <column id="entityId" caption="Id"/>
+                                <column id="entityInstanceName"/>
                             </columns>
                             <rows datasource="entityLogDs"/>
                             <rowsCount/>

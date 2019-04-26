@@ -413,6 +413,28 @@ public class WebGroupBox extends WebAbstractComponent<CubaGroupBox> implements G
     }
 
     @Override
+    public void setExpandRatio(Component component, float ratio) {
+        AbstractOrderedLayout layout = getComponentContent();
+        layout.setExpandRatio(WebComponentsHelper.getComposition(component), ratio);
+    }
+
+    @Override
+    public float getExpandRatio(Component component) {
+        AbstractOrderedLayout layout = getComponentContent();
+        return layout.getExpandRatio(component.unwrap(com.vaadin.ui.Component.class));
+    }
+
+    @Override
+    public boolean isRequiredIndicatorVisible() {
+        return component.isRequiredIndicatorVisible();
+    }
+
+    @Override
+    public void setRequiredIndicatorVisible(boolean visible) {
+        component.setRequiredIndicatorVisible(visible);
+    }
+
+    @Override
     public void attached() {
         super.attached();
 

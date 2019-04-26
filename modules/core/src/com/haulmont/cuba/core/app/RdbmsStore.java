@@ -648,7 +648,7 @@ public class RdbmsStore implements DataStore {
 
     protected View createRestrictedView(LoadContext context) {
         View view = context.getView() != null ? context.getView() :
-                viewRepository.getView(metadata.getClassNN(context.getMetaClass()), View.LOCAL);
+                viewRepository.getView(metadata.getClassNN(context.getMetaClass()), View.BASE);
         View copy = View.copy(isAuthorizationRequired(context) ? attributeSecurity.createRestrictedView(view) : view);
         if (context.isLoadPartialEntities()
                 && !needToApplyInMemoryReadConstraints(context)
@@ -1023,7 +1023,7 @@ public class RdbmsStore implements DataStore {
             return;
         em.detach(rootEntity);
         metadataTools.traverseAttributesByView(view, rootEntity, (entity, property) -> {
-            if (property.getRange().isClass()) {
+            if (property.getRange().isClass() && !metadataTools.isEmbedded(property)) {
                 Object value = entity.getValue(property.getName());
                 if (value != null) {
                     if (property.getRange().getCardinality().isMany()) {

@@ -32,7 +32,6 @@ import com.haulmont.cuba.core.app.serialization.EntitySerializationOption;
 import com.haulmont.cuba.core.entity.*;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.core.global.validation.CustomValidationException;
-import com.haulmont.cuba.core.global.validation.EntityValidationException;
 import com.haulmont.cuba.core.global.validation.groups.RestApiChecks;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -43,8 +42,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
 import javax.validation.groups.Default;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -83,9 +80,6 @@ public class EntityImportExport implements EntityImportExportAPI {
 
     @Inject
     protected ViewRepository viewRepository;
-
-    @Inject
-    protected BeanValidation beanValidation;
 
     @Inject
     protected ReferenceToEntitySupport referenceToEntitySupport;
@@ -250,13 +244,10 @@ public class EntityImportExport implements EntityImportExportAPI {
         }
 
         if (validate) {
-            Validator validator = beanValidation.getValidator();
-            for (Entity entity : commitContext.getCommitInstances()) {
-                Set<ConstraintViolation<Entity>> violations = validator.validate(entity, Default.class, RestApiChecks.class);
-                if (!violations.isEmpty()) {
-                    throw new EntityValidationException("Entity validation failed", violations);
-                }
-            }
+            commitContext.setValidationType(CommitContext.ValidationType.ALWAYS_VALIDATE);
+            commitContext.setValidationGroups(Arrays.asList(Default.class, RestApiChecks.class));
+        } else {
+            commitContext.setValidationType(CommitContext.ValidationType.NEVER_VALIDATE);
         }
 
         //we shouldn't remove entities with the softDeletion = false
@@ -644,9 +635,10 @@ public class EntityImportExport implements EntityImportExportAPI {
             EntityImportView importViewPropertyView = importViewProperty.getView();
             if (importViewPropertyView == null) {
                 MetaProperty metaProperty = metaClass.getPropertyNN(importViewProperty.getName());
+                if (metaProperty.isReadOnly()) continue;
                 if (metaProperty.getRange().isClass()) {
                     MetaClass propertyMetaClass = metaProperty.getRange().asClass();
-                    regularView.addProperty(importViewProperty.getName(), viewRepository.getView(propertyMetaClass, View.MINIMAL));
+                    regularView.addProperty(importViewProperty.getName(), new View(propertyMetaClass.getJavaClass(), false));
                 } else {
                     regularView.addProperty(importViewProperty.getName());
                 }
@@ -705,7 +697,7 @@ public class EntityImportExport implements EntityImportExportAPI {
         if (result == null) {
             LoadContext<? extends Entity> ctx = LoadContext.create(entity.getClass())
                     .setSoftDeletion(false)
-                    .setView(View.MINIMAL)
+                    .setView(new View(entity.getMetaClass().getJavaClass(), false))
                     .setId(entity.getId());
             result = dataManager.load(ctx);
             if (result == null) {

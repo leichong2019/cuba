@@ -16,6 +16,8 @@
 
 package com.haulmont.cuba.gui.model.impl;
 
+import com.haulmont.bali.events.EventHub;
+import com.haulmont.bali.events.Subscription;
 import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
@@ -23,14 +25,12 @@ import com.haulmont.cuba.core.global.Sort;
 import com.haulmont.cuba.core.global.Stores;
 import com.haulmont.cuba.core.global.ValueLoadContext;
 import com.haulmont.cuba.core.global.queryconditions.Condition;
-import com.haulmont.cuba.gui.model.DataContext;
-import com.haulmont.cuba.gui.model.HasLoader;
-import com.haulmont.cuba.gui.model.KeyValueCollectionContainer;
-import com.haulmont.cuba.gui.model.KeyValueCollectionLoader;
+import com.haulmont.cuba.gui.model.*;
 import org.springframework.context.ApplicationContext;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -38,20 +38,21 @@ import java.util.function.Function;
  */
 public class KeyValueCollectionLoaderImpl implements KeyValueCollectionLoader {
 
-    private ApplicationContext applicationContext;
+    protected ApplicationContext applicationContext;
 
-    private DataContext dataContext;
-    private KeyValueCollectionContainer container;
-    private String query;
-    private Condition condition;
-    private Map<String, Object> parameters = new HashMap<>();
-    private int firstResult = 0;
-    private int maxResults = Integer.MAX_VALUE;
-    private boolean softDeletion = true;
-    private Sort sort;
+    protected DataContext dataContext;
+    protected KeyValueCollectionContainer container;
+    protected String query;
+    protected Condition condition;
+    protected Map<String, Object> parameters = new HashMap<>();
+    protected int firstResult = 0;
+    protected int maxResults = Integer.MAX_VALUE;
+    protected boolean softDeletion = true;
+    protected Sort sort;
 
-    private String storeName = Stores.MAIN;
-    private Function<ValueLoadContext, Collection<KeyValueEntity>> delegate;
+    protected String storeName = Stores.MAIN;
+    protected Function<ValueLoadContext, List<KeyValueEntity>> delegate;
+    protected EventHub events = new EventHub();
 
     public KeyValueCollectionLoaderImpl(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
@@ -59,6 +60,10 @@ public class KeyValueCollectionLoaderImpl implements KeyValueCollectionLoader {
 
     protected DataManager getDataManager() {
         return applicationContext.getBean(DataManager.NAME, DataManager.class);
+    }
+
+    protected SorterFactory getSorterFactory() {
+        return applicationContext.getBean(SorterFactory.NAME, SorterFactory.class);
     }
 
     @Nullable
@@ -81,20 +86,28 @@ public class KeyValueCollectionLoaderImpl implements KeyValueCollectionLoader {
 
         ValueLoadContext loadContext = createLoadContext();
 
-        Collection<KeyValueEntity> list;
+        if (!sendPreLoadEvent(loadContext)) {
+            return;
+        }
+
+        List<KeyValueEntity> list;
         if (delegate == null) {
             list = getDataManager().loadValues(loadContext);
         } else {
             list = delegate.apply(loadContext);
         }
 
-        // TODO merge KeyValueEntity ???
         if (dataContext != null) {
+            List<KeyValueEntity> mergedList = new ArrayList<>(list.size());
             for (KeyValueEntity entity : list) {
-                dataContext.merge(entity);
+                mergedList.add(dataContext.merge(entity));
             }
+            container.setItems(mergedList);
+        } else {
+            container.setItems(list);
         }
-        container.setItems(list);
+
+        sendPostLoadEvent(list);
     }
 
     @Override
@@ -121,6 +134,17 @@ public class KeyValueCollectionLoaderImpl implements KeyValueCollectionLoader {
         return loadContext;
     }
 
+    protected boolean sendPreLoadEvent(ValueLoadContext loadContext) {
+        PreLoadEvent preLoadEvent = new PreLoadEvent(this, loadContext);
+        events.publish(PreLoadEvent.class, preLoadEvent);
+        return !preLoadEvent.isLoadPrevented();
+    }
+
+    protected void sendPostLoadEvent(List<KeyValueEntity> entities) {
+        PostLoadEvent postLoadEvent = new PostLoadEvent(this, entities);
+        events.publish(PostLoadEvent.class, postLoadEvent);
+    }
+
     @Override
     public KeyValueCollectionContainer getContainer() {
         return container;
@@ -129,7 +153,10 @@ public class KeyValueCollectionLoaderImpl implements KeyValueCollectionLoader {
     @Override
     public void setContainer(KeyValueCollectionContainer container) {
         this.container = container;
-        container.setSorter(new CollectionContainerSorter(container, this));
+        if (container instanceof HasLoader) {
+            ((HasLoader) container).setLoader(this);
+        }
+        container.setSorter(getSorterFactory().createCollectionContainerSorter(container, this));
     }
 
     @Override
@@ -205,13 +232,23 @@ public class KeyValueCollectionLoaderImpl implements KeyValueCollectionLoader {
     }
 
     @Override
-    public Function<ValueLoadContext, Collection<KeyValueEntity>> getDelegate() {
+    public Function<ValueLoadContext, List<KeyValueEntity>> getDelegate() {
         return delegate;
     }
 
     @Override
-    public void setLoadDelegate(Function<ValueLoadContext, Collection<KeyValueEntity>> delegate) {
+    public void setLoadDelegate(Function<ValueLoadContext, List<KeyValueEntity>> delegate) {
         this.delegate = delegate;
+    }
+
+    @Override
+    public Subscription addPreLoadListener(Consumer<PreLoadEvent> listener) {
+        return events.subscribe(PreLoadEvent.class, listener);
+    }
+
+    @Override
+    public Subscription addPostLoadListener(Consumer<PostLoadEvent> listener) {
+        return events.subscribe(PostLoadEvent.class, listener);
     }
 
     @Override

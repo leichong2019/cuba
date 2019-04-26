@@ -33,6 +33,7 @@ import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.*;
 import javax.persistence.Entity;
+import java.time.LocalDate;
 import java.util.*;
 
 @Entity(name = "sys$CategoryAttribute")
@@ -59,6 +60,9 @@ public class CategoryAttribute extends StandardEntity {
 
     @Column(name = "CODE", length = CODE_FIELD_LENGTH, nullable = false)
     private String code;
+
+    @Column(name = "DESCRIPTION")
+    private String description;
 
     @Column(name = "ENUMERATION")
     private String enumeration;
@@ -109,6 +113,9 @@ public class CategoryAttribute extends StandardEntity {
     @Column(name = "DEFAULT_DATE")
     private Date defaultDate;
 
+    @Column(name = "DEFAULT_DATE_WO_TIME")
+    private LocalDate defaultDateWithoutTime;
+
     @Column(name = "DEFAULT_DATE_IS_CURRENT")
     private Boolean defaultDateIsCurrent;
 
@@ -133,12 +140,19 @@ public class CategoryAttribute extends StandardEntity {
     @Column(name = "LOCALE_NAMES")
     protected String localeNames;
 
+    @Column(name = "LOCALE_DESCRIPTIONS")
+    protected String localeDescriptions;
+
     @Column(name = "ENUMERATION_LOCALES")
     protected String enumerationLocales;
 
     @Transient
     @MetaProperty(related = {"localeNames", "name"})
     protected String localeName;
+
+    @Transient
+    @MetaProperty(related = {"localeDescriptions", "description"})
+    protected String localeDescription;
 
     @Transient
     @MetaProperty(related = "enumerationLocales")
@@ -164,6 +178,14 @@ public class CategoryAttribute extends StandardEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getEnumeration() {
@@ -234,6 +256,14 @@ public class CategoryAttribute extends StandardEntity {
         this.defaultDate = defaultDate;
     }
 
+    public LocalDate getDefaultDateWithoutTime() {
+        return defaultDateWithoutTime;
+    }
+
+    public void setDefaultDateWithoutTime(LocalDate defaultDateTime) {
+        this.defaultDateWithoutTime = defaultDateTime;
+    }
+
     public Object getDefaultValue() {
         if (dataType != null) {
             switch (PropertyType.fromId(dataType)) {
@@ -241,6 +271,7 @@ public class CategoryAttribute extends StandardEntity {
                 case DOUBLE: return defaultDouble;
                 case BOOLEAN: return defaultBoolean;
                 case DATE: return defaultDate;
+                case DATE_WITHOUT_TIME: return defaultDateWithoutTime;
                 case STRING: return defaultString;
                 case ENUMERATION: return defaultString;
                 case ENTITY: return getObjectDefaultEntityId();
@@ -415,6 +446,22 @@ public class CategoryAttribute extends StandardEntity {
             localeName = name;
         }
         return localeName;
+    }
+
+    public String getLocaleDescriptions() {
+        return localeDescriptions;
+    }
+
+    public void setLocaleDescriptions(String localeDescriptions) {
+        this.localeDescriptions = localeDescriptions;
+    }
+
+    public String getLocaleDescription() {
+        localeDescription = LocaleHelper.getLocalizedName(localeDescriptions);
+        if (localeDescription == null) {
+            localeDescription = description;
+        }
+        return localeDescription;
     }
 
     public void setEnumerationLocales(String enumerationLocales) {

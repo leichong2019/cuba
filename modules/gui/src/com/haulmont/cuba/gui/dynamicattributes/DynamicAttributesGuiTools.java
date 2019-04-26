@@ -23,6 +23,7 @@ import com.haulmont.bali.util.Preconditions;
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.core.app.dynamicattributes.DynamicAttributes;
 import com.haulmont.cuba.core.app.dynamicattributes.DynamicAttributesUtils;
+import com.haulmont.cuba.core.app.dynamicattributes.PropertyType;
 import com.haulmont.cuba.core.entity.BaseGenericIdEntity;
 import com.haulmont.cuba.core.entity.Categorized;
 import com.haulmont.cuba.core.entity.CategoryAttribute;
@@ -37,12 +38,14 @@ import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.data.DsBuilder;
 import com.haulmont.cuba.gui.data.impl.DatasourceImplementation;
+import com.haulmont.cuba.gui.sys.ScreensHelper;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -66,6 +69,9 @@ public class DynamicAttributesGuiTools {
 
     @Inject
     protected DataManager dataManager;
+
+    @Inject
+    protected ScreensHelper screensHelper;
 
     /**
      * Enforce the datasource to change modified status if dynamic attribute is changed
@@ -97,6 +103,17 @@ public class DynamicAttributesGuiTools {
         }
 
         return categoryAttributes;
+    }
+
+    /**
+     * Get attributes which should be added automatically to the screen and component.
+     * Based on visibility settings from category attribute editor.
+     * Resulting list is sorted using CategoryAttribute.orderNo parameter.
+     */
+    public List<CategoryAttribute> getSortedAttributesToShowOnTheScreen(MetaClass metaClass, String screen, @Nullable String component) {
+        List<CategoryAttribute> attributesToShow = new ArrayList<>(getAttributesToShowOnTheScreen(metaClass, screen, component));
+        attributesToShow.sort(Comparator.comparingInt(CategoryAttribute::getOrderNo));
+        return attributesToShow;
     }
 
     /**
@@ -154,38 +171,47 @@ public class DynamicAttributesGuiTools {
         if (item.getDynamicAttributes() == null) {
             item.setDynamicAttributes(new HashMap<>());
         }
-        Date currentTimestamp = AppBeans.get(TimeSource.NAME, TimeSource.class).currentTimestamp();
+        ZonedDateTime currentTimestamp = AppBeans.get(TimeSource.NAME, TimeSource.class).now();
         boolean entityIsCategorized = item instanceof Categorized && ((Categorized) item).getCategory() != null;
 
         for (CategoryAttribute categoryAttribute : attributes) {
-            String code = DynamicAttributesUtils.encodeAttributeCode(categoryAttribute.getCode());
-            if (entityIsCategorized && !categoryAttribute.getCategory().equals(((Categorized) item).getCategory())) {
-                item.setValue(code, null);//cleanup attributes from not dedicated category
-                continue;
-            }
+            setDefaultAttributeValue(item, categoryAttribute, entityIsCategorized, currentTimestamp);
+        }
+    }
 
-            if (item.getValue(code) != null) {
-                continue;//skip not null attributes
-            }
+    protected void setDefaultAttributeValue(BaseGenericIdEntity item, CategoryAttribute categoryAttribute,
+                                   boolean entityIsCategorized, ZonedDateTime currentTimestamp) {
+        String code = DynamicAttributesUtils.encodeAttributeCode(categoryAttribute.getCode());
+        if (entityIsCategorized && !categoryAttribute.getCategory().equals(((Categorized) item).getCategory())) {
+            item.setValue(code, null);//cleanup attributes from not dedicated category
+            return;
+        }
 
-            if (categoryAttribute.getDefaultValue() != null) {
-                if (BooleanUtils.isTrue(categoryAttribute.getIsEntity())) {
-                    MetaClass entityMetaClass = metadata.getClassNN(categoryAttribute.getJavaClassForEntity());
-                    LoadContext<Entity> lc = new LoadContext<>(entityMetaClass).setView(View.MINIMAL);
-                    String pkName = referenceToEntitySupport.getPrimaryKeyForLoadingEntity(entityMetaClass);
-                    lc.setQueryString(format("select e from %s e where e.%s = :entityId", entityMetaClass.getName(), pkName))
-                            .setParameter("entityId", categoryAttribute.getDefaultValue());
-                    Entity defaultEntity = dataManager.load(lc);
-                    item.setValue(code, defaultEntity);
-                } else if (Boolean.TRUE.equals(categoryAttribute.getIsCollection())) {
-                    List<Object> list = new ArrayList<>();
-                    list.add(categoryAttribute.getDefaultValue());
-                    item.setValue(code, list);
-                } else {
-                    item.setValue(code, categoryAttribute.getDefaultValue());
-                }
-            } else if (Boolean.TRUE.equals(categoryAttribute.getDefaultDateIsCurrent())) {
-                item.setValue(code, currentTimestamp);
+        if (item.getValue(code) != null) {
+            return;//skip not null attributes
+        }
+
+        if (categoryAttribute.getDefaultValue() != null) {
+            if (BooleanUtils.isTrue(categoryAttribute.getIsEntity())) {
+                MetaClass entityMetaClass = metadata.getClassNN(categoryAttribute.getJavaClassForEntity());
+                LoadContext<Entity> lc = new LoadContext<>(entityMetaClass).setView(View.MINIMAL);
+                String pkName = referenceToEntitySupport.getPrimaryKeyForLoadingEntity(entityMetaClass);
+                lc.setQueryString(format("select e from %s e where e.%s = :entityId", entityMetaClass.getName(), pkName))
+                        .setParameter("entityId", categoryAttribute.getDefaultValue());
+                Entity defaultEntity = dataManager.load(lc);
+                item.setValue(code, defaultEntity);
+            } else if (Boolean.TRUE.equals(categoryAttribute.getIsCollection())) {
+                List<Object> list = new ArrayList<>();
+                list.add(categoryAttribute.getDefaultValue());
+                item.setValue(code, list);
+            } else {
+                item.setValue(code, categoryAttribute.getDefaultValue());
+            }
+        } else if (Boolean.TRUE.equals(categoryAttribute.getDefaultDateIsCurrent())) {
+            if (PropertyType.DATE_WITHOUT_TIME.equals(categoryAttribute.getDataType())) {
+                item.setValue(code, currentTimestamp.toLocalDate());
+            } else {
+                item.setValue(code, Date.from(currentTimestamp.toInstant()));
             }
         }
     }
@@ -233,7 +259,8 @@ public class DynamicAttributesGuiTools {
             lookupAction.setLookupScreen(screen);
         } else {
             screen = windowConfig.getBrowseScreenId(metaClass);
-            if (windowConfig.findWindowInfo(screen) != null) {
+            Map<String, String> screensMap = screensHelper.getAvailableBrowserScreens(javaClass);
+            if (windowConfig.findWindowInfo(screen) != null && screensMap.containsValue(screen)) {
                 lookupAction.setLookupScreen(screen);
                 lookupAction.setLookupScreenOpenType(OpenType.THIS_TAB);
             } else {

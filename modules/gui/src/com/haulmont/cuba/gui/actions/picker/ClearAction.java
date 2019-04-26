@@ -17,7 +17,10 @@
 package com.haulmont.cuba.gui.actions.picker;
 
 import com.haulmont.chile.core.model.MetaProperty;
+import com.haulmont.cuba.client.ClientConfig;
 import com.haulmont.cuba.core.entity.Entity;
+import com.haulmont.cuba.core.global.Configuration;
+import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.gui.components.ActionType;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.SupportsUserAction;
@@ -30,17 +33,20 @@ import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.FrameOwner;
 import com.haulmont.cuba.gui.screen.UiControllerUtils;
+import org.springframework.beans.factory.InitializingBean;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 @ActionType(ClearAction.ID)
-public class ClearAction extends BaseAction implements PickerField.PickerFieldAction {
+public class ClearAction extends BaseAction implements PickerField.PickerFieldAction, InitializingBean {
 
     public static final String ID = "picker_clear";
 
     protected PickerField pickerField;
     protected Icons icons;
+    protected Messages messages;
+    protected Configuration configuration;
 
     protected boolean editable = true;
 
@@ -50,6 +56,23 @@ public class ClearAction extends BaseAction implements PickerField.PickerFieldAc
 
     public ClearAction(String id) {
         super(id);
+    }
+
+    @Inject
+    protected void setConfiguration(Configuration configuration) {
+        this.configuration = configuration;
+    }
+
+    @Inject
+    protected void setMessages(Messages messages) {
+        this.messages = messages;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        setShortcut(configuration.getConfig(ClientConfig.class).getPickerClearShortcut());
+        setDescription(messages.getMainMessage("pickerField.action.clear.tooltip")
+                + " (" + getShortcutCombination().format() + ")");
     }
 
     @Override

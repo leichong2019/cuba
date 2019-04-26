@@ -17,9 +17,11 @@
 @import "../halo/halo";
 
 @import "app/table-paging";
+@import "app/report-wizard";
 
 @mixin hover {
   @include halo;
 
   @include hover-cuba-table-paging;
+  @include hover-cuba-report-wizard;
 }

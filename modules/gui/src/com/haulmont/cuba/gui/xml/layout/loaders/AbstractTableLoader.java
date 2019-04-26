@@ -201,6 +201,8 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
         if (collectionContainer != null) {
             if (dataLoader instanceof CollectionLoader) {
                 addDynamicAttributes(resultComponent, metaClass, null, (CollectionLoader) dataLoader, availableColumns);
+            } else if (collectionContainer instanceof CollectionPropertyContainer) {
+                addDynamicAttributes(resultComponent, metaClass, null, null, availableColumns);
             }
             //noinspection unchecked
             resultComponent.setItems(createContainerTableSource(collectionContainer));
@@ -262,16 +264,18 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
         }
     }
 
+    @SuppressWarnings("unchecked")
     protected void addDynamicAttributes(Table component, MetaClass metaClass, Datasource ds, CollectionLoader collectionLoader,
                                         List<Table.Column> availableColumns) {
         if (getMetadataTools().isPersistent(metaClass)) {
             String windowId = getWindowId(context);
-            // Man be no windowId, if a loader is used from a CompositeComponent
+            // May be no windowId, if a loader is used from a CompositeComponent
             if (windowId == null) {
                 return;
             }
-            Set<CategoryAttribute> attributesToShow =
-                    getDynamicAttributesGuiTools().getAttributesToShowOnTheScreen(metaClass,
+
+            List<CategoryAttribute> attributesToShow =
+                    getDynamicAttributesGuiTools().getSortedAttributesToShowOnTheScreen(metaClass,
                             windowId, component.getId());
             if (CollectionUtils.isNotEmpty(attributesToShow)) {
                 if (collectionLoader != null) {
@@ -280,7 +284,7 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
                     ds.setLoadDynamicAttributes(true);
                 }
                 for (CategoryAttribute attribute : attributesToShow) {
-                    final MetaPropertyPath metaPropertyPath = DynamicAttributesUtils.getMetaPropertyPath(metaClass, attribute);
+                    MetaPropertyPath metaPropertyPath = DynamicAttributesUtils.getMetaPropertyPath(metaClass, attribute);
 
                     Object columnWithSameId = IterableUtils.find(availableColumns,
                             o -> o.getId().equals(metaPropertyPath));
@@ -289,11 +293,13 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
                         continue;
                     }
 
-                    final Table.Column column = new Table.Column(metaPropertyPath);
+                    Table.Column column = new Table.Column(metaPropertyPath);
 
                     column.setCaption(LocaleHelper.isLocalizedValueDefined(attribute.getLocaleNames()) ?
                             attribute.getLocaleName() :
                             StringUtils.capitalize(attribute.getName()));
+
+                    column.setDescription(attribute.getLocaleDescription());
 
                     if (attribute.getDataType().equals(PropertyType.STRING)) {
                         ClientConfig clientConfig = getConfiguration().getConfig(ClientConfig.class);
@@ -338,14 +344,8 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
         }
     }
 
-    protected List<Table.Column> loadColumnsByInclude(String viewName, Element columnsElement, MetaClass metaClass, View view) {
-        View currentView = view;
-        if (viewName != null) {
-            ViewRepository viewRepository = beanLocator.get(ViewRepository.NAME);
-            currentView = viewRepository.getView(metaClass, viewName);
-        }
-
-        Collection<String> appliedProperties = getAppliedProperties(columnsElement, currentView, metaClass);
+    protected List<Table.Column> loadColumnsByInclude(Element columnsElement, MetaClass metaClass, View view) {
+        Collection<String> appliedProperties = getAppliedProperties(columnsElement, view, metaClass);
 
         List<Table.Column> columns = new ArrayList<>(appliedProperties.size());
         List<Element> columnElements = columnsElement.elements("column");
@@ -381,7 +381,7 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
                 MetaPropertyPath dynamicAttributePath = DynamicAttributesUtils.getMetaPropertyPath(metaClass, propertyId);
 
                 MetaPropertyPath mpp = metaClass.getPropertyPath(propertyId);
-                boolean isViewContainsProperty = mpp != null && getMetadataTools().viewContainsProperty(currentView, mpp);
+                boolean isViewContainsProperty = mpp != null && getMetadataTools().viewContainsProperty(view, mpp);
 
                 if (isViewContainsProperty || dynamicAttributePath != null) {
                     String visible = column.attributeValue("visible");
@@ -396,22 +396,10 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
     }
 
     protected List<Table.Column> loadColumns(Table component, Element columnsElement, MetaClass metaClass, View view) {
-        String includeByView = columnsElement.attributeValue("includeByView");
         String includeAll = columnsElement.attributeValue("includeAll");
-
-        if (StringUtils.isNotBlank(includeByView) && StringUtils.isNotBlank(includeAll)) {
-            throw new GuiDevelopmentException("'includeByView' and 'includeAll' attributes cannot be defined simultaneously",
-                    getContext());
-        }
-
-        if (StringUtils.isNotBlank(includeByView)) {
-            return loadColumnsByInclude(includeByView, columnsElement, metaClass, view);
-        }
-
-        if (StringUtils.isNotBlank(includeAll)) {
-            if (Boolean.parseBoolean(includeAll)) {
-                return loadColumnsByInclude(null, columnsElement, metaClass, view);
-            }
+        if (StringUtils.isNotBlank(includeAll)
+                && Boolean.parseBoolean(includeAll)) {
+            return loadColumnsByInclude(columnsElement, metaClass, view);
         }
 
         List<Element> columnElements = columnsElement.elements("column");
@@ -555,6 +543,7 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
                     columnCaption = LocaleHelper.isLocalizedValueDefined(categoryAttribute.getLocaleNames()) ?
                             categoryAttribute.getLocaleName() :
                             StringUtils.capitalize(categoryAttribute.getName());
+                    column.setDescription(categoryAttribute.getLocaleDescription());
                 } else {
                     MetaClass propertyMetaClass = getMetadataTools().getPropertyEnclosingMetaClass(mpp);
                     columnCaption = getMessageTools().getPropertyCaption(propertyMetaClass, propertyName);
@@ -574,7 +563,17 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
         if (metaPropertyPath != null)
             column.setType(metaPropertyPath.getRangeJavaClass());
 
+        String expandRatio = element.attributeValue("expandRatio");
         String width = loadThemeString(element.attributeValue("width"));
+        if (StringUtils.isNotEmpty(expandRatio)) {
+            column.setExpandRatio(Float.parseFloat(expandRatio));
+
+            if (StringUtils.isNotEmpty(width)) {
+                throw new GuiDevelopmentException(
+                        "Properties 'width' and 'expandRatio' cannot be used simultaneously", context);
+            }
+        }
+
         if (StringUtils.isNotEmpty(width)) {
             if (StringUtils.endsWith(width, "px")) {
                 width = StringUtils.substring(width, 0, width.length() - 2);
@@ -618,10 +617,11 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
         }
     }
 
+    @SuppressWarnings("unchecked")
     protected void loadAggregation(Table.Column column, Element columnElement) {
         Element aggregationElement = columnElement.element("aggregation");
         if (aggregationElement != null) {
-            final AggregationInfo aggregation = new AggregationInfo();
+            AggregationInfo aggregation = new AggregationInfo();
             aggregation.setPropertyPath((MetaPropertyPath) column.getId());
             String aggregationType = aggregationElement.attributeValue("type");
             if (StringUtils.isNotEmpty(aggregationType)) {
@@ -629,7 +629,7 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
             }
 
             String aggregationEditable = aggregationElement.attributeValue("editable");
-            if (StringUtils.isNotEmpty("editable")) {
+            if (StringUtils.isNotEmpty(aggregationEditable)) {
                 aggregation.setEditable(Boolean.valueOf(aggregationEditable));
             }
 
@@ -639,7 +639,6 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
             }
 
             Function formatter = loadFormatter(aggregationElement);
-            //noinspection unchecked
             aggregation.setFormatter(formatter == null ? column.getFormatter() : formatter);
             column.setAggregation(aggregation);
 
@@ -676,7 +675,7 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
         List<Element> validatorElements = element.elements("validator");
 
         for (Element validatorElement : validatorElements) {
-            final Field.Validator validator = loadValidator(validatorElement);
+            Field.Validator validator = loadValidator(validatorElement);
             if (validator != null) {
                 component.addValidator(validator);
             }
@@ -723,26 +722,16 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
         List<String> excludes = StringUtils.isEmpty(exclude) ? Collections.emptyList() :
                 Splitter.on(",").omitEmptyStrings().trimResults().splitToList(exclude);
 
-        String includeSystem = columnsElement.attributeValue("includeSystem");
-        boolean isIncludeSystem = StringUtils.isNotBlank(includeSystem) && Boolean.parseBoolean(includeSystem);
-
         MetadataTools metadataTools = getMetadataTools();
 
         Stream<String> properties;
-        if (metadataTools.isPersistent(metaClass)) {
+        if (metadataTools.isPersistent(metaClass) && view != null) {
             properties = view.getProperties().stream().map(ViewProperty::getName);
         } else {
-            properties = metaClass.getOwnProperties().stream().map(MetadataObject::getName);
+            properties = metaClass.getProperties().stream().map(MetadataObject::getName);
         }
 
-        List<String> appliedProperties = properties.filter(s -> {
-            MetaProperty metaProperty = metaClass.getProperty(s);
-            if (isIncludeSystem || !metadataTools.isSystem(metaProperty)) {
-                return !excludes.contains(s);
-            } else {
-                return false;
-            }
-        }).collect(Collectors.toList());
+        List<String> appliedProperties = properties.filter(s -> !excludes.contains(s)).collect(Collectors.toList());
 
         return appliedProperties;
     }

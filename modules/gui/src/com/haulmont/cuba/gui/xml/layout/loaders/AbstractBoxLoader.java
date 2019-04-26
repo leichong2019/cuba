@@ -17,12 +17,7 @@
 
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
-import com.google.common.base.Strings;
 import com.haulmont.cuba.gui.components.BoxLayout;
-import com.haulmont.cuba.gui.components.Component;
-import org.dom4j.Element;
-
-import java.util.List;
 
 public abstract class AbstractBoxLoader<T extends BoxLayout> extends ContainerLoader<T> {
     @Override
@@ -48,30 +43,12 @@ public abstract class AbstractBoxLoader<T extends BoxLayout> extends ContainerLo
         loadCaption(resultComponent, element);
         loadDescription(resultComponent, element);
         loadContextHelp(resultComponent, element);
+        loadRequiredIndicatorVisible(resultComponent, element);
 
         loadSubComponentsAndExpand(resultComponent, element);
         loadResponsive(resultComponent, element);
         loadCss(resultComponent, element);
 
         setComponentsRatio(resultComponent, element);
-    }
-
-    protected void setComponentsRatio(BoxLayout resultComponent, Element element) {
-        List<Element> elements = element.elements();
-        if (elements.isEmpty()) {
-            return;
-        }
-
-        for (int i = 0; i < elements.size(); i++) {
-            String stringRatio = elements.get(i).attributeValue("box.expandRatio");
-            if (!Strings.isNullOrEmpty(stringRatio)) {
-
-                Component subComponent = resultComponent.getComponent(i);
-                if (subComponent != null) {
-                    float ratio = Float.parseFloat(stringRatio);
-                    resultComponent.setExpandRatio(subComponent, ratio);
-                }
-            }
-        }
     }
 }

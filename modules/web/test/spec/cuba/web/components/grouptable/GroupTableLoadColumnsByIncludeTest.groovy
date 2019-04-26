@@ -17,12 +17,9 @@
 package spec.cuba.web.components.grouptable
 
 import com.haulmont.cuba.gui.components.GroupTable
-import com.haulmont.cuba.gui.config.WindowConfig
 import com.haulmont.cuba.gui.screen.OpenMode
-import com.haulmont.cuba.gui.sys.UiControllersConfiguration
 import com.haulmont.cuba.security.app.UserManagementService
 import com.haulmont.cuba.web.testsupport.TestServiceProxy
-import org.springframework.core.type.classreading.MetadataReaderFactory
 import spec.cuba.web.UiScreenSpec
 import spec.cuba.web.components.grouptable.screens.GroupTableLoadColumnsByIncludeScreen
 
@@ -34,25 +31,16 @@ class GroupTableLoadColumnsByIncludeTest extends UiScreenSpec {
             getSubstitutedUsers(_) >> Collections.emptyList()
         })
 
-        def configuration = new UiControllersConfiguration()
-        configuration.applicationContext = cont.getApplicationContext()
-        configuration.metadataReaderFactory = cont.getBean(MetadataReaderFactory)
-        configuration.basePackages = ['spec.cuba.web.components.grouptable.screens']
-
-        def windowConfig = cont.getBean(WindowConfig)
-        windowConfig.configurations = [configuration]
-        windowConfig.initialized = false
+        exportScreensPackages(['spec.cuba.web.components.grouptable.screens'])
     }
 
     def cleanup() {
         TestServiceProxy.clear()
 
-        def windowConfig = cont.getBean(WindowConfig)
-        windowConfig.configurations = []
-        windowConfig.initialized = false
+        resetScreensConfig()
     }
 
-    def "load column by includeAll"() {
+    def "load columns by includeAll"() {
         def screens = vaadinUi.screens
         def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
         screens.show(mainWindow)
@@ -68,7 +56,7 @@ class GroupTableLoadColumnsByIncludeTest extends UiScreenSpec {
         columnList.size() == 4
     }
 
-    def "load column by includeAll and includeSystem"() {
+    def "load columns by includeAll with system properties"() {
         def screens = vaadinUi.screens
         def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
         screens.show(mainWindow)
@@ -84,7 +72,7 @@ class GroupTableLoadColumnsByIncludeTest extends UiScreenSpec {
         columnList.size() == 12
     }
 
-    def "exclude system and other properties"() {
+    def "exclude columns"() {
         def screens = vaadinUi.screens
         def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
         screens.show(mainWindow)
@@ -103,22 +91,6 @@ class GroupTableLoadColumnsByIncludeTest extends UiScreenSpec {
         groupTable.getColumn("createTs") == null
     }
 
-    def "load columns by view"() {
-        def screens = vaadinUi.screens
-        def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
-        screens.show(mainWindow)
-
-        def groupTableScreen = screens.create(GroupTableLoadColumnsByIncludeScreen)
-        groupTableScreen.show()
-
-        when:
-        def groupTable = groupTableScreen.getWindow().getComponentNN("groupTableView") as GroupTable
-        def columnList = groupTable.getColumns()
-
-        then:
-        columnList.size() == 4
-    }
-
     def "entity with embedded property"() {
         def screens = vaadinUi.screens
 
@@ -133,7 +105,7 @@ class GroupTableLoadColumnsByIncludeTest extends UiScreenSpec {
         def columnList = groupTable.getColumns()
 
         then:
-        columnList.size() == 6
+        columnList.size() == 14
 
         groupTable.getColumn("address.city") != null
         groupTable.getColumn("address.zip") != null
@@ -154,13 +126,13 @@ class GroupTableLoadColumnsByIncludeTest extends UiScreenSpec {
         def columnList = groupTable.getColumns()
 
         then:
-        columnList.size() == 4
+        columnList.size() == 12
 
         groupTable.getColumn("address").isGroupAllowed()
         !groupTable.getColumn("name").isSortable()
     }
 
-    def "group table with non persistent entity"() {
+    def "with non persistent entity"() {
         def screens = vaadinUi.screens
 
         def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
@@ -174,8 +146,25 @@ class GroupTableLoadColumnsByIncludeTest extends UiScreenSpec {
         def columnList = groupTable.getColumns()
 
         then:
-        columnList.size() == 4
+        columnList.size() == 5
 
         groupTable.getColumn("isFragile") == null
+    }
+
+    def "load columns without view"() {
+        def screens = vaadinUi.screens
+
+        def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
+        screens.show(mainWindow)
+
+        def groupTableScreen = screens.create(GroupTableLoadColumnsByIncludeScreen)
+        groupTableScreen.show()
+
+        when:
+        def groupTable = groupTableScreen.getWindow().getComponentNN("groupTableWithoutView") as GroupTable
+        def columnList = groupTable.getColumns()
+
+        then:
+        columnList.size() == 12
     }
 }

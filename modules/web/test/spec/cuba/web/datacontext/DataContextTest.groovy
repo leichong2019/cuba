@@ -264,10 +264,6 @@ class DataContextTest extends Specification {
 
         DataContext context = factory.createDataContext()
 
-        TestServiceProxy.mock(DataService, Mock(DataService) {
-            commit(_) >> Collections.emptySet()
-        })
-
         when: "merge graph then modify and remove some instances"
 
         User user1 = new User(login: 'u1', name: 'User 1', userRoles: [])
@@ -302,7 +298,7 @@ class DataContextTest extends Specification {
             removed.addAll(e.removedInstances)
         })
 
-        context.commit()
+        def committed = context.commit()
 
         then:
 
@@ -312,6 +308,9 @@ class DataContextTest extends Specification {
 
         removed.size() == 1
         removed.contains(user1Role2)
+
+        committed.containsAll([role1, user1])
+        !committed.contains(user1Role2)
     }
 
     def "remove"() {
@@ -615,6 +614,31 @@ class DataContextTest extends Specification {
         dataContext.hasChanges()
         dataContext.isModified(customer)
         dataContext.find(Customer, customer.id).is(customer)
+    }
+
+    def "remove of newly created entity does not commit it"() {
+        DataContext context = factory.createDataContext()
+
+        Order order = new Order(number: '111')
+        context.merge(order)
+
+        when:
+
+        context.remove(order)
+
+        then:
+
+        context.find(Order, order.id) == null
+
+        when:
+
+        def removed = []
+        context.addPreCommitListener { e -> removed.addAll(e.removedInstances) }
+        context.commit()
+
+        then:
+
+        !removed.contains(order)
     }
 
     private void makeDetached(def entity) {

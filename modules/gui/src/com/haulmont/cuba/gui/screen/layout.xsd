@@ -388,7 +388,6 @@
                     <xs:enumeration value="com.haulmont.cuba.gui.components.validators.LongValidator"/>
                     <xs:enumeration value="com.haulmont.cuba.gui.components.validators.PatternValidator"/>
                     <xs:enumeration value="com.haulmont.cuba.gui.components.validators.ScriptValidator"/>
-                    <xs:enumeration value="com.haulmont.cuba.gui.components.validators.StringValidator"/>
                 </xs:restriction>
             </xs:simpleType>
         </xs:union>
@@ -868,6 +867,73 @@
         </xs:restriction>
     </xs:simpleType>
 
+    <xs:simpleType name="sandbox">
+        <xs:union>
+            <xs:simpleType>
+                <xs:restriction base="xs:string"/>
+            </xs:simpleType>
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="allow-forms"/>
+                    <xs:enumeration value="allow-modals"/>
+                    <xs:enumeration value="allow-orientation-lock"/>
+                    <xs:enumeration value="allow-pointer-lock"/>
+                    <xs:enumeration value="allow-popups"/>
+                    <xs:enumeration value="allow-popups-to-escape-sandbox"/>
+                    <xs:enumeration value="allow-presentation"/>
+                    <xs:enumeration value="allow-same-origin"/>
+                    <xs:enumeration value="allow-scripts"/>
+                    <xs:enumeration value="allow-storage-access-by-user-activation"/>
+                    <xs:enumeration value="allow-top-navigation"/>
+                    <xs:enumeration value="allow-top-navigation-by-user-activation"/>
+                    <xs:enumeration value="allow-downloads-without-user-activation"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:union>
+    </xs:simpleType>
+
+    <xs:simpleType name="allow">
+        <xs:union>
+            <xs:simpleType>
+                <xs:restriction base="xs:string"/>
+            </xs:simpleType>
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="autoplay"/>
+                    <xs:enumeration value="camera"/>
+                    <xs:enumeration value="document-domain"/>
+                    <xs:enumeration value="encrypted-media"/>
+                    <xs:enumeration value="fullscreen"/>
+                    <xs:enumeration value="geolocation"/>
+                    <xs:enumeration value="microphone"/>
+                    <xs:enumeration value="midi"/>
+                    <xs:enumeration value="payment"/>
+                    <xs:enumeration value="vr"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:union>
+    </xs:simpleType>
+
+    <xs:simpleType name="referrerpolicy">
+        <xs:union>
+            <xs:simpleType>
+                <xs:restriction base="xs:string"/>
+            </xs:simpleType>
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="no-referrer"/>
+                    <xs:enumeration value="no-referrer-when-downgrade"/>
+                    <xs:enumeration value="origin"/>
+                    <xs:enumeration value="origin-when-cross-origin"/>
+                    <xs:enumeration value="same-origin"/>
+                    <xs:enumeration value="strict-origin"/>
+                    <xs:enumeration value="strict-origin-when-cross-origin"/>
+                    <xs:enumeration value="unsafe-url"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:union>
+    </xs:simpleType>
+
     <!-- Interfaces -->
 
     <xs:attributeGroup name="hasId">
@@ -1056,6 +1122,23 @@
         <xs:attribute name="tabIndex" type="xs:int"/>
     </xs:attributeGroup>
 
+    <xs:attributeGroup name="hasSandbox">
+        <xs:attribute name="sandbox" type="sandbox"/>
+    </xs:attributeGroup>
+
+    <xs:attributeGroup name="hasSrcdoc">
+        <xs:attribute name="srcdoc" type="xs:string"/>
+        <xs:attribute name="srcdocFile" type="xs:string"/>
+    </xs:attributeGroup>
+
+    <xs:attributeGroup name="hasAllow">
+        <xs:attribute name="allow" type="allow"/>
+    </xs:attributeGroup>
+
+    <xs:attributeGroup name="hasReferrerpolicy">
+        <xs:attribute name="referrerpolicy" type="referrerpolicy"/>
+    </xs:attributeGroup>
+
     <xs:attributeGroup name="isTableComponent">
         <xs:attribute name="dataContainer" type="xs:string"/>
         <xs:attribute name="rowHeaderMode" type="rowHeaderMode"/>
@@ -1159,9 +1242,7 @@
     </xs:complexType>
 
     <xs:attributeGroup name="columnsLoadType">
-        <xs:attribute name="includeByView" type="xs:string"/>
         <xs:attribute name="includeAll" type="xs:boolean"/>
-        <xs:attribute name="includeSystem" type="xs:boolean"/>
         <xs:attribute name="exclude" type="xs:string"/>
     </xs:attributeGroup>
 
@@ -2021,6 +2102,17 @@
         </xs:complexContent>
     </xs:complexType>
 
+    <xs:complexType name="browserFrameComponent">
+        <xs:complexContent>
+            <xs:extension base="resourceViewComponent">
+                <xs:attributeGroup ref="hasSandbox"/>
+                <xs:attributeGroup ref="hasSrcdoc"/>
+                <xs:attributeGroup ref="hasAllow"/>
+                <xs:attributeGroup ref="hasReferrerpolicy"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
     <xs:complexType name="imageComponent">
         <xs:complexContent>
             <xs:extension base="resourceViewComponent">
@@ -2191,6 +2283,7 @@
         <xs:attribute name="maxTextLength" type="xs:integer"/>
         <xs:attribute name="align" type="columnAlignment"/>
         <xs:attribute name="captionAsHtml" type="xs:boolean"/>
+        <xs:attribute name="expandRatio" type="xs:float"/>
 
         <!-- Show entity reference as clickable link -->
         <xs:attribute name="link" type="xs:boolean"/>
@@ -2627,6 +2720,7 @@
 
                 <xs:attribute name="stylename" type="layoutStylename"/>
                 <xs:attribute name="template" type="xs:string"/>
+                <xs:attribute name="requiredIndicatorVisible" type="xs:boolean"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -2643,6 +2737,7 @@
 
                 <xs:attribute name="stylename" type="boxLayoutStylename"/>
                 <xs:attribute name="expand" type="xs:string"/>
+                <xs:attribute name="requiredIndicatorVisible" type="xs:boolean"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -2654,6 +2749,8 @@
                 <xs:group ref="layoutOrComponent"/>
 
                 <xs:attribute name="stylename" type="layoutStylename"/>
+                <xs:attribute name="requiredIndicatorVisible" type="xs:boolean"/>
+
                 <xs:attributeGroup ref="hasSpacingMargin"/>
                 <xs:attributeGroup ref="hasContextHelp"/>
             </xs:extension>
@@ -2667,6 +2764,8 @@
                 <xs:group ref="layoutOrComponent"/>
 
                 <xs:attribute name="stylename" type="csslayoutStylename"/>
+                <xs:attribute name="requiredIndicatorVisible" type="xs:boolean"/>
+
                 <xs:attributeGroup ref="hasResponsive"/>
                 <xs:attributeGroup ref="hasContextHelp"/>
             </xs:extension>
@@ -2694,6 +2793,8 @@
 
                 <xs:attribute name="contentMaxHeight" type="componentSize"/>
                 <xs:attribute name="contentMaxWidth" type="componentSize"/>
+
+                <xs:attribute name="requiredIndicatorVisible" type="xs:boolean"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -2827,6 +2928,8 @@
                     </xs:element>
                 </xs:sequence>
 
+                <xs:attribute name="requiredIndicatorVisible" type="xs:boolean"/>
+
                 <xs:attributeGroup ref="hasSpacingMargin"/>
                 <xs:attributeGroup ref="hasContextHelp"/>
             </xs:extension>
@@ -2850,6 +2953,7 @@
                 <xs:attribute name="collapsed" type="xs:boolean"/>
                 <xs:attribute name="orientation" type="orientation"/>
                 <xs:attribute name="showAsPanel" type="xs:boolean"/>
+                <xs:attribute name="requiredIndicatorVisible" type="xs:boolean"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -2879,7 +2983,7 @@
         <xs:complexContent>
             <xs:extension base="baseComponent">
                 <xs:all>
-                    <xs:element name="properties" type="fragmentProperties"/>
+                    <xs:element name="properties" type="fragmentProperties" minOccurs="0"/>
                 </xs:all>
 
                 <xs:attribute name="screen" type="xs:string"/>
@@ -2889,7 +2993,7 @@
 
     <xs:complexType name="fragmentProperties">
         <xs:sequence>
-            <xs:element name="property" type="fragmentProperty"/>
+            <xs:element name="property" type="fragmentProperty" minOccurs="0"/>
         </xs:sequence>
     </xs:complexType>
 
@@ -3162,7 +3266,7 @@
                 <xs:element name="multiUpload" type="multiuploadComponent"/>
                 <xs:element name="embedded" type="embeddedComponent"/>
                 <xs:element name="image" type="imageComponent"/>
-                <xs:element name="browserFrame" type="resourceViewComponent"/>
+                <xs:element name="browserFrame" type="browserFrameComponent"/>
 
                 <xs:element name="tree" type="treeComponent"/>
                 <xs:element name="table" type="tableComponent"/>

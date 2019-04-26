@@ -20,6 +20,7 @@ import com.vaadin.data.HasValue;
 import com.vaadin.data.ValueProvider;
 import com.vaadin.event.Action;
 import com.vaadin.server.Page;
+import com.vaadin.server.Resource;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.Registration;
 import com.vaadin.ui.*;
@@ -41,6 +42,8 @@ public class CubaPickerField<T> extends com.vaadin.ui.CustomField<T> implements 
 
     protected AbstractComponent field;
     protected ValueProvider<T, String> textFieldValueProvider;
+
+    protected IconGenerator<T> iconGenerator;
 
     protected List<Button> buttons = new ArrayList<>(4);
     protected CubaCssActionsLayout container;
@@ -156,11 +159,30 @@ public class CubaPickerField<T> extends com.vaadin.ui.CustomField<T> implements 
     protected void doSetValue(T value) {
         internalValue = value;
         updateTextRepresentation();
+        updateIcon(value);
     }
 
     @Override
     public T getValue() {
         return internalValue;
+    }
+
+
+    public IconGenerator<T> getIconGenerator() {
+        return iconGenerator;
+    }
+
+    public void setIconGenerator(IconGenerator<T> iconGenerator) {
+        if (this.iconGenerator != iconGenerator) {
+            this.iconGenerator = iconGenerator;
+
+            updateIcon(internalValue);
+        }
+    }
+
+    protected void updateIcon(T value) {
+        Resource iconResource = iconGenerator != null ? iconGenerator.apply(value) : null;
+        getField().setIcon(iconResource);
     }
 
     public boolean isFieldReadOnly() {

@@ -268,8 +268,7 @@ configure(globalModule) {
         compile(bom['org.slf4j:log4j-over-slf4j'])
         compile(bom['org.perf4j:perf4j'])
         compile(bom['com.google.code.findbugs:jsr305'])
-        compile(bom['javax:javaee-api'])
-        
+
         compile(bom['antlr:antlr'])
         compile(bom['org.antlr:antlr-runtime'])
         compile(bom['com.google.guava:guava'])
@@ -294,6 +293,8 @@ configure(globalModule) {
         compile(bom['org.glassfish:javax.el'])
         compile(bom['org.mindrot:jbcrypt'])
 
+        compile(bom['javax.inject:javax.inject'])
+        compile(bom['javax.annotation:javax.annotation-api'])
         compileOnly(bom['javax.servlet:javax.servlet-api'])
     }
 
@@ -367,7 +368,6 @@ configure(coreModule) {
         compile(globalModule)
         compile(sharedLibModule)
 
-        compile(bom['javax.validation:validation-api'])
         compile(bom['com.thoughtworks.xstream:xstream'])
         compile(bom['org.jgroups:jgroups'])
         compile(bom['org.aspectj:aspectjrt'])
@@ -488,6 +488,7 @@ configure(coreTestsModule) {
         compile(bom['org.apache.commons:commons-dbcp2'])
         compile(bom['org.jmockit:jmockit'])
         compile(bom['junit:junit'])
+        compile(bom['javax.servlet:javax.servlet-api'])
     }
 
     task sourceJar(type: Jar) {
@@ -522,6 +523,7 @@ configure(clientTestsModule) {
 
         compile(bom['org.jmockit:jmockit'])
         compile(bom['junit:junit'])
+        compile(bom['javax.servlet:javax.servlet-api'])
     }
 
     task sourceJar(type: Jar) {
@@ -762,6 +764,9 @@ configure(webToolkitModule) {
         compile(bom['com.vaadin:vaadin-client-compiler'])
         compile(bom['com.vaadin:vaadin-compatibility-client'])
 
+        // for code server only
+        compile('org.eclipse.jetty:jetty-server:9.2.27.v20190403')
+
         runtime(bom['javax.servlet:javax.servlet-api'])
     }
 
@@ -796,6 +801,7 @@ configure(webToolkitModule) {
 
     task debugWidgetSet(type: CubaWidgetSetDebug) {
         widgetSetClass = 'com.haulmont.cuba.web.widgets.WidgetSet'
+        xmx = '-Xmx1600m'
     }
 
     jar {

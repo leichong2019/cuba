@@ -16,6 +16,8 @@
 
 package com.haulmont.cuba.gui.model.impl;
 
+import com.haulmont.bali.events.EventHub;
+import com.haulmont.bali.events.Subscription;
 import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
@@ -23,6 +25,7 @@ import com.haulmont.cuba.core.global.Stores;
 import com.haulmont.cuba.core.global.ValueLoadContext;
 import com.haulmont.cuba.core.global.queryconditions.Condition;
 import com.haulmont.cuba.gui.model.DataContext;
+import com.haulmont.cuba.gui.model.HasLoader;
 import com.haulmont.cuba.gui.model.KeyValueContainer;
 import com.haulmont.cuba.gui.model.KeyValueInstanceLoader;
 import org.springframework.context.ApplicationContext;
@@ -32,21 +35,23 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class KeyValueInstanceLoaderImpl implements KeyValueInstanceLoader {
 
-    private ApplicationContext applicationContext;
+    protected ApplicationContext applicationContext;
 
-    private DataContext dataContext;
-    private KeyValueContainer container;
-    private String query;
-    private Condition condition;
-    private Map<String, Object> parameters = new HashMap<>();
-    private boolean softDeletion = true;
+    protected DataContext dataContext;
+    protected KeyValueContainer container;
+    protected String query;
+    protected Condition condition;
+    protected Map<String, Object> parameters = new HashMap<>();
+    protected boolean softDeletion = true;
 
-    private String storeName = Stores.MAIN;
-    private Function<ValueLoadContext, KeyValueEntity> delegate;
+    protected String storeName = Stores.MAIN;
+    protected Function<ValueLoadContext, KeyValueEntity> delegate;
+    protected EventHub events = new EventHub();
 
     public KeyValueInstanceLoaderImpl(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
@@ -76,6 +81,10 @@ public class KeyValueInstanceLoaderImpl implements KeyValueInstanceLoader {
 
         ValueLoadContext loadContext = createLoadContext();
 
+        if (!sendPreLoadEvent(loadContext)) {
+            return;
+        }
+
         KeyValueEntity result = null;
         if (delegate == null) {
             List<KeyValueEntity> list = getDataManager().loadValues(loadContext);
@@ -87,6 +96,7 @@ public class KeyValueInstanceLoaderImpl implements KeyValueInstanceLoader {
         }
 
         container.setItem(result);
+        sendPostLoadEvent(result);
     }
 
     @Override
@@ -108,6 +118,17 @@ public class KeyValueInstanceLoaderImpl implements KeyValueInstanceLoader {
         return loadContext;
     }
 
+    protected boolean sendPreLoadEvent(ValueLoadContext loadContext) {
+        PreLoadEvent preLoadEvent = new PreLoadEvent(this, loadContext);
+        events.publish(PreLoadEvent.class, preLoadEvent);
+        return !preLoadEvent.isLoadPrevented();
+    }
+
+    protected void sendPostLoadEvent(KeyValueEntity entity) {
+        PostLoadEvent postLoadEvent = new PostLoadEvent(this, entity);
+        events.publish(PostLoadEvent.class, postLoadEvent);
+    }
+
     @Override
     public KeyValueContainer getContainer() {
         return container;
@@ -116,6 +137,9 @@ public class KeyValueInstanceLoaderImpl implements KeyValueInstanceLoader {
     @Override
     public void setContainer(KeyValueContainer container) {
         this.container = container;
+        if (container instanceof HasLoader) {
+            ((HasLoader) container).setLoader(this);
+        }
     }
 
     @Override
@@ -174,6 +198,16 @@ public class KeyValueInstanceLoaderImpl implements KeyValueInstanceLoader {
     @Override
     public void setLoadDelegate(Function<ValueLoadContext, KeyValueEntity> delegate) {
         this.delegate = delegate;
+    }
+
+    @Override
+    public Subscription addPreLoadListener(Consumer<PreLoadEvent> listener) {
+        return events.subscribe(PreLoadEvent.class, listener);
+    }
+
+    @Override
+    public Subscription addPostLoadListener(Consumer<PostLoadEvent> listener) {
+        return events.subscribe(PostLoadEvent.class, listener);
     }
 
     @Override
