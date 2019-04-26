@@ -64,7 +64,7 @@ public class BrowserFrameLoader extends AbstractResourceViewLoader<BrowserFrame>
             if (resource == null) {
                 String msg = String.format("Can't load srcdocFile in BrowserFrame. The file with given path not found: %s",
                         srcdocFile);
-                throw new GuiDevelopmentException(msg, context.getFullFrameId());
+                throw new GuiDevelopmentException(msg, context);
             }
 
             resultComponent.setSrcdoc(resource);

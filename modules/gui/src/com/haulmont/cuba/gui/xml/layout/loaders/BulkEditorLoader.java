@@ -77,7 +77,7 @@ public class BulkEditorLoader extends AbstractComponentLoader<BulkEditor> {
         if (window != null && !(window instanceof LegacyFrame)) {
             throw new GuiDevelopmentException(
                     "BulkEditor component can be used only in legacy screens based on AbstractWindow",
-                    context.getFullFrameId());
+                    context);
         }
 
         loadEnable(resultComponent, element);
