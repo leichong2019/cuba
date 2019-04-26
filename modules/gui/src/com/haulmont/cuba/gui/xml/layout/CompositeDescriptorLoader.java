@@ -51,11 +51,11 @@ public class CompositeDescriptorLoader {
     protected String loadDescriptor(String resourcePath) {
         try (InputStream stream = resources.getResourceAsStream(resourcePath)) {
             if (stream == null) {
-                throw new DevelopmentException("Descriptor is not found " + resourcePath, "Path", resourcePath);
+                throw new DevelopmentException("Composite component descriptor not found " + resourcePath, "Path", resourcePath);
             }
             return IOUtils.toString(stream, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new RuntimeException("Unable to read component descriptor");
+            throw new RuntimeException("Unable to read composite component descriptor");
         }
     }
 

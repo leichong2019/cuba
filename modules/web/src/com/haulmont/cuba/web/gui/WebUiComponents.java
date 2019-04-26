@@ -247,12 +247,11 @@ public class WebUiComponents implements UiComponents {
         CompositeDescriptor descriptor = componentClass.getAnnotation(CompositeDescriptor.class);
         if (descriptor != null) {
             Component root = processCompositeDescriptor(componentClass, descriptor.value());
-            WebComponentsHelper.setCompositeComponentRoot(compositeComponent, root);
+            CompositeComponentUtils.setRoot(compositeComponent, root);
         }
 
         CompositeComponent.CreateEvent event = new CompositeComponent.CreateEvent(compositeComponent);
-        WebComponentsHelper.fireCompositeComponentEvent(compositeComponent,
-                CompositeComponent.CreateEvent.class, event);
+        CompositeComponentUtils.fireEvent(compositeComponent, CompositeComponent.CreateEvent.class, event);
     }
 
     protected Component processCompositeDescriptor(Class<? extends Component> componentClass, String descriptorPath) {
