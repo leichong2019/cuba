@@ -36,7 +36,6 @@ public class CompositeComponent<T extends Component>
     protected String id;
     protected T root;
     protected Frame frame;
-    protected boolean attached = false;
 
     // private, lazily initialized
     private EventHub eventHub = null;
@@ -165,19 +164,13 @@ public class CompositeComponent<T extends Component>
 
     @Override
     public void attached() {
-        attached = true;
-
         ((AttachNotifier) getCompositionNN()).attached();
-
         getEventHub().publish(AttachEvent.class, new AttachEvent(this));
     }
 
     @Override
     public void detached() {
-        attached = false;
-
         ((AttachNotifier) getCompositionNN()).detached();
-
         getEventHub().publish(DetachEvent.class, new DetachEvent(this));
     }
 
