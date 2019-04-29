@@ -30,7 +30,8 @@ import java.lang.annotation.Target;
 public @interface CompositeDescriptor {
 
     /**
-     * @return a file path to an xml descriptor
+     * @return a path to the XML descriptor. If the value contains a file name only (i.e. don't start with '/'),
+     * it is assumed that the file is located in the package of the composite component class.
      */
     String value();
 }

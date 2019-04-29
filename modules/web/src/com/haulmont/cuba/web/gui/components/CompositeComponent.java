@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.EventObject;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class CompositeComponent<T extends Component>
@@ -54,6 +55,20 @@ public class CompositeComponent<T extends Component>
     protected T getCompositionNN() {
         Preconditions.checkState(root != null, "Composition root is not initialized");
         return root;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <C> C getInnerComponent(String id) {
+        return (C) getInnerComponentOptional(id).orElseThrow(() ->
+                new IllegalArgumentException(String.format("Not found component with id '%s'", id)));
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <C> Optional<C> getInnerComponentOptional(String id) {
+        Preconditions.checkState(getCompositionNN() instanceof ComponentContainer,
+                "Composition can't contain inner components");
+
+        return (Optional<C>) Optional.ofNullable(((ComponentContainer) getCompositionNN()).getComponent(id));
     }
 
     protected void setComposition(T composition) {
