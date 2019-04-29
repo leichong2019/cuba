@@ -35,7 +35,7 @@
         </dataGrid>
         <cssLayout id="sendMessageBox" width="100%" stylename="v-component-group message-box">
             <textField id="messageField" inputPrompt="Enter your message" width="100%"/>
-            <button id="sendBtn" caption="msg://send"/>
+            <button id="sendBtn" caption="msg://test_send"/>
         </cssLayout>
     </vbox>
 </composite>

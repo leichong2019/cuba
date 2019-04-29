@@ -17,11 +17,8 @@
 package spec.cuba.web.components.composite.components.comments;
 
 import com.google.common.base.Strings;
-import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.core.global.MetadataTools;
-import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.Button;
-import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.ComponentContainer;
 import com.haulmont.cuba.gui.components.DataGrid;
 import com.haulmont.cuba.gui.components.TextField;
@@ -33,21 +30,20 @@ import com.haulmont.cuba.gui.components.sys.ShowInfoAction;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.web.gui.components.CompositeComponent;
 import com.haulmont.cuba.web.gui.components.CompositeDescriptor;
+import com.haulmont.cuba.web.gui.components.CompositeWithCaption;
 import com.haulmont.cuba.web.testmodel.compositecomponent.Comment;
 
 import javax.inject.Inject;
 import java.util.function.Function;
 
-@CompositeDescriptor("spec/cuba/web/components/composite/components/comments/commentary-panel.xml")
-public class TestCommentaryPanel extends CompositeComponent<VBoxLayout>
-        implements Component.HasCaption {
+@CompositeDescriptor("/spec/cuba/web/components/composite/components/comments/commentary-panel.xml")
+public class TestCommentaryPanel extends CompositeComponent<VBoxLayout> implements CompositeWithCaption {
 
     public static final String NAME = "testCommentaryPanel";
 
     /* Beans */
-    private Messages messages;
+    @Inject
     private MetadataTools metadataTools;
-    private UiComponents uiComponents;
 
     /* Nested Components */
     private DataGrid<Comment> commentsDataGrid;
@@ -57,34 +53,18 @@ public class TestCommentaryPanel extends CompositeComponent<VBoxLayout>
     private CollectionContainer<Comment> collectionContainer;
     private Function<String, Comment> commentProvider;
 
-    @Inject
-    public void setMessages(Messages messages) {
-        this.messages = messages;
-    }
-
-    @Inject
-    public void setMetadataTools(MetadataTools metadataTools) {
-        this.metadataTools = metadataTools;
-    }
-
-    @Inject
-    public void setUiComponents(UiComponents uiComponents) {
-        this.uiComponents = uiComponents;
-    }
-
     public TestCommentaryPanel() {
         getEventHub().subscribe(CreateEvent.class, event ->
                 initComponent(getCompositionNN()));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void setComposition(VBoxLayout composition) {
         super.setComposition(composition);
 
-        commentsDataGrid = (DataGrid<Comment>) composition.getComponentNN("commentsDataGrid");
-        messageField = (TextField<String>) composition.getComponentNN("messageField");
-        sendBtn = (Button) composition.getComponentNN("sendBtn");
+        commentsDataGrid = getInnerComponent("commentsDataGrid");
+        messageField = getInnerComponent("messageField");
+        sendBtn = getInnerComponent("sendBtn");
     }
 
     private void initComponent(ComponentContainer composition) {
@@ -157,26 +137,6 @@ public class TestCommentaryPanel extends CompositeComponent<VBoxLayout>
 
     public void setCreateCommentProvider(Function<String, Comment> commentProvider) {
         this.commentProvider = commentProvider;
-    }
-
-    @Override
-    public String getCaption() {
-        return getCompositionNN().getCaption();
-    }
-
-    @Override
-    public void setCaption(String caption) {
-        getCompositionNN().setCaption(caption);
-    }
-
-    @Override
-    public String getDescription() {
-        return getCompositionNN().getDescription();
-    }
-
-    @Override
-    public void setDescription(String description) {
-        getCompositionNN().setDescription(description);
     }
 
     public CollectionContainer<Comment> getCollectionContainer() {

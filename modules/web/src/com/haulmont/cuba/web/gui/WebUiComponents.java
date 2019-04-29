@@ -246,12 +246,25 @@ public class WebUiComponents implements UiComponents {
 
         CompositeDescriptor descriptor = componentClass.getAnnotation(CompositeDescriptor.class);
         if (descriptor != null) {
-            Component root = processCompositeDescriptor(componentClass, descriptor.value());
+            String descriptorPath = descriptor.value();
+            if (!descriptorPath.startsWith("/")) {
+                String packageName = getPackage(componentClass);
+                if (StringUtils.isNotEmpty(packageName)) {
+                    String relativePath = packageName.replace('.', '/');
+                    descriptorPath = "/" + relativePath + "/" + descriptorPath;
+                }
+            }
+            Component root = processCompositeDescriptor(componentClass, descriptorPath);
             CompositeComponentUtils.setRoot(compositeComponent, root);
         }
 
         CompositeComponent.CreateEvent event = new CompositeComponent.CreateEvent(compositeComponent);
         CompositeComponentUtils.fireEvent(compositeComponent, CompositeComponent.CreateEvent.class, event);
+    }
+
+    protected String getPackage(Class<? extends Component> componentClass) {
+        Package javaPackage = componentClass.getPackage();
+        return javaPackage != null ? javaPackage.getName() : "";
     }
 
     protected Component processCompositeDescriptor(Class<? extends Component> componentClass, String descriptorPath) {

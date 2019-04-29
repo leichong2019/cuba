@@ -59,7 +59,7 @@ class CompositeComponentTest extends UiScreenSpec {
         resetScreensConfig()
     }
 
-    def "composite component as field in an editor screen"() {
+    def "composite component as field in an editor screen and relative path to descriptor"() {
         def screens = vaadinUi.screens
         def screenBuilders = cont.getBean(ScreenBuilders)
 
@@ -100,7 +100,7 @@ class CompositeComponentTest extends UiScreenSpec {
         lineDc.getItem().getQuantity() == 20
     }
 
-    def "composite component containing a DataGrid with MetaClass"() {
+    def "composite component containing a DataGrid with MetaClass and full path to descriptor"() {
         def screens = vaadinUi.screens
 
         def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
