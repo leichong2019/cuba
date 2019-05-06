@@ -621,14 +621,16 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
      */
     abstract class AbstractDataGridEditorEvent<E extends Entity> extends AbstractDataGridEvent {
         protected E item;
+        protected Map<String, Field> fields;
 
         /**
          * @param component the DataGrid from which this event originates
          * @param item      the editing item
          */
-        public AbstractDataGridEditorEvent(DataGrid component, E item) {
+        public AbstractDataGridEditorEvent(DataGrid component, E item, Map<String, Field> fields) {
             super(component);
             this.item = item;
+            this.fields = fields;
         }
 
         /**
@@ -646,10 +648,19 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
         public E getItem() {
             return item;
         }
+
+        /**
+         * @return the components that are used in the editor
+         */
+        public Map<String, Field> getFields() {
+            return fields;
+        }
     }
 
     /**
      * An event that is fired before the item is updated.
+     * Provides access to the components that were used in the editor,
+     * giving the possibility to use their values programmatically.
      */
     class EditorPreCommitEvent<E extends Entity> extends AbstractDataGridEditorEvent<E> {
         /**
@@ -658,8 +669,8 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
          * @param component the DataGrid from which this event originates
          * @param item      the editing item
          */
-        public EditorPreCommitEvent(DataGrid component, E item) {
-            super(component, item);
+        public EditorPreCommitEvent(DataGrid component, E item, Map<String, Field> fields) {
+            super(component, item, fields);
         }
     }
 
@@ -681,6 +692,8 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
 
     /**
      * An event that is fired after the item is updated.
+     * Provides access to the components that were used in the editor,
+     * giving the possibility to use their values programmatically.
      */
     class EditorPostCommitEvent<E extends Entity> extends AbstractDataGridEditorEvent<E> {
         /**
@@ -689,8 +702,8 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
          * @param component the DataGrid from which this event originates
          * @param item      the edited item
          */
-        public EditorPostCommitEvent(DataGrid component, E item) {
-            super(component, item);
+        public EditorPostCommitEvent(DataGrid component, E item, Map<String, Field> fields) {
+            super(component, item, fields);
         }
     }
 
@@ -712,6 +725,8 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
 
     /**
      * An event that is fired when the DataGrid editor is closed.
+     * Provides access to the components that were used in the editor,
+     * giving the possibility to use their values programmatically.
      */
     class EditorCloseEvent<E extends Entity> extends AbstractDataGridEditorEvent<E> {
         /**
@@ -720,8 +735,8 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
          * @param component the DataGrid from which this event originates
          * @param item      the edited item
          */
-        public EditorCloseEvent(DataGrid component, E item) {
-            super(component, item);
+        public EditorCloseEvent(DataGrid component, E item, Map<String, Field> fields) {
+            super(component, item, fields);
         }
     }
 
@@ -762,8 +777,6 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
      * }</pre>
      */
     class EditorOpenEvent<E extends Entity> extends AbstractDataGridEditorEvent<E> {
-        protected Map<String, Field> fields;
-
         /**
          * @param component the DataGrid from which this event originates
          * @param item      the editing item
@@ -771,12 +784,7 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
          *                  and value - the field that is used in the editor for this column
          */
         public EditorOpenEvent(DataGrid component, E item, Map<String, Field> fields) {
-            super(component, item);
-            this.fields = fields;
-        }
-
-        public Map<String, Field> getFields() {
-            return fields;
+            super(component, item, fields);
         }
     }
 
