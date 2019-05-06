@@ -655,6 +655,18 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
         public Map<String, Field> getFields() {
             return fields;
         }
+
+        /**
+         * Returns an {@code Optional} describing the field corresponding
+         * to the given column id, if non-null, otherwise returns an empty {@code Optional}.
+         *
+         * @param columnId a column id
+         * @return an {@code Optional} describing the field corresponding
+         * to the given column id, if non-null, otherwise returns an empty {@code Optional}
+         */
+        public Optional<Field> getField(String columnId) {
+            return Optional.ofNullable(fields.get(columnId));
+        }
     }
 
     /**
