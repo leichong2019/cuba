@@ -23,6 +23,7 @@ import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.chile.core.model.MetaPropertyPath;
 import com.haulmont.cuba.client.sys.PersistenceManagerClient;
+import com.haulmont.cuba.core.app.keyvalue.KeyValueMetaClass;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.MessageTools;
@@ -66,6 +67,7 @@ import com.haulmont.cuba.gui.data.impl.DatasourceImplementation;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.DataComponents;
 import com.haulmont.cuba.gui.model.InstanceContainer;
+import com.haulmont.cuba.gui.model.impl.KeyValueContainerImpl;
 import com.haulmont.cuba.gui.sys.UiTestIds;
 import com.haulmont.cuba.gui.theme.ThemeConstants;
 import com.haulmont.cuba.gui.theme.ThemeConstantsManager;
@@ -1391,7 +1393,16 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
         ViewRepository viewRepository = beanLocator.get(ViewRepository.NAME);
         MetaClass metaClass = items.getEntityMetaClass();
 
-        InstanceContainer<E> instanceContainer = factory.createInstanceContainer(metaClass.getJavaClass());
+        InstanceContainer<E> instanceContainer;
+        if (metaClass instanceof KeyValueMetaClass) {
+            instanceContainer = (InstanceContainer<E>) new KeyValueContainerImpl() {
+                {
+                    entityMetaClass = metaClass;
+                }
+            };
+        } else {
+            instanceContainer = factory.createInstanceContainer(metaClass.getJavaClass());
+        }
         instanceContainer.setView(viewRepository.getView(metaClass, View.LOCAL));
         instanceContainer.setItem(item);
 
