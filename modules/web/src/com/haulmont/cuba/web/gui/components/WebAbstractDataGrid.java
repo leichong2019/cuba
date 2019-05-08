@@ -1395,11 +1395,8 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
         InstanceContainer<E> instanceContainer;
         if (metaClass instanceof KeyValueMetaClass) {
-            instanceContainer = (InstanceContainer<E>) new KeyValueContainerImpl() {
-                {
-                    entityMetaClass = metaClass;
-                }
-            };
+            //noinspection unchecked
+            instanceContainer = (InstanceContainer<E>) new KeyValueContainerImpl((KeyValueMetaClass) metaClass);
         } else {
             instanceContainer = factory.createInstanceContainer(metaClass.getJavaClass());
         }
