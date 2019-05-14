@@ -74,7 +74,7 @@ public abstract class AbstractTemporalDatatype<T extends Temporal> implements Da
         try {
             return formatter.parse(value.trim(), newInstance());
         } catch (DateTimeParseException ex) {
-            throw new ParseException(ex.getLocalizedMessage(), 0);
+            throw new ParseException(ex.getMessage(), 0);
         }
     }
 
@@ -94,7 +94,7 @@ public abstract class AbstractTemporalDatatype<T extends Temporal> implements Da
         try {
             return formatter.parse(value.trim(), newInstance());
         } catch (DateTimeParseException ex) {
-            throw new ParseException(ex.getLocalizedMessage(), 0);
+            throw new ParseException(ex.getMessage(), 0);
         }
     }
 
