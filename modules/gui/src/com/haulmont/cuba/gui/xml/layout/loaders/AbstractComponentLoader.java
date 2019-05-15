@@ -64,6 +64,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static com.haulmont.cuba.gui.icons.Icons.ICON_NAME_REGEX;
@@ -1006,8 +1007,16 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
 
     @SuppressWarnings("unchecked")
     protected void loadContainer(T component, Element element) {
+        if (component instanceof HasValueSource) {
+            String property = element.attributeValue("property");
+            Optional<InstanceContainer> containerOptional = loadContainer(element, property);
+            containerOptional.ifPresent(container ->
+                    ((HasValueSource) component).setValueSource(new ContainerValueSource<>(container, property)));
+        }
+    }
+
+    protected Optional<InstanceContainer> loadContainer(Element element, String property) {
         String containerId = element.attributeValue("dataContainer");
-        String property = element.attributeValue("property");
 
         // In case a component has only a property,
         // we try to obtain `dataContainer` from a parent element.
@@ -1020,18 +1029,17 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
             if (property == null) {
                 throw new GuiDevelopmentException(
                         String.format("Can't set container '%s' for component '%s' because 'property' " +
-                                "attribute is not defined", containerId, component.getId()), context);
+                                "attribute is not defined", containerId, element.attributeValue("id")), context);
             }
 
 
             FrameOwner frameOwner = getComponentContext().getFrame().getFrameOwner();
             ScreenData screenData = UiControllerUtils.getScreenData(frameOwner);
-            InstanceContainer container = screenData.getContainer(containerId);
 
-            if (component instanceof HasValueSource) {
-                ((HasValueSource) component).setValueSource(new ContainerValueSource<>(container, property));
-            }
+            return Optional.of(screenData.getContainer(containerId));
         }
+
+        return Optional.empty();
     }
 
     protected String getParentDataContainer(Element element) {
