@@ -24,7 +24,6 @@ import com.haulmont.cuba.gui.components.LookupField;
 import com.haulmont.cuba.gui.components.data.options.ContainerOptions;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
-import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.screen.FrameOwner;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
@@ -32,7 +31,6 @@ import org.dom4j.Element;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.Optional;
 
 public class LookupFieldLoader extends AbstractFieldLoader<LookupField> {
 
@@ -138,8 +136,7 @@ public class LookupFieldLoader extends AbstractFieldLoader<LookupField> {
     protected void loadContainer(LookupField component, Element element) {
         super.loadContainer(component, element);
 
-        Optional<CollectionContainer> optionsContainerOptional = loadOptionsContainer(element);
-        optionsContainerOptional.ifPresent(optionsContainer ->
+        loadOptionsContainer(element).ifPresent(optionsContainer ->
                 component.setOptions(new ContainerOptions(optionsContainer)));
     }
 

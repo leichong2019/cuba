@@ -23,7 +23,8 @@ import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.chile.core.model.MetaPropertyPath;
 import com.haulmont.cuba.core.app.dynamicattributes.DynamicAttributesUtils;
 import com.haulmont.cuba.core.entity.CategoryAttribute;
-import com.haulmont.cuba.core.global.*;
+import com.haulmont.cuba.core.global.MessageTools;
+import com.haulmont.cuba.core.global.MetadataTools;
 import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.data.HasValueSource;
@@ -43,7 +44,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static com.haulmont.cuba.core.app.dynamicattributes.DynamicAttributesUtils.getCategoryAttribute;
 import static com.haulmont.cuba.core.app.dynamicattributes.DynamicAttributesUtils.isDynamicAttribute;
@@ -239,8 +243,7 @@ public class FormLoader extends AbstractComponentLoader<Form> {
             throw new GuiDevelopmentException("Field element has no 'property' attribute", context);
         }
 
-        Optional<InstanceContainer> containerOptional = loadContainer(element, property);
-        InstanceContainer container = containerOptional.orElseThrow(() ->
+        InstanceContainer container = loadContainer(element, property).orElseThrow(() ->
                 new GuiDevelopmentException(String.format("Can't infer component for field '%s'. " +
                         "No data container associated with it", property), context));
         MetaClass metaClass = container.getEntityMetaClass();
@@ -249,8 +252,7 @@ public class FormLoader extends AbstractComponentLoader<Form> {
         context.setValueSource(new ContainerValueSource<>(container, property));
         context.setXmlDescriptor(element);
 
-        Optional<CollectionContainer> optionsContainerOptional = loadOptionsContainer(element);
-        optionsContainerOptional.ifPresent(optionsContainer ->
+        loadOptionsContainer(element).ifPresent(optionsContainer ->
                 context.setOptions(new ContainerOptions(optionsContainer)));
 
         return (Field) getUiComponentsGenerator().generate(context);

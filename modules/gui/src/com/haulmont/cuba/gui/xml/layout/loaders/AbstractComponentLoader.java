@@ -1010,8 +1010,7 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
     protected void loadContainer(T component, Element element) {
         if (component instanceof HasValueSource) {
             String property = element.attributeValue("property");
-            Optional<InstanceContainer> containerOptional = loadContainer(element, property);
-            containerOptional.ifPresent(container ->
+            loadContainer(element, property).ifPresent(container ->
                     ((HasValueSource) component).setValueSource(new ContainerValueSource<>(container, property)));
         }
     }

@@ -23,11 +23,8 @@ import com.haulmont.cuba.gui.components.OptionsField;
 import com.haulmont.cuba.gui.components.data.options.ContainerOptions;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
-import com.haulmont.cuba.gui.model.CollectionContainer;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
-
-import java.util.Optional;
 
 public abstract class AbstractOptionsBaseLoader<T extends OptionsField> extends AbstractFieldLoader<T> {
     @Override
@@ -68,8 +65,7 @@ public abstract class AbstractOptionsBaseLoader<T extends OptionsField> extends 
     protected void loadContainer(T component, Element element) {
         super.loadContainer(component, element);
 
-        Optional<CollectionContainer> optionsContainerOptional = loadOptionsContainer(element);
-        optionsContainerOptional.ifPresent(optionsContainer ->
+        loadOptionsContainer(element).ifPresent(optionsContainer ->
                 component.setOptions(new ContainerOptions(optionsContainer)));
     }
 }
