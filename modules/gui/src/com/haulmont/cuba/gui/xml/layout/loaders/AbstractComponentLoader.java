@@ -39,6 +39,7 @@ import com.haulmont.cuba.gui.components.data.HasValueSource;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.components.validators.*;
 import com.haulmont.cuba.gui.icons.Icons;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.model.ScreenData;
 import com.haulmont.cuba.gui.screen.FrameOwner;
@@ -1037,6 +1038,21 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
             ScreenData screenData = UiControllerUtils.getScreenData(frameOwner);
 
             return Optional.of(screenData.getContainer(containerId));
+        }
+
+        return Optional.empty();
+    }
+
+    protected Optional<CollectionContainer> loadOptionsContainer(Element element) {
+        String containerId = element.attributeValue("optionsContainer");
+        if (containerId != null) {
+            FrameOwner frameOwner = getComponentContext().getFrame().getFrameOwner();
+            ScreenData screenData = UiControllerUtils.getScreenData(frameOwner);
+            InstanceContainer container = screenData.getContainer(containerId);
+            if (!(container instanceof CollectionContainer)) {
+                throw new GuiDevelopmentException("Not a CollectionContainer: " + containerId, context);
+            }
+            return Optional.of((CollectionContainer) container);
         }
 
         return Optional.empty();

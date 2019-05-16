@@ -2753,6 +2753,7 @@
 
         <xs:attribute name="property" type="xs:string" use="required"/>
         <xs:attribute name="dataContainer" type="xs:string"/>
+        <xs:attribute name="optionsContainer" type="xs:string"/>
 
         <xs:attributeGroup ref="hasEditState"/>
         <xs:attributeGroup ref="hasVisibility"/>

@@ -29,6 +29,7 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.data.HasValueSource;
 import com.haulmont.cuba.gui.components.data.ValueSourceProvider;
 import com.haulmont.cuba.gui.components.data.meta.EntityValueSource;
+import com.haulmont.cuba.gui.components.data.options.ContainerOptions;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSourceProvider;
 import com.haulmont.cuba.gui.dynamicattributes.DynamicAttributeComponentsGenerator;
@@ -247,6 +248,10 @@ public class FormLoader extends AbstractComponentLoader<Form> {
         ComponentGenerationContext context = new ComponentGenerationContext(metaClass, property);
         context.setValueSource(new ContainerValueSource<>(container, property));
         context.setXmlDescriptor(element);
+
+        Optional<CollectionContainer> optionsContainerOptional = loadOptionsContainer(element);
+        optionsContainerOptional.ifPresent(optionsContainer ->
+                context.setOptions(new ContainerOptions(optionsContainer)));
 
         return (Field) getUiComponentsGenerator().generate(context);
     }
