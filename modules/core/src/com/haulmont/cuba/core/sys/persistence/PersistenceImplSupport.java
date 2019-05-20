@@ -457,6 +457,7 @@ public class PersistenceImplSupport implements ApplicationContextAware {
         public void afterCompletion(int status) {
             try {
                 Collection<Entity> instances = container.getAllInstances();
+                entityLog.flushDbGeneratedIdEntities(instances);
                 if (log.isTraceEnabled())
                     log.trace("ContainerResourceSynchronization.afterCompletion: instances = " + instances);
                 for (Object instance : instances) {

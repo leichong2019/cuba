@@ -86,6 +86,9 @@ public class EntityLog implements EntityLogAPI {
     @GuardedBy("lock")
     protected Map<String, Set<String>> entitiesAuto;
 
+    @GuardedBy("lock")
+    protected Collection<EntityLogItem> dbGeneratedIdEntities = new ArrayList<>();
+
     protected ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     protected ThreadLocal<Boolean> entityLogSwitchedOn = new ThreadLocal<>();
 
@@ -120,6 +123,42 @@ public class EntityLog implements EntityLogAPI {
             EntityLogItem itemToSave = sameEntityList.get(0);
             computeChanges(itemToSave, sameEntityList);
             saveItem(itemToSave);
+        }
+    }
+
+    @Override
+    public void flushDbGeneratedIdEntities(Collection<Entity> committedEntities) {
+        if (committedEntities == null || committedEntities.isEmpty()) {
+            return;
+        }
+        Collection<Entity> committedDbGeneratedIdEntities = committedEntities.stream()
+                .filter(e -> e instanceof BaseDbGeneratedIdEntity)
+                .collect(Collectors.toList());
+        if (committedDbGeneratedIdEntities.isEmpty()) {
+            return;
+        }
+        Collection<EntityLogItem> itemsToCommit;
+        lock.writeLock().lock();
+        try {
+            itemsToCommit = dbGeneratedIdEntities.stream()
+                    .filter(i -> committedDbGeneratedIdEntities.contains(i.getDbGeneratedIdEntity()))
+                    .collect(Collectors.toList());
+            dbGeneratedIdEntities.removeAll(itemsToCommit);
+        } finally {
+            lock.writeLock().unlock();
+        }
+        itemsToCommit.stream()
+                .filter(i -> i.getDbGeneratedIdEntity().getId().get() != null)
+                .forEach(this::commitDbGeneratedIdEntityLogItem);
+    }
+
+    protected void commitDbGeneratedIdEntityLogItem(EntityLogItem item) {
+        Number id = item.getDbGeneratedIdEntity().getId().getNN();
+        item.setObjectEntityId(id);
+        try (Transaction tx = persistence.createTransaction()) {
+            EntityManager em = persistence.getEntityManager();
+            em.persist(item);
+            tx.commit();
         }
     }
 
@@ -208,18 +247,12 @@ public class EntityLog implements EntityLogAPI {
                 }
             }
         } else {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-                @Override
-                public void afterCommit() {
-                    Number id = item.getDbGeneratedIdEntity().getId().getNN();
-                    item.setObjectEntityId(id);
-                    try (Transaction tx = persistence.createTransaction()) {
-                        EntityManager em = persistence.getEntityManager();
-                        em.persist(item);
-                        tx.commit();
-                    }
-                }
-            });
+            lock.writeLock().lock();
+            try {
+                dbGeneratedIdEntities.add(item);
+            } finally {
+                lock.writeLock().unlock();
+            }
         }
     }
 

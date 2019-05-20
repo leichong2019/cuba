@@ -19,6 +19,7 @@ package com.haulmont.cuba.security.app;
 import com.haulmont.cuba.core.entity.Entity;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 
 /**
  * Allows to log entity lifecycle events: create, modify, delete.
@@ -100,4 +101,12 @@ public interface EntityLogAPI {
      * to the database.
      */
     void flush();
+
+    /**
+     * Flush BaseDbGeneratedIdEntity records accumulated by invocations of {@link #registerCreate(Entity)} and other registration methods
+     * to the database.
+     *
+     * @param committedEntities entities that were committed in the current transaction
+     */
+    void flushDbGeneratedIdEntities(Collection<Entity> committedEntities);
 }
