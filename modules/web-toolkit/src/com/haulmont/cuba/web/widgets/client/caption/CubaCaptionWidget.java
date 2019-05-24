@@ -244,9 +244,7 @@ public class CubaCaptionWidget extends VCaption implements ClickHandler {
         if (state.captionAsHtml) {
             captionText.setInnerHTML(state.caption);
         } else {
-            if (state.caption.contains("\n")) {
-                captionText.addClassName("c-captiontext-preformatted");
-            }
+            captionText.addClassName("c-captiontext-preformatted");
             captionText.setInnerText(state.caption);
         }
     }
