@@ -52,7 +52,7 @@
   .#{$primary-stylename}-slot.c-full-height-widget .v-caption .v-captiontext {
     line-height: $v-line-height;
 
-    white-space: normal;
+    white-space: pre-wrap;
     word-wrap: break-word;
     overflow-wrap: break-word;
   }
