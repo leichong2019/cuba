@@ -1,7 +1,7 @@
 package spec.cuba.core.query_sort
 
 import com.haulmont.cuba.core.app.JpqlSortExpressionProvider
-import com.haulmont.cuba.core.app.RdbmsQueryBuilder
+import com.haulmont.cuba.core.app.JpqlQueryBuilder
 import com.haulmont.cuba.core.global.AppBeans
 import com.haulmont.cuba.core.global.Metadata
 import com.haulmont.cuba.core.global.Sort
@@ -18,11 +18,11 @@ class QuerySortTest extends Specification {
 
     def "sort"() {
 
-        RdbmsQueryBuilder queryBuilder
+        JpqlQueryBuilder queryBuilder
 
         when: "by single property"
 
-        queryBuilder = AppBeans.get(RdbmsQueryBuilder)
+        queryBuilder = AppBeans.get(JpqlQueryBuilder)
         queryBuilder.init('select u from sec$User u', null,
                 Sort.by('name'), [:], null, null, null, 'sec$User')
 
@@ -32,7 +32,7 @@ class QuerySortTest extends Specification {
 
         when: "by two properties"
 
-        queryBuilder = AppBeans.get(RdbmsQueryBuilder)
+        queryBuilder = AppBeans.get(JpqlQueryBuilder)
         queryBuilder.init('select u from sec$User u', null,
                 Sort.by('login', 'name'), [:], null, null, null, 'sec$User')
 
@@ -42,7 +42,7 @@ class QuerySortTest extends Specification {
 
         when: "by two properties desc"
 
-        queryBuilder = AppBeans.get(RdbmsQueryBuilder)
+        queryBuilder = AppBeans.get(JpqlQueryBuilder)
         queryBuilder.init('select u from sec$User u', null,
                 Sort.by(Sort.Direction.DESC, 'login', 'name'), [:], null, null, null, 'sec$User')
 
@@ -52,7 +52,7 @@ class QuerySortTest extends Specification {
 
         when: "by reference property"
 
-        queryBuilder = AppBeans.get(RdbmsQueryBuilder)
+        queryBuilder = AppBeans.get(JpqlQueryBuilder)
         queryBuilder.init('select u from sec$User u', null,
                 Sort.by('group.name'), [:], null, null, null, 'sec$User')
 
@@ -62,7 +62,7 @@ class QuerySortTest extends Specification {
 
         when: "by reference property desc"
 
-        queryBuilder = AppBeans.get(RdbmsQueryBuilder)
+        queryBuilder = AppBeans.get(JpqlQueryBuilder)
         queryBuilder.init('select u from sec$User u', null,
                 Sort.by(Sort.Direction.DESC, 'group.name'), [:], null, null, null, 'sec$User')
 
@@ -73,7 +73,7 @@ class QuerySortTest extends Specification {
 
     def "sort by single property with order function and nulls first"() {
 
-        RdbmsQueryBuilder queryBuilder
+        JpqlQueryBuilder queryBuilder
         TestJpqlSortExpressionProvider sortExpressionProvider
 
         setup:
@@ -83,7 +83,7 @@ class QuerySortTest extends Specification {
 
         when:
 
-        queryBuilder = AppBeans.get(RdbmsQueryBuilder)
+        queryBuilder = AppBeans.get(JpqlQueryBuilder)
         queryBuilder.init('select e from test$Order e', null,
                 Sort.by('number'), [:], null, null, null, 'test$Order')
 
@@ -97,11 +97,11 @@ class QuerySortTest extends Specification {
 
     def "sort by multiple properties in different directions is not supported"() {
 
-        RdbmsQueryBuilder queryBuilder
+        JpqlQueryBuilder queryBuilder
 
         when:
 
-        queryBuilder = AppBeans.get(RdbmsQueryBuilder)
+        queryBuilder = AppBeans.get(JpqlQueryBuilder)
         queryBuilder.init('select u from sec$User u', null,
                 Sort.by(Sort.Order.asc('login'), Sort.Order.desc('name')), [:], null, null, null, 'sec$User')
 
@@ -112,11 +112,11 @@ class QuerySortTest extends Specification {
 
     def "sort by non-persistent property"() {
 
-        RdbmsQueryBuilder queryBuilder
+        JpqlQueryBuilder queryBuilder
 
         when: "by single non-persistent property"
 
-        queryBuilder = AppBeans.get(RdbmsQueryBuilder)
+        queryBuilder = AppBeans.get(JpqlQueryBuilder)
         queryBuilder.init('select e from sys$EntitySnapshot e', null,
                 Sort.by('changeDate'), [:], null, null, null, 'sys$EntitySnapshot')
 
@@ -126,7 +126,7 @@ class QuerySortTest extends Specification {
 
         when: "by persistent and non-persistent property"
 
-        queryBuilder = AppBeans.get(RdbmsQueryBuilder)
+        queryBuilder = AppBeans.get(JpqlQueryBuilder)
         queryBuilder.init('select e from sys$EntitySnapshot e', null,
                 Sort.by('createTs', 'changeDate'), [:], null, null, null, 'sys$EntitySnapshot')
 
@@ -136,7 +136,7 @@ class QuerySortTest extends Specification {
 
         when: "by single non-persistent property desc"
 
-        queryBuilder = AppBeans.get(RdbmsQueryBuilder)
+        queryBuilder = AppBeans.get(JpqlQueryBuilder)
         queryBuilder.init('select e from sys$EntitySnapshot e', null,
                 Sort.by(Sort.Direction.DESC, 'changeDate'), [:], null, null, null, 'sys$EntitySnapshot')
 
@@ -146,7 +146,7 @@ class QuerySortTest extends Specification {
 
         when: "by non-persistent property related to two other properties"
 
-        queryBuilder = AppBeans.get(RdbmsQueryBuilder)
+        queryBuilder = AppBeans.get(JpqlQueryBuilder)
         queryBuilder.init('select e from sys$EntitySnapshot e', null,
                 Sort.by('label'), [:], null, null, null, 'sys$EntitySnapshot')
 
@@ -156,7 +156,7 @@ class QuerySortTest extends Specification {
 
         when: "by non-persistent property related to two other properties desc"
 
-        queryBuilder = AppBeans.get(RdbmsQueryBuilder)
+        queryBuilder = AppBeans.get(JpqlQueryBuilder)
         queryBuilder.init('select e from sys$EntitySnapshot e', null,
                 Sort.by(Sort.Direction.DESC, 'label'), [:], null, null, null, 'sys$EntitySnapshot')
 

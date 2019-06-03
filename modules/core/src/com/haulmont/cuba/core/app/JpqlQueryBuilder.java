@@ -17,6 +17,7 @@
 
 package com.haulmont.cuba.core.app;
 
+import com.google.common.base.Strings;
 import com.haulmont.bali.util.StringHelper;
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.chile.core.model.MetaProperty;
@@ -33,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,19 +41,28 @@ import java.util.stream.Collectors;
 /**
  * Builds {@link Query} instance to use in DataService.
  */
-@Component(RdbmsQueryBuilder.NAME)
+@Component(JpqlQueryBuilder.NAME)
 @Scope("prototype")
-public class RdbmsQueryBuilder {
+public class JpqlQueryBuilder {
 
-    public static final String NAME = "cuba_RdbmsQueryBuilder";
+    public static final String NAME = "cuba_JpqlQueryBuilder";
 
-    private static final Logger log = LoggerFactory.getLogger(RdbmsQueryBuilder.class);
+    private static final Logger log = LoggerFactory.getLogger(JpqlQueryBuilder.class);
+
+    protected Object id;
+    protected List<Object> ids;
 
     protected String queryString;
     protected Map<String, Object> queryParams;
     protected String[] noConversionParams;
+    protected Condition condition;
+    protected Sort sort;
+
     protected String entityName;
     protected boolean singleResult;
+
+    protected String resultQuery;
+    protected Map<String, Object> resultParams;
 
     @Inject
     protected Metadata metadata;
@@ -67,9 +76,53 @@ public class RdbmsQueryBuilder {
     @Inject
     protected SortJpqlGenerator sortJpqlGenerator;
 
-    public void init(@Nullable String queryString, Condition condition, Sort sort,
-                     Map<String, Object> queryParams, String[] noConversionParams,
-                     @Nullable Object id, @Nullable List<?> ids, String entityName) {
+    public JpqlQueryBuilder setId(Object id) {
+        this.id = id;
+        return this;
+    }
+
+    public JpqlQueryBuilder setIds(List<Object> ids) {
+        this.ids = ids;
+        return this;
+    }
+
+    public JpqlQueryBuilder setQuery(String queryString) {
+        this.queryString = queryString;
+        return this;
+    }
+
+    public JpqlQueryBuilder setQueryParams(Map<String, Object> queryParams) {
+        this.queryParams = queryParams;
+        return this;
+    }
+
+    public JpqlQueryBuilder setNoConversionParams(String[] noConversionParams) {
+        this.noConversionParams = noConversionParams;
+        return this;
+    }
+
+    public JpqlQueryBuilder setCondition(Condition condition) {
+        this.condition = condition;
+        return this;
+    }
+
+    public JpqlQueryBuilder setSort(Sort sort) {
+        this.sort = sort;
+        return this;
+    }
+
+    public void buildQueryString() {
+        if (Strings.isNullOrEmpty(queryString)) {
+            if (id != null) {
+                resultQuery = String.format("select e from %s e where e.%s = :entityId", entityName, getPkName(entityName));
+                resultParams = new HashMap<>();
+                resultParams.put("entityId", id);
+            } else if (ids != null && ids.isEmpty()) {
+
+            }
+        }
+
+
         this.entityName = entityName;
         String qs;
         if (ids != null && !ids.isEmpty()) {
@@ -100,9 +153,10 @@ public class RdbmsQueryBuilder {
             qs = conditionJpqlGenerator.processQuery(qs, actualized);
         }
         if (sort != null) {
-            qs = sortJpqlGenerator.processQuery(entityName, qs, sort);
+            resultQueryString = sortJpqlGenerator.processQuery(entityName, qs, sort);
         }
-        this.queryString = qs;
+
+        return resultQueryString;
     }
 
     protected String getPkName(String entityName) {

@@ -20,7 +20,7 @@ package com.haulmont.cuba.core.app.queryresults;
 import com.haulmont.bali.db.QueryRunner;
 import com.haulmont.cuba.core.*;
 import com.haulmont.cuba.core.app.ClusterManagerAPI;
-import com.haulmont.cuba.core.app.RdbmsQueryBuilder;
+import com.haulmont.cuba.core.app.JpqlQueryBuilder;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.core.sys.AppContext;
 import com.haulmont.cuba.core.sys.QueryHolder;
@@ -97,7 +97,7 @@ public class QueryResultsManager implements QueryResultsManagerAPI {
             transformer.removeOrderBy();
             String queryString = transformer.getResult();
 
-            RdbmsQueryBuilder queryBuilder = AppBeans.get(RdbmsQueryBuilder.NAME);
+            JpqlQueryBuilder queryBuilder = AppBeans.get(JpqlQueryBuilder.NAME);
             queryBuilder.init(queryString, contextQuery.getCondition(), contextQuery.getSort(),
                     contextQuery.getParameters(), contextQuery.getNoConversionParams(),
                     null, null, entityName);
@@ -106,7 +106,7 @@ public class QueryResultsManager implements QueryResultsManagerAPI {
             }
             Query query = queryBuilder.getQuery(em);
 
-            String logMsg = "Load previous query results: " + RdbmsQueryBuilder.printQuery(query.getQueryString());
+            String logMsg = "Load previous query results: " + JpqlQueryBuilder.printQuery(query.getQueryString());
             log.debug(logMsg);
             long start = System.currentTimeMillis();
 

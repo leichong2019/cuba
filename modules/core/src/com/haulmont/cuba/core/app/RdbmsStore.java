@@ -189,7 +189,7 @@ public class RdbmsStore implements DataStore {
         if (log.isDebugEnabled())
             log.debug("loadList: metaClass=" + context.getMetaClass() + ", view=" + context.getView()
                     + (context.getPrevQueries().isEmpty() ? "" : ", from selected")
-                    + ", query=" + (context.getQuery() == null ? null : RdbmsQueryBuilder.printQuery(context.getQuery().getQueryString()))
+                    + ", query=" + (context.getQuery() == null ? null : JpqlQueryBuilder.printQuery(context.getQuery().getQueryString()))
                     + (context.getQuery() == null || context.getQuery().getFirstResult() == 0 ? "" : ", first=" + context.getQuery().getFirstResult())
                     + (context.getQuery() == null || context.getQuery().getMaxResults() == 0 ? "" : ", max=" + context.getQuery().getMaxResults()));
 
@@ -304,7 +304,7 @@ public class RdbmsStore implements DataStore {
         if (log.isDebugEnabled())
             log.debug("getCount: metaClass=" + context.getMetaClass()
                     + (context.getPrevQueries().isEmpty() ? "" : ", from selected")
-                    + ", query=" + (context.getQuery() == null ? null : RdbmsQueryBuilder.printQuery(context.getQuery().getQueryString())));
+                    + ", query=" + (context.getQuery() == null ? null : JpqlQueryBuilder.printQuery(context.getQuery().getQueryString())));
 
         MetaClass metaClass = metadata.getClassNN(context.getMetaClass());
 
@@ -557,7 +557,7 @@ public class RdbmsStore implements DataStore {
         ValueLoadContext.Query contextQuery = context.getQuery();
 
         if (log.isDebugEnabled())
-            log.debug("query: " + (RdbmsQueryBuilder.printQuery(contextQuery.getQueryString()))
+            log.debug("query: " + (JpqlQueryBuilder.printQuery(contextQuery.getQueryString()))
                     + (contextQuery.getFirstResult() == 0 ? "" : ", first=" + contextQuery.getFirstResult())
                     + (contextQuery.getMaxResults() == 0 ? "" : ", max=" + contextQuery.getMaxResults()));
 
@@ -574,7 +574,7 @@ public class RdbmsStore implements DataStore {
 
             List<String> keys = context.getProperties();
 
-            RdbmsQueryBuilder queryBuilder = AppBeans.get(RdbmsQueryBuilder.NAME);
+            JpqlQueryBuilder queryBuilder = AppBeans.get(JpqlQueryBuilder.NAME);
             queryBuilder.init(contextQuery.getQueryString(), contextQuery.getCondition(), contextQuery.getSort(),
                     contextQuery.getParameters(), contextQuery.getNoConversionParams(),
                     null, null, metadata.getClassNN(KeyValueEntity.class).getName());
@@ -653,7 +653,7 @@ public class RdbmsStore implements DataStore {
 
     protected Query createQuery(EntityManager em, LoadContext<?> context, boolean singleResult) {
         LoadContext.Query contextQuery = context.getQuery();
-        RdbmsQueryBuilder queryBuilder = AppBeans.get(RdbmsQueryBuilder.NAME);
+        JpqlQueryBuilder queryBuilder = AppBeans.get(JpqlQueryBuilder.NAME);
         queryBuilder.init(
                 contextQuery == null ? null : contextQuery.getQueryString(),
                 contextQuery == null ? null : contextQuery.getCondition(),
