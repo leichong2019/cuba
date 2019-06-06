@@ -98,11 +98,16 @@ public class QueryResultsManager implements QueryResultsManagerAPI {
             String queryString = transformer.getResult();
 
             JpqlQueryBuilder queryBuilder = AppBeans.get(JpqlQueryBuilder.NAME);
-            queryBuilder.init(queryString, contextQuery.getCondition(), contextQuery.getSort(),
-                    contextQuery.getParameters(), contextQuery.getNoConversionParams(),
-                    null, null, entityName);
+
+            queryBuilder.setQueryString(queryString)
+                    .setEntityName(entityName)
+                    .setCondition(contextQuery.getCondition())
+                    .setSort(contextQuery.getSort())
+                    .setQueryParameters(contextQuery.getParameters())
+                    .setNoConversionParams(contextQuery.getNoConversionParams());
+
             if (prevQueries.size() > 1) {
-                queryBuilder.restrictByPreviousResults(userSessionSource.getUserSession().getId(), loadContext.getQueryKey());
+                queryBuilder.setPreviousResults(userSessionSource.getUserSession().getId(), loadContext.getQueryKey());
             }
             Query query = queryBuilder.getQuery(em);
 

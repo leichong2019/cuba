@@ -575,9 +575,14 @@ public class RdbmsStore implements DataStore {
             List<String> keys = context.getProperties();
 
             JpqlQueryBuilder queryBuilder = AppBeans.get(JpqlQueryBuilder.NAME);
-            queryBuilder.init(contextQuery.getQueryString(), contextQuery.getCondition(), contextQuery.getSort(),
-                    contextQuery.getParameters(), contextQuery.getNoConversionParams(),
-                    null, null, metadata.getClassNN(KeyValueEntity.class).getName());
+
+            queryBuilder.setValueProperties(context.getProperties())
+                    .setQueryString(contextQuery.getQueryString())
+                    .setCondition(contextQuery.getCondition())
+                    .setSort(contextQuery.getSort())
+                    .setQueryParameters(contextQuery.getParameters())
+                    .setNoConversionParams(contextQuery.getNoConversionParams());
+
             Query query = queryBuilder.getQuery(em);
 
             if (contextQuery.getFirstResult() != 0)
@@ -653,24 +658,27 @@ public class RdbmsStore implements DataStore {
 
     protected Query createQuery(EntityManager em, LoadContext<?> context, boolean singleResult) {
         LoadContext.Query contextQuery = context.getQuery();
-        JpqlQueryBuilder queryBuilder = AppBeans.get(JpqlQueryBuilder.NAME);
-        queryBuilder.init(
-                contextQuery == null ? null : contextQuery.getQueryString(),
-                contextQuery == null ? null : contextQuery.getCondition(),
-                contextQuery == null ? null : contextQuery.getSort(),
-                contextQuery == null ? null : contextQuery.getParameters(),
-                contextQuery == null ? null : contextQuery.getNoConversionParams(),
-                context.getId(),
-                context.getIds(),
-                context.getMetaClass()
-        );
 
-        queryBuilder.setSingleResult(singleResult);
+        JpqlQueryBuilder queryBuilder = AppBeans.get(JpqlQueryBuilder.NAME);
+
+        queryBuilder.setId(context.getId())
+                .setIds(context.getIds())
+                .setEntityName(context.getMetaClass())
+                .setSingleResult(singleResult);
+
+        if (contextQuery != null) {
+            queryBuilder.setQueryString(contextQuery.getQueryString())
+                    .setCondition(contextQuery.getCondition())
+                    .setSort(contextQuery.getSort())
+                    .setQueryParameters(contextQuery.getParameters())
+                    .setNoConversionParams(contextQuery.getNoConversionParams());
+        }
 
         if (!context.getPrevQueries().isEmpty()) {
             log.debug("Restrict query by previous results");
-            queryBuilder.restrictByPreviousResults(userSessionSource.getUserSession().getId(), context.getQueryKey());
+            queryBuilder.setPreviousResults(userSessionSource.getUserSession().getId(), context.getQueryKey());
         }
+
         Query query = queryBuilder.getQuery(em);
 
         if (contextQuery != null) {
