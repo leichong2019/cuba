@@ -18,6 +18,7 @@
 package com.haulmont.cuba.web.widgets.client.twincolselect;
 
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -35,6 +36,8 @@ import java.util.stream.Collectors;
 public class CubaTwinColSelectWidget extends VTwinColSelect {
 
     protected boolean addAllBtnEnabled;
+
+    protected boolean reorderable;
 
     protected VButton addAll;
 
@@ -70,12 +73,12 @@ public class CubaTwinColSelectWidget extends VTwinColSelect {
         items.removeAll(selection);
 
         updateListBox(items, optionsListBox, (listBox, _items) -> {
-            updateListBox(listBox, _items);
+            updateListBoxItems(listBox, _items);
             afterUpdatesOptionsBox(_items);
         });
 
         updateListBox(selection, selectionsListBox, (listBox, _items) -> {
-            updateListBox(listBox, _items);
+            updateListBoxItems(listBox, _items);
             afterUpdatesSelectionsBox(_items);
         });
     }
@@ -101,6 +104,34 @@ public class CubaTwinColSelectWidget extends VTwinColSelect {
                 String item = listBox.getItemText(i);
                 listBox.setItemSelected(i, selectedItems.contains(item));
             }
+        }
+    }
+
+    protected void updateListBoxItems(ListBox listBox, List<JsonObject> options) {
+        Map<String, String> listBoxItems = ((CubaDoubleClickListBox) listBox).getItems();
+
+        for (int i = 0; i < options.size(); i++) {
+            final JsonObject item = options.get(i);
+            String value = MultiSelectWidget.getKey(item);
+            String itemText = MultiSelectWidget.getCaption(item);
+            // reuse existing option if possible
+            if (i < listBox.getItemCount()) {
+                if (!reorderable) {
+                    if (!listBoxItems.get(value).equals(itemText)) {
+                        listBox.addItem(itemText, value);
+                    }
+                } else {
+                    listBox.setItemText(i, itemText);
+                    listBox.setValue(i, value);
+                }
+            } else {
+                listBox.addItem(MultiSelectWidget.getCaption(item),
+                        MultiSelectWidget.getKey(item));
+            }
+        }
+        // remove extra
+        for (int i = listBox.getItemCount() - 1; i >= options.size(); i--) {
+            listBox.removeItem(i);
         }
     }
 
@@ -201,6 +232,16 @@ public class CubaTwinColSelectWidget extends VTwinColSelect {
         }
     }
 
+    public void setReorderable(boolean reorderable) {
+        if (this.reorderable != reorderable) {
+            this.reorderable = reorderable;
+        }
+    }
+
+    public boolean isReorderable() {
+        return reorderable;
+    }
+
     @Override
     protected void afterUpdatesOptionsBox(List<JsonObject> items) {
         int index = 0;
@@ -278,6 +319,16 @@ public class CubaTwinColSelectWidget extends VTwinColSelect {
             assert optionIndex >= 0 && getItemCount() > optionIndex;
             SelectElement select = getElement().cast();
             return select.getOptions().getItem(optionIndex);
+        }
+
+        public Map<String, String> getItems() {
+            Map<String, String> items = new HashMap<>();
+            for (int i = 0;i < getItemCount(); i++) {
+                String value = ((OptionElement) getOptionElement(i)).getValue();
+                String itemText = getOptionText((OptionElement) getOptionElement(i));
+                items.put(value, itemText);
+            }
+            return items;
         }
     }
 }

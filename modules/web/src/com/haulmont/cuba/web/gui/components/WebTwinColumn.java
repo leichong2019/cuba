@@ -224,6 +224,16 @@ public class WebTwinColumn<V> extends WebV8AbstractField<CubaTwinColSelect<V>, S
     }
 
     @Override
+    public void setReorderable(boolean reorderable) {
+        component.setReorderable(reorderable);
+    }
+
+    @Override
+    public boolean isReorderable() {
+        return component.isReorderable();
+    }
+
+    @Override
     public void setLeftColumnCaption(String leftColumnCaption) {
         component.setLeftColumnCaption(leftColumnCaption);
     }

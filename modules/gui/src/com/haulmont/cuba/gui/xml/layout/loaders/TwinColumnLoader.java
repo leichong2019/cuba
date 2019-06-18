@@ -59,6 +59,11 @@ public class TwinColumnLoader extends AbstractFieldLoader<TwinColumn> {
             resultComponent.setRows(Integer.parseInt(rows));
         }
 
+        String reorderable = element.attributeValue("reorderable");
+        if (StringUtils.isNotEmpty(reorderable)) {
+            resultComponent.setReorderable(Boolean.parseBoolean(reorderable));
+        }
+
         String addBtnEnabled = element.attributeValue("addAllBtnEnabled");
         if (StringUtils.isNotEmpty(addBtnEnabled)) {
             resultComponent.setAddAllBtnEnabled(Boolean.parseBoolean(addBtnEnabled));
