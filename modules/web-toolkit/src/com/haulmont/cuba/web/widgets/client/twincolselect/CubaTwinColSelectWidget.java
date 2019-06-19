@@ -108,25 +108,24 @@ public class CubaTwinColSelectWidget extends VTwinColSelect {
     }
 
     protected void updateListBoxItems(ListBox listBox, List<JsonObject> options) {
-        Map<String, String> listBoxItems = ((CubaDoubleClickListBox) listBox).getItems();
+        List<String> listBoxItems = ((CubaDoubleClickListBox) listBox).getItems();
 
         for (int i = 0; i < options.size(); i++) {
             final JsonObject item = options.get(i);
             String value = MultiSelectWidget.getKey(item);
             String itemText = MultiSelectWidget.getCaption(item);
+            int index = i;
             // reuse existing option if possible
-            if (i < listBox.getItemCount()) {
+            if (index < listBox.getItemCount()) {
                 if (!reorderable) {
-                    if (!listBoxItems.get(value).equals(itemText)) {
-                        listBox.addItem(itemText, value);
+                    if (listBoxItems.indexOf(itemText) >= 0) {
+                        index = listBoxItems.indexOf(itemText);
                     }
-                } else {
-                    listBox.setItemText(i, itemText);
-                    listBox.setValue(i, value);
                 }
+                listBox.setItemText(index, itemText);
+                listBox.setValue(index, value);
             } else {
-                listBox.addItem(MultiSelectWidget.getCaption(item),
-                        MultiSelectWidget.getKey(item));
+                listBox.addItem(itemText, value);
             }
         }
         // remove extra
@@ -321,12 +320,10 @@ public class CubaTwinColSelectWidget extends VTwinColSelect {
             return select.getOptions().getItem(optionIndex);
         }
 
-        public Map<String, String> getItems() {
-            Map<String, String> items = new HashMap<>();
+        public List<String> getItems() {
+            List<String> items = new ArrayList<>();
             for (int i = 0;i < getItemCount(); i++) {
-                String value = ((OptionElement) getOptionElement(i)).getValue();
-                String itemText = getOptionText((OptionElement) getOptionElement(i));
-                items.put(value, itemText);
+                items.add(getOptionText((OptionElement) getOptionElement(i)));
             }
             return items;
         }
