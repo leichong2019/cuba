@@ -113,24 +113,21 @@ public class CubaTwinColSelectWidget extends VTwinColSelect {
         for (int i = 0; i < options.size(); i++) {
             final JsonObject item = options.get(i);
             String value = MultiSelectWidget.getKey(item);
-            String itemText = MultiSelectWidget.getCaption(item);
+            String caption = MultiSelectWidget.getCaption(item);
             int index = i;
             // reuse existing option if possible
             if (index < listBox.getItemCount()) {
                 if (!reorderable) {
-                    if (listBoxItems.indexOf(itemText) >= 0) {
-                        index = listBoxItems.indexOf(itemText);
+                    int listBoxItemIndex = listBoxItems.indexOf(caption);
+                    if (listBoxItemIndex >= 0) {
+                        index = listBoxItemIndex;
                     }
                 }
-                listBox.setItemText(index, itemText);
+                listBox.setItemText(index, caption);
                 listBox.setValue(index, value);
             } else {
-                listBox.addItem(itemText, value);
+                listBox.addItem(caption, value);
             }
-        }
-        // remove extra
-        for (int i = listBox.getItemCount() - 1; i >= options.size(); i--) {
-            listBox.removeItem(i);
         }
     }
 
@@ -322,8 +319,9 @@ public class CubaTwinColSelectWidget extends VTwinColSelect {
 
         public List<String> getItems() {
             List<String> items = new ArrayList<>();
-            for (int i = 0;i < getItemCount(); i++) {
-                items.add(getOptionText((OptionElement) getOptionElement(i)));
+            for (int i = 0; i < getItemCount(); i++) {
+                OptionElement optionElement = (OptionElement) getOptionElement(i);
+                items.add(getOptionText(optionElement));
             }
             return items;
         }
