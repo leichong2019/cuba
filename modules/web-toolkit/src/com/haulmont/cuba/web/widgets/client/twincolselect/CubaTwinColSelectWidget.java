@@ -18,7 +18,6 @@
 package com.haulmont.cuba.web.widgets.client.twincolselect;
 
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -37,7 +36,7 @@ public class CubaTwinColSelectWidget extends VTwinColSelect {
 
     protected boolean addAllBtnEnabled;
 
-    protected boolean reorderable;
+    protected boolean reorderable = true;
 
     protected VButton addAll;
 
@@ -73,12 +72,12 @@ public class CubaTwinColSelectWidget extends VTwinColSelect {
         items.removeAll(selection);
 
         updateListBox(items, optionsListBox, (listBox, _items) -> {
-            updateListBoxItems(listBox, _items);
+            updateListBox(listBox, _items);
             afterUpdatesOptionsBox(_items);
         });
 
         updateListBox(selection, selectionsListBox, (listBox, _items) -> {
-            updateListBoxItems(listBox, _items);
+            updateListBox(listBox, _items);
             afterUpdatesSelectionsBox(_items);
         });
     }
@@ -103,30 +102,6 @@ public class CubaTwinColSelectWidget extends VTwinColSelect {
             for (int i = 0; i < itemsCount; i++) {
                 String item = listBox.getItemText(i);
                 listBox.setItemSelected(i, selectedItems.contains(item));
-            }
-        }
-    }
-
-    protected void updateListBoxItems(ListBox listBox, List<JsonObject> options) {
-        List<String> listBoxItems = ((CubaDoubleClickListBox) listBox).getItems();
-
-        for (int i = 0; i < options.size(); i++) {
-            final JsonObject item = options.get(i);
-            String value = MultiSelectWidget.getKey(item);
-            String caption = MultiSelectWidget.getCaption(item);
-            int index = i;
-            // reuse existing option if possible
-            if (index < listBox.getItemCount()) {
-                if (!reorderable) {
-                    int listBoxItemIndex = listBoxItems.indexOf(caption);
-                    if (listBoxItemIndex >= 0) {
-                        index = listBoxItemIndex;
-                    }
-                }
-                listBox.setItemText(index, caption);
-                listBox.setValue(index, value);
-            } else {
-                listBox.addItem(caption, value);
             }
         }
     }
@@ -315,15 +290,6 @@ public class CubaTwinColSelectWidget extends VTwinColSelect {
             assert optionIndex >= 0 && getItemCount() > optionIndex;
             SelectElement select = getElement().cast();
             return select.getOptions().getItem(optionIndex);
-        }
-
-        public List<String> getItems() {
-            List<String> items = new ArrayList<>();
-            for (int i = 0; i < getItemCount(); i++) {
-                OptionElement optionElement = (OptionElement) getOptionElement(i);
-                items.add(getOptionText(optionElement));
-            }
-            return items;
         }
     }
 }

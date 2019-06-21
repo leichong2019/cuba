@@ -119,8 +119,14 @@ public class WebTwinColumn<V> extends WebV8AbstractField<CubaTwinColSelect<V>, S
 
     @Override
     protected Collection<V> convertToModel(Set<V> componentRawValue) throws ConversionException {
-        Stream<V> items = optionsBinding == null ? Stream.empty()
-                : optionsBinding.getSource().getOptions().filter(componentRawValue::contains);
+        Stream<V> items;
+        if (optionsBinding == null) {
+            items = Stream.empty();
+        } else {
+            items = isReorderable()
+                    ? optionsBinding.getSource().getOptions().filter(componentRawValue::contains)
+                    : componentRawValue.stream();
+        }
 
         if (valueBinding != null) {
             Class<?> targetType = valueBinding.getSource().getType();
