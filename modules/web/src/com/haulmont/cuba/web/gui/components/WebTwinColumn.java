@@ -123,9 +123,10 @@ public class WebTwinColumn<V> extends WebV8AbstractField<CubaTwinColSelect<V>, S
         if (optionsBinding == null) {
             items = Stream.empty();
         } else {
+            Stream<V> options = optionsBinding.getSource().getOptions();
             items = isReorderable()
-                    ? optionsBinding.getSource().getOptions().filter(componentRawValue::contains)
-                    : componentRawValue.stream();
+                    ? options.filter(componentRawValue::contains)
+                    : componentRawValue.stream().filter(options.collect(Collectors.toSet())::contains);
         }
 
         if (valueBinding != null) {
