@@ -103,6 +103,12 @@ $cuba-filter-friendly-search-button: false !default;
       border-top-right-radius: 0;
     }
 
+    .v-button.filter-search-button.search-explicitly::after {
+        @include valo-focus-style();
+        border: 1px solid $v-focus-color;
+        z-index: 5;
+    }
+
     .v-button.v-popupbutton {
       width: $v-unit-size;
       padding-left: 0;
