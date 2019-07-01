@@ -89,7 +89,6 @@ import java.util.stream.Collectors;
 public class FilterDelegateImpl implements FilterDelegate {
 
     protected static final String BORDER_HIDDEN_STYLENAME = "border-hidden";
-    protected static final String SEARCH_EXPLICITLY_STYLE = "search-explicitly";
 
     protected static final String GLOBAL_FILTER_PERMISSION = "cuba.gui.filter.global";
     protected static final String GLOBAL_APP_FOLDERS_PERMISSION = "cuba.gui.appFolder.global";
@@ -854,8 +853,10 @@ public class FilterDelegateImpl implements FilterDelegate {
 
         recursivelyCreateConditionsLayout(conditionsFocusType, false, conditions.getRootNodes(), conditionsLayout, 0);
 
-        List<Node<AbstractCondition>> nodes = conditions.getRootNodes();
-        subscribeToParamValueChangeEventRecursively(nodes);
+        if (isSearchImmediately()) {
+            List<Node<AbstractCondition>> nodes = conditions.getRootNodes();
+            subscribeToParamValueChangeEventRecursively(nodes);
+        }
 
         conditionsLayout.setVisible(!conditionsLayout.getComponents().isEmpty());
     }
@@ -1659,10 +1660,6 @@ public class FilterDelegateImpl implements FilterDelegate {
             afterFilterAppliedHandler.afterFilterApplied();
         }
 
-        if (!isSearchImmediately()) {
-            searchBtn.removeStyleName(SEARCH_EXPLICITLY_STYLE);
-        }
-
         return true;
     }
 
@@ -2405,8 +2402,6 @@ public class FilterDelegateImpl implements FilterDelegate {
                 paramValueChangeSubscriptions.add(condition.getParam().addParamValueChangeListener(event -> {
                     if (isSearchImmediately()) {
                         apply(false);
-                    } else if (!searchBtn.getStyleName().contains(SEARCH_EXPLICITLY_STYLE)) {
-                        searchBtn.addStyleName(SEARCH_EXPLICITLY_STYLE);
                     }
                 }));
             }
@@ -2586,7 +2581,9 @@ public class FilterDelegateImpl implements FilterDelegate {
                 } else {
                     requestFocusToParamEditComponent();
                     // subscribe if editor was closed without changes
-                    subscribeToParamValueChangeEventRecursively(conditions.getRootNodes());
+                    if (isSearchImmediately()) {
+                        subscribeToParamValueChangeEventRecursively(conditions.getRootNodes());
+                    }
                 }
                 settingsBtn.focus();
             });
@@ -2676,8 +2673,8 @@ public class FilterDelegateImpl implements FilterDelegate {
                 }
             }
 
-            subscribeToParamValueChangeEventRecursively(conditions.getRootNodes());
             if (isSearchImmediately()) {
+                subscribeToParamValueChangeEventRecursively(conditions.getRootNodes());
                 apply(false);
             }
         }
