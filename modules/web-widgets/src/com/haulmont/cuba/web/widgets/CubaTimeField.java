@@ -231,4 +231,11 @@ public class CubaTimeField extends AbstractField<LocalTime> {
             getState().captionManagedByLayout = captionManagedByLayout;
         }
     }
+
+    @Override
+    public void beforeClientResponse(boolean initial) {
+        super.beforeClientResponse(initial);
+
+        getState().timeFormat = timeFormat;
+    }
 }
