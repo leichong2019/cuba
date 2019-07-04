@@ -220,7 +220,7 @@ public class FilterDelegateImpl implements FilterDelegate {
     protected boolean windowCaptionUpdateEnabled = true;
 
     protected List<Subscription> paramValueChangeSubscriptions;
-    protected Boolean searchImmediately;
+    protected Boolean applyImmediately;
 
     protected enum ConditionsFocusType {
         NONE,
@@ -242,7 +242,7 @@ public class FilterDelegateImpl implements FilterDelegate {
         filterMode = FilterMode.GENERIC_MODE;
 
         conditionsLocation = clientConfig.getGenericFilterConditionsLocation();
-        searchImmediately = clientConfig.getGenericFilterSearchImmediately();
+        applyImmediately = clientConfig.getGenericFilterApplyImmediately();
 
         createLayout();
     }
@@ -849,11 +849,11 @@ public class FilterDelegateImpl implements FilterDelegate {
 
         paramEditComponentToFocus = null;
 
-        removeParamValueChangeSubscriptions();
+        clearParamValueChangeSubscriptions();
 
         recursivelyCreateConditionsLayout(conditionsFocusType, false, conditions.getRootNodes(), conditionsLayout, 0);
 
-        if (isSearchImmediately()) {
+        if (isApplyImmediately()) {
             List<Node<AbstractCondition>> nodes = conditions.getRootNodes();
             subscribeToParamValueChangeEventRecursively(nodes);
         }
@@ -2373,16 +2373,16 @@ public class FilterDelegateImpl implements FilterDelegate {
     }
 
     @Override
-    public void setSearchImmediately(boolean immediately) {
-        this.searchImmediately = immediately;
+    public void setApplyImmediately(boolean immediately) {
+        this.applyImmediately = immediately;
     }
 
     @Override
-    public boolean isSearchImmediately() {
-        return searchImmediately;
+    public boolean isApplyImmediately() {
+        return applyImmediately;
     }
 
-    protected void removeParamValueChangeSubscriptions() {
+    protected void clearParamValueChangeSubscriptions() {
         if (paramValueChangeSubscriptions != null) {
             paramValueChangeSubscriptions.forEach(Subscription::remove);
             paramValueChangeSubscriptions.clear();
@@ -2399,12 +2399,15 @@ public class FilterDelegateImpl implements FilterDelegate {
             if (condition.isGroup()) {
                 subscribeToParamValueChangeEventRecursively(node.getChildren());
             } else {
-                paramValueChangeSubscriptions.add(condition.getParam().addParamValueChangeListener(event -> {
-                    if (isSearchImmediately()) {
-                        apply(false);
-                    }
-                }));
+                paramValueChangeSubscriptions.add(
+                        condition.getParam().addParamValueChangeListener(this::handleParamValueChange));
             }
+        }
+    }
+
+    protected void handleParamValueChange(Param.ParamValueChangedEvent event) {
+        if (isApplyImmediately()) {
+            apply(false);
         }
     }
 
@@ -2555,7 +2558,7 @@ public class FilterDelegateImpl implements FilterDelegate {
             params.put("conditionsTree", conditions);
 
             // remove subscriptions because if param default value is editing it will invoke value change event
-            removeParamValueChangeSubscriptions();
+            clearParamValueChangeSubscriptions();
 
             FilterEditor window = (FilterEditor) getWindowManager().openWindow(windowInfo, OpenType.DIALOG, params);
             window.addCloseListener(actionId -> {
@@ -2581,7 +2584,7 @@ public class FilterDelegateImpl implements FilterDelegate {
                 } else {
                     requestFocusToParamEditComponent();
                     // subscribe if editor was closed without changes
-                    if (isSearchImmediately()) {
+                    if (isApplyImmediately()) {
                         subscribeToParamValueChangeEventRecursively(conditions.getRootNodes());
                     }
                 }
@@ -2665,7 +2668,7 @@ public class FilterDelegateImpl implements FilterDelegate {
 
         @Override
         public void actionPerform(Component component) {
-            removeParamValueChangeSubscriptions();
+            clearParamValueChangeSubscriptions();
 
             for (AbstractCondition condition : conditions.toConditionsList()) {
                 if (!Boolean.TRUE.equals(condition.getHidden()) && condition.getParam() != null) {
@@ -2673,7 +2676,7 @@ public class FilterDelegateImpl implements FilterDelegate {
                 }
             }
 
-            if (isSearchImmediately()) {
+            if (isApplyImmediately()) {
                 subscribeToParamValueChangeEventRecursively(conditions.getRootNodes());
                 apply(false);
             }

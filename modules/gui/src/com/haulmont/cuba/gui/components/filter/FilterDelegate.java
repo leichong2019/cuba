@@ -153,9 +153,9 @@ public interface FilterDelegate {
 
     void setWindowCaptionUpdateEnabled(boolean windowCaptionUpdateEnabled);
 
-    void setSearchImmediately(boolean immediately);
+    void setApplyImmediately(boolean immediately);
 
-    boolean isSearchImmediately();
+    boolean isApplyImmediately();
 
     class FDExpandedStateChangeEvent implements HasUserOriginated {
         private final FilterDelegate delegate;

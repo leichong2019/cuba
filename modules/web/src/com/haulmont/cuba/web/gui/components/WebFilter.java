@@ -446,13 +446,13 @@ public class WebFilter extends WebAbstractComponent<com.vaadin.ui.Component> imp
     }
 
     @Override
-    public void setSearchImmediately(boolean immediately) {
-        delegate.setSearchImmediately(immediately);
+    public void setApplyImmediately(boolean immediately) {
+        delegate.setApplyImmediately(immediately);
     }
 
     @Override
-    public boolean isSearchImmediately() {
-        return delegate.isSearchImmediately();
+    public boolean isApplyImmediately() {
+        return delegate.isApplyImmediately();
     }
 
     @Override

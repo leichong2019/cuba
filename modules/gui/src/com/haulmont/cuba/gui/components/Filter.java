@@ -237,16 +237,16 @@ public interface Filter extends HasMargin, Component.BelongToFrame, HasNamedComp
 
     /**
      * Set to true if filter should be applied immediately after every parameter's value changing. True, by default.
-     * Default value can be managed by using {@link ClientConfig#getGenericFilterSearchImmediately()} property.
+     * Default value can be managed by using {@link ClientConfig#getGenericFilterApplyImmediately()} property.
      *
      * @param immediately immediately option
      */
-    void setSearchImmediately(boolean immediately);
+    void setApplyImmediately(boolean immediately);
 
     /**
      * @return true if filter should be applied immediately after every parameter's value changing
      */
-    boolean isSearchImmediately();
+    boolean isApplyImmediately();
     /**
      * A predicate that tests whether a property with the given path should be available for filtering.
      */

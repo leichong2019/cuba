@@ -221,10 +221,10 @@ public interface ClientConfig extends Config {
      *
      * @return true if the filter should be applied immediately after every parameter's value changing
      */
-    @Property("cuba.gui.genericFilterSearchImmediately")
+    @Property("cuba.gui.genericFilterApplyImmediately")
     @Source(type = SourceType.DATABASE)
     @DefaultBoolean(true)
-    boolean getGenericFilterSearchImmediately();
+    boolean getGenericFilterApplyImmediately();
 
     /**
      * Support e-mail. Exception report emails are sent to this address.
