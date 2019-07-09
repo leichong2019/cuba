@@ -1159,7 +1159,9 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
     }
 
     /**
-     * Generic ColumnGenerator that is most commonly used for declarative generators.
+     * INTERNAL
+     * <p>
+     * Generic ColumnGenerator that is used for declaratively installed generators.
      *
      * @param <E> DataGrid data type
      * @param <T> Column data type
@@ -1247,6 +1249,8 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
     Column<E> addGeneratedColumn(String columnId, ColumnGenerator<E, ?> generator, int index);
 
     /**
+     * INTERNAL
+     * <p>
      * Add a generated column to the DataGrid.
      *
      * @param columnId  column identifier as defined in XML descriptor
