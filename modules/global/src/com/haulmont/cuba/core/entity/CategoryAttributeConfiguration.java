@@ -65,6 +65,12 @@ public class CategoryAttributeConfiguration extends BaseGenericIdEntity<String> 
     @MetaProperty
     protected String numberFormatPattern;
 
+    @MetaProperty
+    protected String valuesLoaderType;
+
+    @MetaProperty
+    protected String valuesLoaderScript;
+
     public Integer getMinInt() {
         return minInt;
     }
@@ -183,6 +189,22 @@ public class CategoryAttributeConfiguration extends BaseGenericIdEntity<String> 
 
     public void setNumberFormatPattern(String numberFormatPattern) {
         this.numberFormatPattern = numberFormatPattern;
+    }
+
+    public CategoryAttributeValuesLoaderType getValuesLoaderType() {
+        return CategoryAttributeValuesLoaderType.fromId(valuesLoaderType);
+    }
+
+    public void setValuesLoaderType(CategoryAttributeValuesLoaderType valuesLoaderType) {
+        this.valuesLoaderType = valuesLoaderType == null ? null : valuesLoaderType.getId();
+    }
+
+    public String getValuesLoaderScript() {
+        return valuesLoaderScript;
+    }
+
+    public void setValuesLoaderScript(String valuesLoaderScript) {
+        this.valuesLoaderScript = valuesLoaderScript;
     }
 
     @Override
