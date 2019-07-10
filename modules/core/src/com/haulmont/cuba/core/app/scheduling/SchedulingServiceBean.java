@@ -87,6 +87,23 @@ public class SchedulingServiceBean implements SchedulingService {
     }
 
     @Override
+    public User getUserByLogin(String login) {
+        User result;
+
+        Transaction tx = persistence.createTransaction();
+        try {
+            EntityManager em = persistence.getEntityManager();
+            Query query = em.createQuery("select u from sec$User u where u.login = :login");
+            query.setParameter("login", login);
+            result = (User) query.getSingleResult();
+            tx.commit();
+        } finally {
+            tx.end();
+        }
+        return result;
+    }
+
+    @Override
     public void setActive(boolean active) {
         scheduling.setActive(active);
         clusterManager.send(new SetSchedulingActiveMsg(active));
