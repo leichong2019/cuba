@@ -43,6 +43,7 @@ public interface SchedulingService {
      * Return a list of user login names that can be used by scheduled tasks.
      * @return  list of user login names
      */
+    @Deprecated
     List<String> getAvailableUsers();
 
     /**
@@ -52,6 +53,14 @@ public interface SchedulingService {
      * @return user
      */
     User getUserByLogin(String login);
+
+    /**
+     * Return a list of users filtered by login using LIKE clause.
+     *
+     * @param searchString login string
+     * @return  list of users
+     */
+    List<User> searchUsersByLogin(String searchString);
 
     /**
      * Activate/deactivate scheduling for all servers in the cluster.

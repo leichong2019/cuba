@@ -26,6 +26,7 @@ import com.haulmont.cuba.core.app.ClusterManagerAPI;
 import com.haulmont.cuba.core.app.SchedulingService;
 import com.haulmont.cuba.core.app.scheduled.MethodInfo;
 import com.haulmont.cuba.core.entity.ScheduledTask;
+import com.haulmont.cuba.core.global.QueryUtils;
 import com.haulmont.cuba.security.entity.User;
 import org.springframework.stereotype.Service;
 
@@ -96,6 +97,24 @@ public class SchedulingServiceBean implements SchedulingService {
             Query query = em.createQuery("select u from sec$User u where u.login = :login");
             query.setParameter("login", login);
             result = (User) query.getSingleResult();
+            tx.commit();
+        } finally {
+            tx.end();
+        }
+        return result;
+    }
+
+    @Override
+    public List<User> searchUsersByLogin(String searchString) {
+        List<User> result;
+
+        Transaction tx = persistence.createTransaction();
+        try {
+            EntityManager em = persistence.getEntityManager();
+            Query query = em.createQuery("select e from sec$User e where e.login like :login");
+            searchString = QueryUtils.escapeForLike(searchString);
+            query.setParameter("login", "%" + searchString + "%");
+            result = query.getResultList();
             tx.commit();
         } finally {
             tx.end();

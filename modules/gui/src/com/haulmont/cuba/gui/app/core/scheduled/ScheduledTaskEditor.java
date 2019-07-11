@@ -201,6 +201,7 @@ public class ScheduledTaskEditor extends AbstractEditor<ScheduledTask> {
         });
         userNameField.setOptionCaptionProvider(User::getLogin);
         userNameField.addValueChangeListener(e -> taskDs.getItem().setUserName(e.getValue().getLogin()));
+        userNameField.setSearchExecutor((searchString, searchParams) -> service.searchUsersByLogin(searchString));
 
         logFinishField.addValueChangeListener(e -> {
             if (Boolean.TRUE.equals(e.getValue())) {
