@@ -40,13 +40,6 @@ public interface SchedulingService {
     Map<String, List<MethodInfo>> getAvailableBeans();
 
     /**
-     * Return a list of user login names that can be used by scheduled tasks.
-     * @return  list of user login names
-     */
-    @Deprecated
-    List<String> getAvailableUsers();
-
-    /**
      * Return a user by user login name.
      *
      * @param login user login name

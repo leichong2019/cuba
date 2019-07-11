@@ -68,26 +68,6 @@ public class SchedulingServiceBean implements SchedulingService {
     }
 
     @Override
-    public List<String> getAvailableUsers() {
-        List<String> result = new ArrayList<>();
-
-        Transaction tx = persistence.createTransaction();
-        try {
-            EntityManager em = persistence.getEntityManager();
-            Query query = em.createQuery("select u from sec$User u");
-            List<User> userList = query.getResultList();
-            for (User user : userList) {
-                result.add(user.getLogin());
-            }
-            tx.commit();
-        } finally {
-            tx.end();
-        }
-
-        return result;
-    }
-
-    @Override
     public User getUserByLogin(String login) {
         User result;
 
