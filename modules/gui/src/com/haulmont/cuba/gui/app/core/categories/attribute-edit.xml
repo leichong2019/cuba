@@ -100,14 +100,14 @@
                 </fieldGroup>
             </tab>
             <tab id="valuesLoader" caption="msg://caption.valuesLoaderTab" margin="true">
-                <fieldGroup id="valuesProviderFieldGroup" datasource="attributeDs" width="100%">
+                <fieldGroup id="valuesProviderFieldGroup" datasource="configurationDs" width="100%">
                     <column>
-                        <field id="valuesLoaderType" property="configuration.valuesLoaderType" width="100%"/>
-                        <field id="valuesLoaderScript" property="configuration.valuesLoaderScript" width="100%">
+                        <field id="valuesLoaderType" property="valuesLoaderType" width="100%"/>
+                        <field id="valuesLoaderScript" property="valuesLoaderScript" width="100%">
                             <sourceCodeEditor highlightActiveLine="false"
                                               showGutter="false"
-                                              property="configuration.valuesLoaderScript"
-                                              datasource="attributeDs"/>
+                                              property="valuesLoaderScript"
+                                              datasource="configurationDs"/>
                         </field>
                     </column>
                 </fieldGroup>

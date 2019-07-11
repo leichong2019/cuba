@@ -28,10 +28,7 @@ import com.haulmont.chile.core.datatypes.Datatype;
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.client.ClientConfig;
 import com.haulmont.cuba.core.app.dynamicattributes.PropertyType;
-import com.haulmont.cuba.core.entity.CategoryAttribute;
-import com.haulmont.cuba.core.entity.CategoryAttributeConfiguration;
-import com.haulmont.cuba.core.entity.Entity;
-import com.haulmont.cuba.core.entity.HasUuid;
+import com.haulmont.cuba.core.entity.*;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.core.global.filter.SecurityJpqlGenerator;
 import com.haulmont.cuba.gui.UiComponents;
@@ -75,59 +72,58 @@ import static java.lang.String.format;
  */
 public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
 
-    protected static final Multimap<PropertyType, String> FIELDS_VISIBLE_FOR_DATATYPES = ArrayListMultimap.create();
+    protected static final Multimap<PropertyType, String> FIELDS_VISIBLE_FOR_TYPES = ArrayListMultimap.create();
     protected static final Set<String> ALWAYS_VISIBLE_FIELDS = ImmutableSet.of("name", "code", "required", "dataType",
             "description", "validatorGroovyScript");
+    protected static final Set<PropertyType> SUPPORTED_VALUES_LOADER_TYPES = ImmutableSet.of(PropertyType.STRING,
+            PropertyType.INTEGER, PropertyType.DOUBLE, PropertyType.DECIMAL, PropertyType.ENTITY);
 
     protected static final String WHERE = " where ";
 
     static {
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.BOOLEAN, "defaultBoolean");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.STRING, "defaultString");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.STRING, "width");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.STRING, "rowsCount");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.STRING, "isCollection");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DOUBLE, "defaultDouble");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DOUBLE, "minDouble");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DOUBLE, "maxDouble");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DOUBLE, "width");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DOUBLE, "isCollection");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "defaultDecimal");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "minDecimal");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "maxDecimal");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "width");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "isCollection");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "numberFormatPattern");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "defaultInt");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "minInt");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "maxInt");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "width");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "isCollection");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DATE, "defaultDate");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DATE, "defaultDateIsCurrent");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DATE, "width");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DATE, "isCollection");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DATE_WITHOUT_TIME, "defaultDateWithoutTime");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DATE_WITHOUT_TIME, "defaultDateIsCurrent");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DATE_WITHOUT_TIME, "width");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DATE_WITHOUT_TIME, "isCollection");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.ENUMERATION, "enumeration");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.ENUMERATION, "defaultString");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.ENUMERATION, "width");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.ENUMERATION, "isCollection");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.ENTITY, "entityClass");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.ENTITY, "screen");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.ENTITY, "lookup");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.ENTITY, "defaultEntityId");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.ENTITY, "width");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.ENTITY, "joinClause");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.ENTITY, "whereClause");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.ENTITY, "constraintWizard");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.ENTITY, "isCollection");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.BOOLEAN, "defaultBoolean");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.STRING, "defaultString");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.STRING, "width");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.STRING, "rowsCount");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.STRING, "isCollection");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DOUBLE, "defaultDouble");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DOUBLE, "minDouble");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DOUBLE, "maxDouble");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DOUBLE, "width");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DOUBLE, "isCollection");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DECIMAL, "defaultDecimal");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DECIMAL, "minDecimal");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DECIMAL, "maxDecimal");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DECIMAL, "width");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DECIMAL, "isCollection");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DECIMAL, "numberFormatPattern");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.INTEGER, "defaultInt");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.INTEGER, "minInt");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.INTEGER, "maxInt");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.INTEGER, "width");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.INTEGER, "isCollection");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DATE, "defaultDate");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DATE, "defaultDateIsCurrent");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DATE, "width");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DATE, "isCollection");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DATE_WITHOUT_TIME, "defaultDateWithoutTime");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DATE_WITHOUT_TIME, "defaultDateIsCurrent");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DATE_WITHOUT_TIME, "width");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.DATE_WITHOUT_TIME, "isCollection");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.ENUMERATION, "enumeration");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.ENUMERATION, "defaultString");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.ENUMERATION, "width");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.ENUMERATION, "isCollection");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.ENTITY, "entityClass");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.ENTITY, "screen");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.ENTITY, "lookup");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.ENTITY, "defaultEntityId");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.ENTITY, "width");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.ENTITY, "joinClause");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.ENTITY, "whereClause");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.ENTITY, "constraintWizard");
+        FIELDS_VISIBLE_FOR_TYPES.put(PropertyType.ENTITY, "isCollection");
     }
-
-    @Inject
-    protected FieldGroup attributeFieldGroup;
 
     protected LookupField<PropertyType> dataTypeField;
     protected LookupField<String> screenField;
@@ -135,6 +131,14 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
     protected PickerField<Entity> defaultEntityField;
     protected TextArea<String> descriptionField;
 
+    @Inject
+    protected FieldGroup attributeFieldGroup;
+    @Inject
+    protected Table<ScreenAndComponent> targetScreensTable;
+    @Inject
+    protected TabSheet tabsheet;
+    @Inject
+    protected CollectionDatasource<ScreenAndComponent, UUID> screensDs;
     @Named("attributeFieldGroup.defaultDecimal")
     protected TextField defaultDecimal;
     @Named("attributeFieldGroup.minDecimal")
@@ -145,10 +149,11 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
     protected SourceCodeEditor validatorGroovyScript;
     @Named("columnSettingsFieldGroup.columnAlignment")
     protected LookupField<String> columnAlignment;
+    @Named("valuesProviderFieldGroup.valuesLoaderType")
+    protected LookupField valuesLoaderType;
 
     @Inject
     protected Datasource<CategoryAttribute> attributeDs;
-
     @Inject
     protected Datasource<CategoryAttributeConfiguration> configurationDs;
 
@@ -181,15 +186,6 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
 
     @Inject
     protected ReferenceToEntitySupport referenceToEntitySupport;
-
-    @Inject
-    protected Table<ScreenAndComponent> targetScreensTable;
-
-    @Inject
-    protected TabSheet tabsheet;
-
-    @Inject
-    protected CollectionDatasource<ScreenAndComponent, UUID> screensDs;
 
     @Inject
     protected GlobalConfig globalConfig;
@@ -279,6 +275,7 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
 
         setupVisibility();
         setupNumberFormat();
+        setupValueLoaders();
     }
 
     protected Action initCreateScreenAndComponentAction() {
@@ -464,10 +461,10 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
             linkButton.setCaption(getMessage("constraintWizard"));
             linkButton.setAlignment(Alignment.MIDDLE_LEFT);
 
-            HBoxLayout hbox = uiComponents.create(HBoxLayout.class);
-            hbox.setWidthFull();
-            hbox.add(linkButton);
-            return hbox;
+            HBoxLayout box = uiComponents.create(HBoxLayout.class);
+            box.setWidthFull();
+            box.add(linkButton);
+            return box;
         });
 
         validatorGroovyScript.setContextHelpIconClickHandler(e -> showMessageDialog(getMessage("validatorScript"), getMessage("validatorScriptHelp"),
@@ -503,6 +500,26 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
         columnAlignment.setOptionsList(Arrays.stream(Table.ColumnAlignment.values())
                 .map(Enum::name)
                 .collect(Collectors.toList()));
+    }
+
+    protected void setupValueLoaders() {
+        CategoryAttribute attribute = getItem();
+        if (attribute.getDataType() != null && SUPPORTED_VALUES_LOADER_TYPES.contains(attribute.getDataType())) {
+            tabsheet.getTab("valuesLoader").setEnabled(true);
+            if (attribute.getDataType() == PropertyType.ENTITY) {
+                if (attribute.getConfiguration().getValuesLoaderType() == CategoryAttributeValuesLoaderType.SQL) {
+                    attribute.getConfiguration().setValuesLoaderType(CategoryAttributeValuesLoaderType.GROOVY);
+                    attribute.getConfiguration().setValuesLoaderScript(null);
+                }
+                valuesLoaderType.setEnabled(false);
+            } else {
+                valuesLoaderType.setEnabled(true);
+            }
+        } else {
+            attribute.getConfiguration().setValuesLoaderScript(null);
+            attribute.getConfiguration().setValuesLoaderType(null);
+            tabsheet.getTab("valuesLoader").setEnabled(false);
+        }
     }
 
     public void openConstraintWizard() {
@@ -559,7 +576,7 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
             }
         }
 
-        Collection<String> componentIds = FIELDS_VISIBLE_FOR_DATATYPES.get(attribute.getDataType());
+        Collection<String> componentIds = FIELDS_VISIBLE_FOR_TYPES.get(attribute.getDataType());
         if (componentIds != null) {
             for (String componentId : componentIds) {
                 attributeFieldGroup.setVisible(componentId, true);
@@ -612,8 +629,10 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
         }
 
         if (attribute.getDataType() == PropertyType.BOOLEAN) {
-            attributeFieldGroup.setFieldValue("isCollection", null);
+            attribute.setIsCollection(null);
         }
+
+        setupValueLoaders();
     }
 
     protected void fillSelectEntityScreens(Class entityClass) {
