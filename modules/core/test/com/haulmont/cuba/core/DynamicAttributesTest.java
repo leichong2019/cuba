@@ -17,11 +17,14 @@
 package com.haulmont.cuba.core;
 
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 import com.haulmont.bali.db.QueryRunner;
 import com.haulmont.cuba.core.app.dynamicattributes.DynamicAttributesManagerAPI;
+import com.haulmont.cuba.core.app.dynamicattributes.DynamicAttributesRecalculationTools;
 import com.haulmont.cuba.core.app.dynamicattributes.PropertyType;
 import com.haulmont.cuba.core.entity.Category;
 import com.haulmont.cuba.core.entity.CategoryAttribute;
+import com.haulmont.cuba.core.entity.CategoryAttributeConfiguration;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.security.entity.Group;
 import com.haulmont.cuba.security.entity.Role;
@@ -32,6 +35,8 @@ import com.haulmont.cuba.testmodel.primary_keys.EntityKey;
 import com.haulmont.cuba.testsupport.TestContainer;
 import org.junit.*;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -44,10 +49,11 @@ public class DynamicAttributesTest {
     protected DataManager dataManager;
     protected Metadata metadata;
     protected DynamicAttributesManagerAPI dynamicAttributesManagerAPI;
+    protected DynamicAttributesRecalculationTools recalculationTools;
 
-    protected Category userCategory, userRoleCategory, roleCategory;
+    protected Category userCategory, userRoleCategory, roleCategory, userCategoryWithLoop, userCategoryWithoutLoop;
     protected CategoryAttribute userAttribute, userRoleAttribute, roleAttribute, userGroupAttribute, userGroupCollectionAttribute, userIntCollectionAttribute;
-    protected CategoryAttribute userEnumAttribute, userEnumCollectionAttribute;
+    protected CategoryAttribute userEnumAttribute, userEnumCollectionAttribute, recalcAttr1, recalcAttr2, recalcAttr3, recalcAttr4, recalcAttr5;
     protected Group group, group2;
 
     protected User user, user2;
@@ -60,6 +66,10 @@ public class DynamicAttributesTest {
         dataManager = AppBeans.get(DataManager.class);
         metadata = AppBeans.get(Metadata.class);
         dynamicAttributesManagerAPI = AppBeans.get(DynamicAttributesManagerAPI.class);
+        recalculationTools = AppBeans.get(DynamicAttributesRecalculationTools.class);
+
+        Gson gson = new Gson();
+        CategoryAttributeConfiguration configuration;
 
         QueryRunner runner = new QueryRunner(cont.persistence().getDataSource());
         runner.update("delete from TEST_COMPOSITE_KEY");
@@ -190,6 +200,79 @@ public class DynamicAttributesTest {
             compositeKeyEntity.setEmail("foo@mail.com");
             em.persist(compositeKeyEntity);
 
+            userCategoryWithLoop = metadata.create(Category.class);
+            userCategoryWithLoop.setName("userCategoryWithLoop");
+            userCategoryWithLoop.setEntityType("sec$User");
+            em.persist(userCategoryWithLoop);
+
+            userCategoryWithoutLoop = metadata.create(Category.class);
+            userCategoryWithoutLoop.setName("userCategoryWithoutLoop");
+            userCategoryWithoutLoop.setEntityType("sec$User");
+            em.persist(userCategoryWithoutLoop);
+
+            recalcAttr1 = metadata.create(CategoryAttribute.class);
+            recalcAttr1.setName("recalcAttr1");
+            recalcAttr1.setCode("recalcAttr1");
+            recalcAttr1.setCategory(userCategoryWithoutLoop);
+            recalcAttr1.setCategoryEntityType("sec$User");
+            recalcAttr1.setDataType(PropertyType.STRING);
+
+            recalcAttr2 = metadata.create(CategoryAttribute.class);
+            recalcAttr2.setName("recalcAttr2");
+            recalcAttr2.setCode("recalcAttr2");
+            recalcAttr2.setCategory(userCategoryWithoutLoop);
+            recalcAttr2.setCategoryEntityType("sec$User");
+            recalcAttr2.setDataType(PropertyType.STRING);
+
+            recalcAttr3 = metadata.create(CategoryAttribute.class);
+            recalcAttr3.setName("recalcAttr3");
+            recalcAttr3.setCode("recalcAttr3");
+            recalcAttr3.setCategory(userCategoryWithoutLoop);
+            recalcAttr3.setCategoryEntityType("sec$User");
+            recalcAttr3.setDataType(PropertyType.STRING);
+
+            recalcAttr4 = metadata.create(CategoryAttribute.class);
+            recalcAttr4.setName("recalcAttr4");
+            recalcAttr4.setCode("recalcAttr4");
+            recalcAttr4.setCategory(userCategoryWithLoop);
+            recalcAttr4.setCategoryEntityType("sec$User");
+            recalcAttr4.setDataType(PropertyType.STRING);
+
+            recalcAttr5 = metadata.create(CategoryAttribute.class);
+            recalcAttr5.setName("recalcAttr5");
+            recalcAttr5.setCode("recalcAttr5");
+            recalcAttr5.setCategory(userCategoryWithLoop);
+            recalcAttr5.setCategoryEntityType("sec$User");
+            recalcAttr5.setDataType(PropertyType.STRING);
+
+            configuration = new CategoryAttributeConfiguration();
+            configuration.setDependentCategoryAttributes(Collections.singletonList(recalcAttr2));
+            recalcAttr1.setAttributeConfigurationJson(gson.toJson(configuration));
+            em.persist(recalcAttr1);
+
+            configuration = new CategoryAttributeConfiguration();
+            configuration.setDependentCategoryAttributes(Collections.singletonList(recalcAttr3));
+            configuration.setRecalculationGroovyScript("{E}.getValue(\"+recalcAttr1\") + \"Test\"");
+            recalcAttr2.setAttributeConfigurationJson(gson.toJson(configuration));
+            em.persist(recalcAttr2);
+
+            configuration = new CategoryAttributeConfiguration();
+            configuration.setRecalculationGroovyScript("{E}.getValue(\"+recalcAttr2\") + \"Test\"");
+            recalcAttr3.setAttributeConfigurationJson(gson.toJson(configuration));
+            em.persist(recalcAttr3);
+
+            configuration = new CategoryAttributeConfiguration();
+            configuration.setDependentCategoryAttributes(Collections.singletonList(recalcAttr5));
+            configuration.setRecalculationGroovyScript("{E}.getValue(\"+recalcAttr5\") + \"Test\"");
+            recalcAttr4.setAttributeConfigurationJson(gson.toJson(configuration));
+            em.persist(recalcAttr4);
+
+            configuration = new CategoryAttributeConfiguration();
+            configuration.setDependentCategoryAttributes(Collections.singletonList(recalcAttr4));
+            configuration.setRecalculationGroovyScript("{E}.getValue(\"+recalcAttr4\") + \"Test\"");
+            recalcAttr5.setAttributeConfigurationJson(gson.toJson(configuration));
+            em.persist(recalcAttr5);
+
             tx.commit();
         }
 
@@ -225,8 +308,9 @@ public class DynamicAttributesTest {
         runner.update("delete from TEST_COMPOSITE_KEY");
         cont.deleteRecord(userRole, role, user, user2, group, group2);
         cont.deleteRecord(userAttribute, userRoleAttribute, roleAttribute, userGroupAttribute, userGroupCollectionAttribute,
-                userIntCollectionAttribute, userEnumAttribute, userEnumCollectionAttribute);
-        cont.deleteRecord(userCategory, userRoleCategory, roleCategory);
+                userIntCollectionAttribute, userEnumAttribute, userEnumCollectionAttribute, recalcAttr1, recalcAttr2,
+                recalcAttr3, recalcAttr4, recalcAttr5);
+        cont.deleteRecord(userCategory, userRoleCategory, roleCategory, userCategoryWithLoop, userCategoryWithoutLoop);
     }
 
     @Test
@@ -409,5 +493,30 @@ public class DynamicAttributesTest {
         loadedUser = dataManager.load(loadContext);
         groupsCollection = loadedUser.getValue("+userGroupCollectionAttribute");
         assertEquals(2, groupsCollection.size());
+    }
+
+    @Test
+    public void testDynamicAttributesRecalculationTools() {
+        User loadedUser = dataManager.load(LoadContext.create(User.class).setId(user.getId()).setLoadDynamicAttributes(true));
+        loadedUser.setValue("+recalcAttr1", "Test");
+        User updatedUser = recalculationTools.recalculateDynamicAttributes(loadedUser, recalcAttr1);
+
+        assertNotSame(loadedUser, updatedUser);
+
+        assertEquals("Test", loadedUser.getValue("+recalcAttr1"));
+        assertNull(loadedUser.getValue("+recalcAttr2"));
+        assertNull(loadedUser.getValue("+recalcAttr3"));
+
+        assertEquals("Test", updatedUser.getValue("+recalcAttr1"));
+        assertEquals("TestTest", updatedUser.getValue("+recalcAttr2"));
+        assertEquals("TestTestTest", updatedUser.getValue("+recalcAttr3"));
+
+        Exception e = null;
+        try {
+            recalculationTools.recalculateDynamicAttributes(loadedUser, recalcAttr4);
+        } catch (Exception ex) {
+            e = ex;
+        }
+        assertNotNull(e);
     }
 }

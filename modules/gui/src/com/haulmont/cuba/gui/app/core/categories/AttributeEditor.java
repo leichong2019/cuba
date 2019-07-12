@@ -133,6 +133,9 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
     @Inject
     protected FieldGroup columnSettingsFieldGroup;
 
+    @Inject
+    protected FieldGroup recalculationSettingsFieldGroup;
+
     protected LookupField<PropertyType> dataTypeField;
     protected LookupField<String> screenField;
     protected LookupField<String> entityTypeField;
@@ -202,9 +205,14 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
     protected SourceCodeEditor joinField;
     protected SourceCodeEditor whereField;
 
-    protected HBoxLayout hBoxLayoutField;
+    protected HBoxLayout validatorHBoxLayoutField;
     protected SourceCodeEditor validatorGroovyScriptField;
     protected LinkButton validatorHelpLinkBtn;
+
+    protected HBoxLayout recalculationHBoxLayoutField;
+    protected SourceCodeEditor recalculationGroovyScriptField;
+    protected LinkButton recalculationHelpLinkBtn;
+    protected ListEditor<CategoryAttribute> dependentAttributesField;
 
     protected TextField defaultDecimalField;
     protected TextField minDecimalField;
@@ -222,6 +230,7 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
         initLocalizedFrame();
         initFieldGroup();
         initColumnSettingsFieldGroup();
+        initRecalculationSettingsFieldGroup();
 
         Action createAction = initCreateScreenAndComponentAction();
         targetScreensTable.addAction(createAction);
@@ -237,6 +246,8 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
         maxDecimalField = (TextField) attributeFieldGroup.getFieldNN("configuration.maxDecimal").getComponentNN();
 
         setupBigDecimalFormat();
+
+        dependentAttributesField.setOptionsList(getCategoryAttributes());
     }
 
     protected Action initCreateScreenAndComponentAction() {
@@ -470,12 +481,12 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
                             .modal(false)
                             .width(560f)));
 
-            hBoxLayoutField = uiComponents.create(HBoxLayout.class);
-            hBoxLayoutField.setWidthFull();
-            hBoxLayoutField.add(validatorGroovyScriptField, validatorHelpLinkBtn);
-            hBoxLayoutField.expand(validatorGroovyScriptField);
+            validatorHBoxLayoutField = uiComponents.create(HBoxLayout.class);
+            validatorHBoxLayoutField.setWidthFull();
+            validatorHBoxLayoutField.add(validatorGroovyScriptField, validatorHelpLinkBtn);
+            validatorHBoxLayoutField.expand(validatorGroovyScriptField);
 
-            return hBoxLayoutField;
+            return validatorHBoxLayoutField;
         });
     }
 
@@ -494,6 +505,44 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
             columnAlignmentField.setOptionsList(options);
 
             return columnAlignmentField;
+        });
+    }
+
+    protected void initRecalculationSettingsFieldGroup() {
+        recalculationSettingsFieldGroup.addCustomField("configuration.recalculationGroovyScript", (datasource, propertyId) -> {
+
+            recalculationGroovyScriptField = uiComponents.create(SourceCodeEditor.class);
+            recalculationGroovyScriptField.setMode(SourceCodeEditor.Mode.Groovy);
+            recalculationGroovyScriptField.setDatasource(attributeDs, "configuration.recalculationGroovyScript");
+            recalculationGroovyScriptField.setWidthFull();
+            recalculationGroovyScriptField.setHeight(themeConstants.get("cuba.gui.AttributeEditor.recalculationGroovyScriptField.height"));
+            recalculationGroovyScriptField.setHighlightActiveLine(false);
+            recalculationGroovyScriptField.setShowGutter(false);
+
+            recalculationHelpLinkBtn = uiComponents.create(LinkButton.class);
+            recalculationHelpLinkBtn.setIcon("icons/question-white.png");
+            recalculationHelpLinkBtn.addClickListener(event -> showMessageDialog(getMessage("recalculationScript"), getMessage("recalculationScriptHelp"),
+                    MessageType.CONFIRMATION_HTML
+                            .modal(false)
+                            .width(560f)));
+
+            recalculationHBoxLayoutField = uiComponents.create(HBoxLayout.class);
+            recalculationHBoxLayoutField.setWidthFull();
+            recalculationHBoxLayoutField.add(recalculationGroovyScriptField, recalculationHelpLinkBtn);
+            recalculationHBoxLayoutField.expand(recalculationGroovyScriptField);
+
+            return recalculationHBoxLayoutField;
+        });
+
+        recalculationSettingsFieldGroup.addCustomField("configuration.dependentCategoryAttributes", (datasource, propertyId) -> {
+            dependentAttributesField = uiComponents.create(ListEditor.NAME);
+            dependentAttributesField.setDatasource(datasource, "configuration.dependentCategoryAttributes");
+            dependentAttributesField.setWidth(fieldWidth);
+            dependentAttributesField.setFrame(frame);
+            dependentAttributesField.setItemType(ListEditor.ItemType.ENTITY);
+            dependentAttributesField.setEntityName("sys$CategoryAttribute");
+
+            return dependentAttributesField;
         });
     }
 
@@ -843,5 +892,9 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
             minDecimalField.setValue(minDecimalField.getValue());
             maxDecimalField.setValue(maxDecimalField.getValue());
         }
+    }
+
+    protected List<CategoryAttribute> getCategoryAttributes() {
+        return attributeDs.getItem().getCategory().getCategoryAttrs();
     }
 }

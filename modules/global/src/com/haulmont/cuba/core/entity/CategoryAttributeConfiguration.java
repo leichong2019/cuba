@@ -16,17 +16,28 @@
 
 package com.haulmont.cuba.core.entity;
 
+import com.google.common.base.Strings;
 import com.haulmont.chile.core.annotations.MetaClass;
 import com.haulmont.chile.core.annotations.MetaProperty;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
+import com.haulmont.cuba.core.global.AppBeans;
+import com.haulmont.cuba.core.global.DataManager;
 
+import javax.persistence.Transient;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @MetaClass(name = "sys$CategoryAttributeConfiguration")
 @SystemLevel
 public class CategoryAttributeConfiguration extends BaseGenericIdEntity<String> {
 
     private static final long serialVersionUID = 2670605418267938507L;
+
+    protected transient DataManager dataManager;
 
     protected transient CategoryAttribute categoryAttribute;
 
@@ -64,6 +75,16 @@ public class CategoryAttributeConfiguration extends BaseGenericIdEntity<String> 
 
     @MetaProperty
     protected String numberFormatPattern;
+
+    @MetaProperty
+    protected String recalculationGroovyScript;
+
+    @Transient
+    protected List<UUID> dependentCategoryAttributesIds;
+
+    @MetaProperty
+    @Transient
+    protected transient List<CategoryAttribute> dependentCategoryAttributes;
 
     public Integer getMinInt() {
         return minInt;
@@ -185,6 +206,46 @@ public class CategoryAttributeConfiguration extends BaseGenericIdEntity<String> 
         this.numberFormatPattern = numberFormatPattern;
     }
 
+    public String getRecalculationGroovyScript() {
+        return recalculationGroovyScript;
+    }
+
+    public void setRecalculationGroovyScript(String recalculationGroovyScript) {
+        this.recalculationGroovyScript = recalculationGroovyScript;
+    }
+
+    public List<CategoryAttribute> getDependentCategoryAttributes() {
+        if (dependentCategoryAttributesIds == null || dependentCategoryAttributesIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        if (dependentCategoryAttributes == null) {
+            dependentCategoryAttributes = getDataManager().load(CategoryAttribute.class)
+                    .ids(dependentCategoryAttributesIds)
+                    .list();
+        }
+
+        return dependentCategoryAttributes;
+    }
+
+    public void setDependentCategoryAttributes(List<CategoryAttribute> dependentCategoryAttributes) {
+        if (dependentCategoryAttributes == null) {
+            this.dependentCategoryAttributesIds = null;
+            this.dependentCategoryAttributes = null;
+            return;
+        }
+
+        this.dependentCategoryAttributesIds = dependentCategoryAttributes.stream()
+                .map(BaseUuidEntity::getId)
+                .collect(Collectors.toList());
+
+        this.dependentCategoryAttributes = dependentCategoryAttributes;
+    }
+
+    public Boolean isReadOnly() {
+        return !Strings.isNullOrEmpty(recalculationGroovyScript);
+    }
+
     @Override
     public void setId(String id) {
         this.id = id;
@@ -196,5 +257,12 @@ public class CategoryAttributeConfiguration extends BaseGenericIdEntity<String> 
             return categoryAttribute.getId().toString() + "-Configuration";
         }
         return id;
+    }
+
+    private DataManager getDataManager() {
+        if (dataManager == null) {
+            dataManager = AppBeans.get(DataManager.NAME);
+        }
+        return dataManager;
     }
 }

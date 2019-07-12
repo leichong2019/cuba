@@ -21,14 +21,13 @@ import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.chile.core.model.MetaPropertyPath;
 import com.haulmont.cuba.core.entity.CategoryAttribute;
+import com.haulmont.cuba.core.entity.CategoryAttributeValue;
 import com.haulmont.cuba.core.global.MetadataTools;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.haulmont.cuba.core.app.dynamicattributes.DynamicAttributesUtils.decodeAttributeCode;
@@ -97,5 +96,51 @@ public class DynamicAttributesTools {
             }
         }
         return metadataTools.format(value, metaProperty);
+    }
+
+    /**
+     * Makes a deep copy of the source dynamic attributes. All CategoryAttributeValues will be copied.
+     * For collection CategoryAttributeValues all child CAVs will be copied as well.
+     */
+    public Map<String, CategoryAttributeValue> copyDynamicAttributes(Map<String, CategoryAttributeValue> source) {
+
+        Map<String, CategoryAttributeValue> copiedDynamicAttributes = new HashMap<>();
+
+        for (Map.Entry<String, CategoryAttributeValue> entry : source.entrySet()) {
+            copiedDynamicAttributes.put(entry.getKey(), copyCategoryAttributeValue(entry.getValue()));
+        }
+
+        return copiedDynamicAttributes;
+    }
+
+    /**
+     * Makes a deep copy of the source CategoryAttributeValue. All referenced entities and collections will be copied as well.
+     */
+    public CategoryAttributeValue copyCategoryAttributeValue(CategoryAttributeValue source) {
+        if (Boolean.TRUE.equals(source.getCategoryAttribute().getIsCollection())){
+            return copyCollectionCAV(source);
+        } else {
+            return metadataTools.deepCopy(source);
+        }
+    }
+
+    protected CategoryAttributeValue copyCollectionCAV(CategoryAttributeValue source) {
+        CategoryAttributeValue destination = metadataTools.deepCopy(source);
+        List<CategoryAttributeValue> copiedChildValues = null;
+
+        if (destination.getChildValues() != null) {
+            copiedChildValues = new ArrayList<>();
+            for (CategoryAttributeValue childValue : destination.getChildValues()) {
+                CategoryAttributeValue copiedChildValue = metadataTools.deepCopy(childValue);
+                copiedChildValue.setParent(destination);
+                copiedChildValues.add(copiedChildValue);
+            }
+        }
+
+        destination.setChildValues(copiedChildValues);
+        if (source.getTransientCollectionValue() != null) {
+            destination.setTransientCollectionValue(new ArrayList<>(source.getTransientCollectionValue()));
+        }
+        return destination;
     }
 }
