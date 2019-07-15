@@ -134,6 +134,8 @@ public class FilterDelegateImpl implements FilterDelegate {
     @Inject
     protected BeanLocator beanLocator;
 
+    protected ImmediateModeHelper immediateModeHelper;
+
     protected FtsFilterHelper ftsFilterHelper;
     protected AddConditionHelper addConditionHelper;
     protected ThemeConstants theme;
@@ -219,8 +221,6 @@ public class FilterDelegateImpl implements FilterDelegate {
     protected Consumer<String> captionChangedListener;
     protected boolean windowCaptionUpdateEnabled = true;
 
-    protected List<Subscription> paramValueChangeSubscriptions;
-    protected Map<AbstractCondition, AbstractCondition.Listener> conditionListeners;
     protected Boolean applyImmediately;
 
     protected enum ConditionsFocusType {
@@ -244,6 +244,9 @@ public class FilterDelegateImpl implements FilterDelegate {
 
         conditionsLocation = clientConfig.getGenericFilterConditionsLocation();
         applyImmediately = clientConfig.getGenericFilterApplyImmediately();
+
+        immediateModeHelper = beanLocator.getPrototype(ImmediateModeHelper.NAME);
+        immediateModeHelper.setApplyFilterHandler(this::applyWithImmediateMode);
 
         createLayout();
     }
@@ -482,7 +485,10 @@ public class FilterDelegateImpl implements FilterDelegate {
         maxResultsLookupField.setStyleName("c-maxresults-select");
 
         maxResultsField = textMaxResults ? maxResultsTextField : maxResultsLookupField;
-        maxResultsField.addValueChangeListener(integerValueChangeEvent -> maxResultValueChanged = true);
+        maxResultsField.addValueChangeListener(integerValueChangeEvent -> {
+            maxResultValueChanged = true;
+            applyWithImmediateMode();
+        });
         maxResultsLayout.add(maxResultsField);
     }
 
@@ -850,13 +856,13 @@ public class FilterDelegateImpl implements FilterDelegate {
 
         paramEditComponentToFocus = null;
 
-        clearParamValueChangeSubscriptions();
+        immediateModeHelper.clearParamValueChangeSubscriptions();
 
         recursivelyCreateConditionsLayout(conditionsFocusType, false, conditions.getRootNodes(), conditionsLayout, 0);
 
         if (isApplyImmediately()) {
             List<Node<AbstractCondition>> nodes = conditions.getRootNodes();
-            subscribeToParamValueChangeEventRecursively(nodes);
+            immediateModeHelper.subscribeToParamValueChangeEventRecursively(nodes);
         }
 
         conditionsLayout.setVisible(!conditionsLayout.getComponents().isEmpty());
@@ -1071,6 +1077,8 @@ public class FilterDelegateImpl implements FilterDelegate {
                 conditions.removeCondition(condition);
                 fillConditionsLayout(ConditionsFocusType.NONE);
                 updateFilterModifiedIndicator();
+
+                applyWithImmediateMode();
             }
         };
         removeConditionAction.setVisible(conditionRemoveEnabled);
@@ -1662,6 +1670,12 @@ public class FilterDelegateImpl implements FilterDelegate {
         }
 
         return true;
+    }
+
+    protected void applyWithImmediateMode() {
+        if (isApplyImmediately()) {
+            apply(false);
+        }
     }
 
     @Override
@@ -2387,75 +2401,6 @@ public class FilterDelegateImpl implements FilterDelegate {
         return applyImmediately;
     }
 
-    protected void clearParamValueChangeSubscriptions() {
-        if (paramValueChangeSubscriptions != null) {
-            paramValueChangeSubscriptions.forEach(Subscription::remove);
-            paramValueChangeSubscriptions.clear();
-        }
-
-        if (conditionListeners != null) {
-            for (Map.Entry<AbstractCondition, AbstractCondition.Listener> item : conditionListeners.entrySet()) {
-                item.getKey().removeListener(item.getValue());
-            }
-            conditionListeners.clear();
-        }
-    }
-
-    protected void subscribeToParamValueChangeEventRecursively(List<Node<AbstractCondition>> conditions) {
-        if (paramValueChangeSubscriptions == null) {
-            paramValueChangeSubscriptions = new ArrayList<>();
-        }
-
-        for (Node<AbstractCondition> node : conditions) {
-            AbstractCondition condition = node.getData();
-            if (condition.isGroup()) {
-                subscribeToParamValueChangeEventRecursively(node.getChildren());
-            } else {
-                Subscription subscription = condition.getParam()
-                        .addParamValueChangeListener(this::handleParamValueChange);
-                paramValueChangeSubscriptions.add(subscription);
-
-                addConditionListener(condition, subscription);
-            }
-        }
-    }
-
-    protected void addConditionListener(AbstractCondition condition, Subscription current) {
-        if (conditionListeners == null) {
-            conditionListeners = new HashMap<>();
-        }
-
-        AbstractCondition.Listener listener = new AbstractCondition.Listener() {
-            protected Subscription previous = current;
-
-            @Override
-            public void captionChanged() {
-                // do nothing
-            }
-
-            @Override
-            public void paramChanged(Param oldParam, Param newParam) {
-                previous.remove();
-                paramValueChangeSubscriptions.remove(previous);
-
-                Subscription newSubscription = newParam.addParamValueChangeListener(
-                        event -> handleParamValueChange(event));
-                paramValueChangeSubscriptions.add(newSubscription);
-
-                previous = newSubscription;
-            }
-        };
-
-        condition.addListener(listener);
-        conditionListeners.put(condition, listener);
-    }
-
-    protected void handleParamValueChange(Param.ParamValueChangedEvent event) {
-        if (isApplyImmediately()) {
-            apply(false);
-        }
-    }
-
     protected class FiltersLookupChangeListener implements Consumer<HasValue.ValueChangeEvent<FilterEntity>> {
         public FiltersLookupChangeListener() {
         }
@@ -2603,7 +2548,7 @@ public class FilterDelegateImpl implements FilterDelegate {
             params.put("conditionsTree", conditions);
 
             // remove subscriptions because if param default value is editing it will invoke value change event
-            clearParamValueChangeSubscriptions();
+            immediateModeHelper.clearParamValueChangeSubscriptions();
 
             FilterEditor window = (FilterEditor) getWindowManager().openWindow(windowInfo, OpenType.DIALOG, params);
             window.addCloseListener(actionId -> {
@@ -2626,11 +2571,12 @@ public class FilterDelegateImpl implements FilterDelegate {
                     fillConditionsLayout(ConditionsFocusType.FIRST);
                     requestFocusToParamEditComponent();
                     updateFilterModifiedIndicator();
+                    applyWithImmediateMode();
                 } else {
                     requestFocusToParamEditComponent();
                     // subscribe if editor was closed without changes
                     if (isApplyImmediately()) {
-                        subscribeToParamValueChangeEventRecursively(conditions.getRootNodes());
+                        immediateModeHelper.subscribeToParamValueChangeEventRecursively(conditions.getRootNodes());
                     }
                 }
                 settingsBtn.focus();
@@ -2713,7 +2659,7 @@ public class FilterDelegateImpl implements FilterDelegate {
 
         @Override
         public void actionPerform(Component component) {
-            clearParamValueChangeSubscriptions();
+            immediateModeHelper.clearParamValueChangeSubscriptions();
 
             for (AbstractCondition condition : conditions.toConditionsList()) {
                 if (!Boolean.TRUE.equals(condition.getHidden()) && condition.getParam() != null) {
@@ -2722,7 +2668,7 @@ public class FilterDelegateImpl implements FilterDelegate {
             }
 
             if (isApplyImmediately()) {
-                subscribeToParamValueChangeEventRecursively(conditions.getRootNodes());
+                immediateModeHelper.subscribeToParamValueChangeEventRecursively(conditions.getRootNodes());
                 apply(false);
             }
         }
