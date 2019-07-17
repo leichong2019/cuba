@@ -801,7 +801,7 @@ public class QueryImpl<T> implements TypedQuery<T> {
                 else
                     query.setParameter((String) name, (Date) value, temporalType);
             } else {
-                if (!isValidParamType(query))
+                if (value instanceof Date && !isValidParamType(query))
                     convertValue();
 
                 if (name instanceof Integer)
