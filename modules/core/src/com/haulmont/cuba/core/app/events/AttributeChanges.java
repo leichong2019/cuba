@@ -76,7 +76,7 @@ public class AttributeChanges {
         if (embeddingStep.length > 1) {
             String embeddedEntityName = embeddingStep[0];
             String embeddedAttributeName = embeddingStep[1];
-            if (embeddedChanges.get(embeddedEntityName) != null) {
+            if (embeddedChanges.containsKey(embeddedEntityName)) {
                 return embeddedChanges.get(embeddedEntityName).isChanged(embeddedAttributeName);
             }
         }
