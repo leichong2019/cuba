@@ -21,8 +21,8 @@ import com.haulmont.cuba.core.entity.CategoryAttribute;
 
 import java.util.List;
 
-public interface DynamicAttributesValuesLoader {
-    String NAME = "cuba_DynamicAttributesValuesLoader";
+public interface AttributeOptionsLoaderService {
+    String NAME = "cuba_AttributeOptionsLoaderService";
 
-    List loadValues(CategoryAttribute attribute, BaseGenericIdEntity entity);
+    List loadOptions(BaseGenericIdEntity entity, CategoryAttribute attribute);
 }

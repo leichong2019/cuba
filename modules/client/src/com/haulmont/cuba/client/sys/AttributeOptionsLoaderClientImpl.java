@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.core.app.dynamicattributes;
+package com.haulmont.cuba.client.sys;
 
+import com.haulmont.cuba.core.app.dynamicattributes.AttributeOptionsLoader;
+import com.haulmont.cuba.core.app.dynamicattributes.AttributeOptionsLoaderService;
 import com.haulmont.cuba.core.entity.BaseGenericIdEntity;
 import com.haulmont.cuba.core.entity.CategoryAttribute;
-import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.util.List;
 
-@Service(DynamicAttributesValuesLoaderService.NAME)
-public class DynamicAttributesValuesLoaderServiceBean implements DynamicAttributesValuesLoaderService {
+public class AttributeOptionsLoaderClientImpl implements AttributeOptionsLoader {
     @Inject
-    protected DynamicAttributesValuesLoader valuesLoader;
+    protected AttributeOptionsLoaderService optionsLoaderService;
 
     @Override
-    public List loadValues(CategoryAttribute attribute, BaseGenericIdEntity entity) {
-        return valuesLoader.loadValues(attribute, entity);
+    public List loadOptions(BaseGenericIdEntity entity, CategoryAttribute attribute) {
+        return optionsLoaderService.loadOptions(entity, attribute);
     }
 }

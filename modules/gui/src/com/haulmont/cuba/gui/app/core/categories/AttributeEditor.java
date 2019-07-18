@@ -507,8 +507,8 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
         if (attribute.getDataType() != null && SUPPORTED_VALUES_LOADER_TYPES.contains(attribute.getDataType())) {
             tabsheet.getTab("valuesLoader").setEnabled(true);
             if (attribute.getDataType() == PropertyType.ENTITY) {
-                if (attribute.getConfiguration().getValuesLoaderType() == CategoryAttributeValuesLoaderType.SQL) {
-                    attribute.getConfiguration().setValuesLoaderType(CategoryAttributeValuesLoaderType.GROOVY);
+                if (attribute.getConfiguration().getValuesLoaderType() == CategoryAttributeOptionsLoaderType.SQL) {
+                    attribute.getConfiguration().setValuesLoaderType(CategoryAttributeOptionsLoaderType.GROOVY);
                     attribute.getConfiguration().setValuesLoaderScript(null);
                 }
                 valuesLoaderType.setEnabled(false);

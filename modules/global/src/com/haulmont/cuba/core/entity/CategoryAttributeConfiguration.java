@@ -191,11 +191,11 @@ public class CategoryAttributeConfiguration extends BaseGenericIdEntity<String> 
         this.numberFormatPattern = numberFormatPattern;
     }
 
-    public CategoryAttributeValuesLoaderType getValuesLoaderType() {
-        return CategoryAttributeValuesLoaderType.fromId(valuesLoaderType);
+    public CategoryAttributeOptionsLoaderType getValuesLoaderType() {
+        return CategoryAttributeOptionsLoaderType.fromId(valuesLoaderType);
     }
 
-    public void setValuesLoaderType(CategoryAttributeValuesLoaderType valuesLoaderType) {
+    public void setValuesLoaderType(CategoryAttributeOptionsLoaderType valuesLoaderType) {
         this.valuesLoaderType = valuesLoaderType == null ? null : valuesLoaderType.getId();
     }
 

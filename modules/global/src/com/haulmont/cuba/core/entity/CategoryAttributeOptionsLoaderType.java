@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.core.app.dynamicattributes;
+package com.haulmont.cuba.core.entity;
 
-import com.haulmont.cuba.core.entity.BaseGenericIdEntity;
-import com.haulmont.cuba.core.entity.CategoryAttribute;
+import com.haulmont.chile.core.datatypes.impl.EnumClass;
+import com.haulmont.chile.core.datatypes.impl.EnumUtils;
 
-import java.util.List;
+public enum CategoryAttributeOptionsLoaderType implements EnumClass<String> {
+    SQL,
+    GROOVY;
 
-public interface DynamicAttributesValuesLoaderService {
-    String NAME = "cuba_DynamicAttributesValuesLoaderService";
+    @Override
+    public String getId() {
+        return name();
+    }
 
-    List loadValues(CategoryAttribute attribute, BaseGenericIdEntity entity);
+    public static CategoryAttributeOptionsLoaderType fromId(String id) {
+        return EnumUtils.fromIdSafe(CategoryAttributeOptionsLoaderType.class, id, null);
+    }
 }
