@@ -19,6 +19,7 @@ package com.haulmont.cuba.core;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.haulmont.bali.db.QueryRunner;
+import com.haulmont.cuba.core.app.dynamicattributes.DynamicAttributesCacheService;
 import com.haulmont.cuba.core.app.dynamicattributes.DynamicAttributesManagerAPI;
 import com.haulmont.cuba.core.app.dynamicattributes.DynamicAttributesRecalculationTools;
 import com.haulmont.cuba.core.app.dynamicattributes.PropertyType;
@@ -50,6 +51,7 @@ public class DynamicAttributesTest {
     protected Metadata metadata;
     protected DynamicAttributesManagerAPI dynamicAttributesManagerAPI;
     protected DynamicAttributesRecalculationTools recalculationTools;
+    protected DynamicAttributesCacheService dynamicAttributesCacheService;
 
     protected Category userCategory, userRoleCategory, roleCategory, userCategoryWithLoop, userCategoryWithoutLoop;
     protected CategoryAttribute userAttribute, userRoleAttribute, roleAttribute, userGroupAttribute, userGroupCollectionAttribute, userIntCollectionAttribute;
@@ -67,6 +69,7 @@ public class DynamicAttributesTest {
         metadata = AppBeans.get(Metadata.class);
         dynamicAttributesManagerAPI = AppBeans.get(DynamicAttributesManagerAPI.class);
         recalculationTools = AppBeans.get(DynamicAttributesRecalculationTools.class);
+        dynamicAttributesCacheService = AppBeans.get(DynamicAttributesCacheService.NAME);
 
         Gson gson = new Gson();
         CategoryAttributeConfiguration configuration;
@@ -216,6 +219,7 @@ public class DynamicAttributesTest {
             recalcAttr1.setCategory(userCategoryWithoutLoop);
             recalcAttr1.setCategoryEntityType("sec$User");
             recalcAttr1.setDataType(PropertyType.STRING);
+            em.persist(recalcAttr1);
 
             recalcAttr2 = metadata.create(CategoryAttribute.class);
             recalcAttr2.setName("recalcAttr2");
@@ -246,32 +250,34 @@ public class DynamicAttributesTest {
             recalcAttr5.setDataType(PropertyType.STRING);
 
             configuration = new CategoryAttributeConfiguration();
-            configuration.setDependentCategoryAttributes(Collections.singletonList(recalcAttr2));
-            recalcAttr1.setAttributeConfigurationJson(gson.toJson(configuration));
-            em.persist(recalcAttr1);
-
-            configuration = new CategoryAttributeConfiguration();
-            configuration.setDependentCategoryAttributes(Collections.singletonList(recalcAttr3));
-            configuration.setRecalculationGroovyScript("{E}.getValue(\"+recalcAttr1\") + \"Test\"");
+            configuration.setDependsOnCategoryAttributes(Collections.singletonList(recalcAttr1));
+            configuration.setRecalculationGroovyScript("entity.getValue(\"+recalcAttr1\") + \"Test\"");
             recalcAttr2.setAttributeConfigurationJson(gson.toJson(configuration));
             em.persist(recalcAttr2);
 
             configuration = new CategoryAttributeConfiguration();
-            configuration.setRecalculationGroovyScript("{E}.getValue(\"+recalcAttr2\") + \"Test\"");
+            configuration.setDependsOnCategoryAttributes(Collections.singletonList(recalcAttr2));
+            configuration.setRecalculationGroovyScript("entity.getValue(\"+recalcAttr2\") + \"Test\"");
             recalcAttr3.setAttributeConfigurationJson(gson.toJson(configuration));
             em.persist(recalcAttr3);
 
+            userCategoryWithoutLoop.setCategoryAttrs(Arrays.asList(recalcAttr1, recalcAttr2, recalcAttr3));
+            em.persist(userCategoryWithoutLoop);
+
             configuration = new CategoryAttributeConfiguration();
-            configuration.setDependentCategoryAttributes(Collections.singletonList(recalcAttr5));
-            configuration.setRecalculationGroovyScript("{E}.getValue(\"+recalcAttr5\") + \"Test\"");
+            configuration.setDependsOnCategoryAttributes(Collections.singletonList(recalcAttr5));
+            configuration.setRecalculationGroovyScript("entity.getValue(\"+recalcAttr5\") + \"Test\"");
             recalcAttr4.setAttributeConfigurationJson(gson.toJson(configuration));
             em.persist(recalcAttr4);
 
             configuration = new CategoryAttributeConfiguration();
-            configuration.setDependentCategoryAttributes(Collections.singletonList(recalcAttr4));
-            configuration.setRecalculationGroovyScript("{E}.getValue(\"+recalcAttr4\") + \"Test\"");
+            configuration.setDependsOnCategoryAttributes(Collections.singletonList(recalcAttr4));
+            configuration.setRecalculationGroovyScript("entity.getValue(\"+recalcAttr4\") + \"Test\"");
             recalcAttr5.setAttributeConfigurationJson(gson.toJson(configuration));
             em.persist(recalcAttr5);
+
+            userCategoryWithLoop.setCategoryAttrs(Arrays.asList(recalcAttr4, recalcAttr5));
+            em.persist(userCategoryWithLoop);
 
             tx.commit();
         }
@@ -499,17 +505,14 @@ public class DynamicAttributesTest {
     public void testDynamicAttributesRecalculationTools() {
         User loadedUser = dataManager.load(LoadContext.create(User.class).setId(user.getId()).setLoadDynamicAttributes(true));
         loadedUser.setValue("+recalcAttr1", "Test");
-        User updatedUser = recalculationTools.recalculateDynamicAttributes(loadedUser, recalcAttr1);
-
-        assertNotSame(loadedUser, updatedUser);
+        recalculationTools.recalculateDynamicAttributes(loadedUser, recalcAttr1);
 
         assertEquals("Test", loadedUser.getValue("+recalcAttr1"));
-        assertNull(loadedUser.getValue("+recalcAttr2"));
-        assertNull(loadedUser.getValue("+recalcAttr3"));
+        assertEquals("TestTest", loadedUser.getValue("+recalcAttr2"));
+        assertEquals("TestTestTest", loadedUser.getValue("+recalcAttr3"));
 
-        assertEquals("Test", updatedUser.getValue("+recalcAttr1"));
-        assertEquals("TestTest", updatedUser.getValue("+recalcAttr2"));
-        assertEquals("TestTestTest", updatedUser.getValue("+recalcAttr3"));
+        assertNull(loadedUser.getValue("+recalcAttr4"));
+        assertNull(loadedUser.getValue("+recalcAttr5"));
 
         Exception e = null;
         try {
@@ -518,5 +521,23 @@ public class DynamicAttributesTest {
             e = ex;
         }
         assertNotNull(e);
+
+        //remove cyclic dependency and test full recalculation
+        recalcAttr4.getConfiguration().setDependsOnCategoryAttributes(null);
+        recalcAttr4.setAttributeConfigurationJson(new Gson().toJson(recalcAttr4.getConfiguration()));
+        dataManager.commit(recalcAttr4);
+        dynamicAttributesCacheService.loadCache();
+
+        loadedUser.setValue("+recalcAttr1", "Test2");
+        loadedUser.setValue("+recalcAttr4", "Test3");
+
+        recalculationTools.recalculateDynamicAttributes(loadedUser);
+
+        assertEquals("Test2", loadedUser.getValue("+recalcAttr1"));
+        assertEquals("Test2Test", loadedUser.getValue("+recalcAttr2"));
+        assertEquals("Test2TestTest", loadedUser.getValue("+recalcAttr3"));
+
+        assertEquals("Test3", loadedUser.getValue("+recalcAttr4"));
+        assertEquals("Test3Test", loadedUser.getValue("+recalcAttr5"));
     }
 }

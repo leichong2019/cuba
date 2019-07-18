@@ -19,6 +19,7 @@ package com.haulmont.cuba.core.app.dynamicattributes;
 import com.google.common.base.Strings;
 import com.haulmont.cuba.core.entity.BaseGenericIdEntity;
 import com.haulmont.cuba.core.entity.CategoryAttribute;
+import com.haulmont.cuba.core.entity.CategoryAttributeValue;
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.core.global.MetadataTools;
 import com.haulmont.cuba.core.global.Scripting;
@@ -47,26 +48,21 @@ public class DynamicAttributesRecalculationTools {
 
     /**
      * Performs recalculation for all dependent dynamic attributes. Recalculation is performed hierarchically.
-     * This method clones {@code entity} and updates this cloned instance only.
-     * Updated entity should be persisted manually if needed.
      *
      * Recalculation level limited by
      * {@code cuba.dynamicAttributes.maxRecalculationLevel} application property. If this property is not defined
      * then the default value is used (default value is 10).
      *
-     * @param entity entity with loaded dynamic attributes. This instance won't be updated
+     * @param entity entity with loaded dynamic attributes.
      * @param attribute an attribute from which the recalculation begins. Value for this attribute won't be changed,
      *                  it is assumed that this attribute was updated before
-     * @return copy of {@code entity} with updated dynamic attributes
      */
-    public <T extends BaseGenericIdEntity> T recalculateDynamicAttributes(T entity, CategoryAttribute attribute) {
+    public void recalculateDynamicAttributes(BaseGenericIdEntity entity, CategoryAttribute attribute) {
 
         if (attribute == null || attribute.getConfiguration().getDependentCategoryAttributes() == null
                 || attribute.getConfiguration().getDependentCategoryAttributes().isEmpty()) {
-            return entity;
+            return;
         }
-
-        T updatedEntity = copyEntity(entity);
 
         Set<CategoryAttribute> needToRecalculate = new HashSet<>(attribute.getConfiguration().getDependentCategoryAttributes());
         int recalculationLevel = 1;
@@ -89,15 +85,15 @@ public class DynamicAttributesRecalculationTools {
 
                 String attributeCode = DynamicAttributesUtils.encodeAttributeCode(dependentAttribute.getCode());
 
-                Object oldValue = updatedEntity.getValue(attributeCode);
-                Object newValue = evaluateGroovyScript(updatedEntity, groovyScript);
+                Object oldValue = entity.getValue(attributeCode);
+                Object newValue = evaluateGroovyScript(entity, groovyScript);
 
                 if ((oldValue == null && newValue == null)
                         || (oldValue != null && oldValue.equals(newValue))) {
                     continue;
                 }
 
-                updatedEntity.setValue(attributeCode, newValue);
+                entity.setValue(attributeCode, newValue);
 
                 if (dependentAttribute.getConfiguration().getDependentCategoryAttributes() != null) {
                     nextLevelAttributes.addAll(dependentAttribute.getConfiguration().getDependentCategoryAttributes());
@@ -107,29 +103,45 @@ public class DynamicAttributesRecalculationTools {
             needToRecalculate = nextLevelAttributes;
             recalculationLevel++;
         }
+    }
 
-        T entityToReturn = metadataTools.deepCopy(entity);
-        //noinspection unchecked
-        entityToReturn.setDynamicAttributes(updatedEntity.getDynamicAttributes());
+    /**
+     * Performs recalculation for all dynamic attributes.
+     *
+     * Recalculation level limited by
+     * {@code cuba.dynamicAttributes.maxRecalculationLevel} application property. If this property is not defined
+     * then the default value is used (default value is 10).
+     *
+     * @param entity entity with loaded dynamic attributes.
+     */
+    public void recalculateDynamicAttributes(BaseGenericIdEntity entity) {
+        Collection<CategoryAttribute> independentAttributes = dynamicAttributesTools.getIndependentCategoryAttributes(entity);
 
-        return entityToReturn;
+        if (independentAttributes == null || independentAttributes.isEmpty()) {
+            return;
+        }
+
+        for (CategoryAttribute attribute : independentAttributes) {
+            recalculateDynamicAttributes(entity, attribute);
+        }
     }
 
     protected Object evaluateGroovyScript(BaseGenericIdEntity entity, String groovyScript) {
 
-        Binding binding = new Binding();
-        binding.setVariable("__entity__", entity);
-        binding.setVariable("dynamicAttributes", entity.getDynamicAttributes());
+        //noinspection unchecked
+        Map<String, CategoryAttributeValue> dynamicAttributes = (Map<String, CategoryAttributeValue>) entity.getDynamicAttributes();
+        Map<String, Object> dynamicAttributesValues = new HashMap<>();
 
-        return scripting.evaluateGroovy(groovyScript.replace("{E}", "__entity__"), binding);
-    }
-
-    protected <T extends BaseGenericIdEntity> T copyEntity(T entity) {
-        T copiedEntity = metadataTools.deepCopy(entity);
-        if (entity.getDynamicAttributes() != null) {
-            //noinspection unchecked
-            copiedEntity.setDynamicAttributes(dynamicAttributesTools.copyDynamicAttributes(entity.getDynamicAttributes()));
+        if (dynamicAttributes != null) {
+            for (Map.Entry<String, CategoryAttributeValue> entry : dynamicAttributes.entrySet()) {
+                dynamicAttributesValues.put(entry.getKey(), entry.getValue().getValue());
+            }
         }
-        return copiedEntity;
+
+        Binding binding = new Binding();
+        binding.setVariable("entity", entity);
+        binding.setVariable("dynamicAttributes", dynamicAttributesValues);
+
+        return scripting.evaluateGroovy(groovyScript, binding);
     }
 }

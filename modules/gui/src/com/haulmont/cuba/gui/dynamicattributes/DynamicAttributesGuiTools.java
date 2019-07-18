@@ -522,10 +522,7 @@ public class DynamicAttributesGuiTools {
 
                             entity.setValue(attributeCode, valueChangeEvent.getValue());
 
-                            BaseGenericIdEntity updatedEntity = recalculationTools.recalculateDynamicAttributes(entity, attribute);
-                            //noinspection unchecked
-                            entity.setDynamicAttributes(updatedEntity.getDynamicAttributes());
-                            container.setItem(entity);
+                            recalculationTools.recalculateDynamicAttributes(entity, attribute);
                         }
                     }
                 } finally {

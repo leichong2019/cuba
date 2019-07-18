@@ -64,6 +64,7 @@ import org.apache.commons.text.TextStringBuilder;
 import org.dom4j.Element;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Consumer;
@@ -209,10 +210,9 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
     protected SourceCodeEditor validatorGroovyScriptField;
     protected LinkButton validatorHelpLinkBtn;
 
-    protected HBoxLayout recalculationHBoxLayoutField;
+    @Named("recalculationSettingsFieldGroup.recalculationGroovyScript")
     protected SourceCodeEditor recalculationGroovyScriptField;
-    protected LinkButton recalculationHelpLinkBtn;
-    protected ListEditor<CategoryAttribute> dependentAttributesField;
+    protected ListEditor<CategoryAttribute> dependsOnAttributesField;
 
     protected TextField defaultDecimalField;
     protected TextField minDecimalField;
@@ -247,7 +247,7 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
 
         setupBigDecimalFormat();
 
-        dependentAttributesField.setOptionsList(getCategoryAttributes());
+        dependsOnAttributesField.setOptionsList(getCategoryAttributesOptionsLists());
     }
 
     protected Action initCreateScreenAndComponentAction() {
@@ -509,40 +509,22 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
     }
 
     protected void initRecalculationSettingsFieldGroup() {
-        recalculationSettingsFieldGroup.addCustomField("configuration.recalculationGroovyScript", (datasource, propertyId) -> {
-
-            recalculationGroovyScriptField = uiComponents.create(SourceCodeEditor.class);
-            recalculationGroovyScriptField.setMode(SourceCodeEditor.Mode.Groovy);
-            recalculationGroovyScriptField.setDatasource(attributeDs, "configuration.recalculationGroovyScript");
-            recalculationGroovyScriptField.setWidthFull();
-            recalculationGroovyScriptField.setHeight(themeConstants.get("cuba.gui.AttributeEditor.recalculationGroovyScriptField.height"));
-            recalculationGroovyScriptField.setHighlightActiveLine(false);
-            recalculationGroovyScriptField.setShowGutter(false);
-
-            recalculationHelpLinkBtn = uiComponents.create(LinkButton.class);
-            recalculationHelpLinkBtn.setIcon("icons/question-white.png");
-            recalculationHelpLinkBtn.addClickListener(event -> showMessageDialog(getMessage("recalculationScript"), getMessage("recalculationScriptHelp"),
+        recalculationGroovyScriptField.setHeight(themeConstants.get("cuba.gui.AttributeEditor.recalculationGroovyScriptField.height"));
+        recalculationGroovyScriptField.setContextHelpIconClickHandler(e ->
+                showMessageDialog(getMessage("recalculationScript"), getMessage("recalculationScriptHelp"),
                     MessageType.CONFIRMATION_HTML
                             .modal(false)
                             .width(560f)));
 
-            recalculationHBoxLayoutField = uiComponents.create(HBoxLayout.class);
-            recalculationHBoxLayoutField.setWidthFull();
-            recalculationHBoxLayoutField.add(recalculationGroovyScriptField, recalculationHelpLinkBtn);
-            recalculationHBoxLayoutField.expand(recalculationGroovyScriptField);
+        recalculationSettingsFieldGroup.addCustomField("configuration.dependsOnCategoryAttributes", (datasource, propertyId) -> {
+            dependsOnAttributesField = uiComponents.create(ListEditor.NAME);
+            dependsOnAttributesField.setDatasource(datasource, "configuration.dependsOnCategoryAttributes");
+            dependsOnAttributesField.setWidth(fieldWidth);
+            dependsOnAttributesField.setFrame(frame);
+            dependsOnAttributesField.setItemType(ListEditor.ItemType.ENTITY);
+            dependsOnAttributesField.setEntityName("sys$CategoryAttribute");
 
-            return recalculationHBoxLayoutField;
-        });
-
-        recalculationSettingsFieldGroup.addCustomField("configuration.dependentCategoryAttributes", (datasource, propertyId) -> {
-            dependentAttributesField = uiComponents.create(ListEditor.NAME);
-            dependentAttributesField.setDatasource(datasource, "configuration.dependentCategoryAttributes");
-            dependentAttributesField.setWidth(fieldWidth);
-            dependentAttributesField.setFrame(frame);
-            dependentAttributesField.setItemType(ListEditor.ItemType.ENTITY);
-            dependentAttributesField.setEntityName("sys$CategoryAttribute");
-
-            return dependentAttributesField;
+            return dependsOnAttributesField;
         });
     }
 
@@ -894,7 +876,9 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
         }
     }
 
-    protected List<CategoryAttribute> getCategoryAttributes() {
-        return attributeDs.getItem().getCategory().getCategoryAttrs();
+    protected List<CategoryAttribute> getCategoryAttributesOptionsLists() {
+        List<CategoryAttribute> optionsList = new ArrayList<>(attributeDs.getItem().getCategory().getCategoryAttrs());
+        optionsList.remove(attributeDs.getItem());
+        return optionsList;
     }
 }

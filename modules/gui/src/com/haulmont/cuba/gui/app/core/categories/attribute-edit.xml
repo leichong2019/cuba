@@ -108,8 +108,15 @@
             <tab id="recalculationSettings" caption="msg://caption.recalculationSettingsTab" spacing="true"  margin="true">
                 <fieldGroup id="recalculationSettingsFieldGroup" datasource="attributeDs" width="100%">
                     <column>
-                        <field id="configuration.dependentCategoryAttributes" custom="true" width="100%"/>
-                        <field id="configuration.recalculationGroovyScript" custom="true" width="100%"/>
+                        <field id="configuration.dependsOnCategoryAttributes" custom="true" width="100%"/>
+                        <field id="recalculationGroovyScript" property="recalculationGroovyScript" width="100%">
+                            <sourceCodeEditor highlightActiveLine="false"
+                                              showGutter="false"
+                                              mode="Groovy"
+                                              property="recalculationGroovyScript"
+                                              datasource="configurationDs"
+                                              caption="msg://com.haulmont.cuba.core.entity/CategoryAttributeConfiguration.recalculationGroovyScript"/>
+                        </field>
                     </column>
                 </fieldGroup>
             </tab>

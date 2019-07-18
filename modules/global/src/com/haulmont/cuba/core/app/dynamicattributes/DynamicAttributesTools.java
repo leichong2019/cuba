@@ -20,8 +20,8 @@ import com.google.common.base.Joiner;
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.chile.core.model.MetaPropertyPath;
+import com.haulmont.cuba.core.entity.BaseGenericIdEntity;
 import com.haulmont.cuba.core.entity.CategoryAttribute;
-import com.haulmont.cuba.core.entity.CategoryAttributeValue;
 import com.haulmont.cuba.core.global.MetadataTools;
 import org.springframework.stereotype.Component;
 
@@ -99,48 +99,44 @@ public class DynamicAttributesTools {
     }
 
     /**
-     * Makes a deep copy of the source dynamic attributes. All CategoryAttributeValues will be copied.
-     * For collection CategoryAttributeValues all child CAVs will be copied as well.
+     * Returns all independent (that does not have any 'depends on' attributes) dynamic attributes for given entity.
      */
-    public Map<String, CategoryAttributeValue> copyDynamicAttributes(Map<String, CategoryAttributeValue> source) {
+    public Collection<CategoryAttribute> getIndependentCategoryAttributes(BaseGenericIdEntity entity) {
+        Collection<CategoryAttribute> attributes = dynamicAttributes.getAttributesForMetaClass(entity.getMetaClass());
 
-        Map<String, CategoryAttributeValue> copiedDynamicAttributes = new HashMap<>();
-
-        for (Map.Entry<String, CategoryAttributeValue> entry : source.entrySet()) {
-            copiedDynamicAttributes.put(entry.getKey(), copyCategoryAttributeValue(entry.getValue()));
+        if (attributes == null || attributes.isEmpty()) {
+            return Collections.emptyList();
         }
 
-        return copiedDynamicAttributes;
-    }
+        Set<CategoryAttribute> independentAttributes = new HashSet<>();
 
-    /**
-     * Makes a deep copy of the source CategoryAttributeValue. All referenced entities and collections will be copied as well.
-     */
-    public CategoryAttributeValue copyCategoryAttributeValue(CategoryAttributeValue source) {
-        if (Boolean.TRUE.equals(source.getCategoryAttribute().getIsCollection())){
-            return copyCollectionCAV(source);
-        } else {
-            return metadataTools.deepCopy(source);
-        }
-    }
-
-    protected CategoryAttributeValue copyCollectionCAV(CategoryAttributeValue source) {
-        CategoryAttributeValue destination = metadataTools.deepCopy(source);
-        List<CategoryAttributeValue> copiedChildValues = null;
-
-        if (destination.getChildValues() != null) {
-            copiedChildValues = new ArrayList<>();
-            for (CategoryAttributeValue childValue : destination.getChildValues()) {
-                CategoryAttributeValue copiedChildValue = metadataTools.deepCopy(childValue);
-                copiedChildValue.setParent(destination);
-                copiedChildValues.add(copiedChildValue);
+        for (CategoryAttribute attribute : attributes) {
+            if (attribute.getConfiguration().getDependsOnCategoryAttributes().isEmpty()) {
+                independentAttributes.add(attribute);
             }
         }
 
-        destination.setChildValues(copiedChildValues);
-        if (source.getTransientCollectionValue() != null) {
-            destination.setTransientCollectionValue(new ArrayList<>(source.getTransientCollectionValue()));
+        return independentAttributes;
+    }
+
+    /**
+     * Returns collection of dependent attributes for given category attribute.
+     */
+    public Collection<CategoryAttribute> getDependentCategoryAttributes(CategoryAttribute attribute) {
+        Collection<CategoryAttribute> attributes = attribute.getCategory().getCategoryAttrs();
+
+        if (attributes == null || attributes.isEmpty()) {
+            return Collections.emptyList();
         }
-        return destination;
+
+        Set<CategoryAttribute> dependentAttributes = new HashSet<>();
+
+        for (CategoryAttribute attr : attributes) {
+            if (attr.getConfiguration().getDependsOnCategoryAttributes().contains(attribute)) {
+                dependentAttributes.add(attr);
+            }
+        }
+
+        return dependentAttributes;
     }
 }

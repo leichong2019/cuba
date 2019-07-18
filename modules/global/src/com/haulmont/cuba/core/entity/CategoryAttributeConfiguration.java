@@ -19,16 +19,14 @@ package com.haulmont.cuba.core.entity;
 import com.google.common.base.Strings;
 import com.haulmont.chile.core.annotations.MetaClass;
 import com.haulmont.chile.core.annotations.MetaProperty;
+import com.haulmont.cuba.core.app.dynamicattributes.DynamicAttributesTools;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.DataManager;
 
 import javax.persistence.Transient;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @MetaClass(name = "sys$CategoryAttributeConfiguration")
@@ -38,6 +36,8 @@ public class CategoryAttributeConfiguration extends BaseGenericIdEntity<String> 
     private static final long serialVersionUID = 2670605418267938507L;
 
     protected transient DataManager dataManager;
+
+    protected transient DynamicAttributesTools dynamicAttributesTools;
 
     protected transient CategoryAttribute categoryAttribute;
 
@@ -79,12 +79,16 @@ public class CategoryAttributeConfiguration extends BaseGenericIdEntity<String> 
     @MetaProperty
     protected String recalculationGroovyScript;
 
+    @MetaProperty
     @Transient
-    protected List<UUID> dependentCategoryAttributesIds;
+    protected transient Collection<CategoryAttribute> dependentCategoryAttributes;
+
+    @Transient
+    protected List<UUID> dependsOnCategoryAttributesIds;
 
     @MetaProperty
     @Transient
-    protected transient List<CategoryAttribute> dependentCategoryAttributes;
+    protected transient List<CategoryAttribute> dependsOnCategoryAttributes;
 
     public Integer getMinInt() {
         return minInt;
@@ -214,32 +218,40 @@ public class CategoryAttributeConfiguration extends BaseGenericIdEntity<String> 
         this.recalculationGroovyScript = recalculationGroovyScript;
     }
 
-    public List<CategoryAttribute> getDependentCategoryAttributes() {
-        if (dependentCategoryAttributesIds == null || dependentCategoryAttributesIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-
+    public Collection<CategoryAttribute> getDependentCategoryAttributes() {
         if (dependentCategoryAttributes == null) {
-            dependentCategoryAttributes = getDataManager().load(CategoryAttribute.class)
-                    .ids(dependentCategoryAttributesIds)
-                    .list();
+            dependentCategoryAttributes = getDynamicAttributesTools().getDependentCategoryAttributes(categoryAttribute);
         }
 
         return dependentCategoryAttributes;
     }
 
-    public void setDependentCategoryAttributes(List<CategoryAttribute> dependentCategoryAttributes) {
-        if (dependentCategoryAttributes == null) {
-            this.dependentCategoryAttributesIds = null;
-            this.dependentCategoryAttributes = null;
+    public List<CategoryAttribute> getDependsOnCategoryAttributes() {
+        if (dependsOnCategoryAttributesIds == null || dependsOnCategoryAttributesIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        if (dependsOnCategoryAttributes == null) {
+            dependsOnCategoryAttributes = getDataManager().load(CategoryAttribute.class)
+                    .ids(dependsOnCategoryAttributesIds)
+                    .list();
+        }
+
+        return dependsOnCategoryAttributes;
+    }
+
+    public void setDependsOnCategoryAttributes(List<CategoryAttribute> dependsOnCategoryAttributes) {
+        if (dependsOnCategoryAttributes == null) {
+            this.dependsOnCategoryAttributesIds = null;
+            this.dependsOnCategoryAttributes = null;
             return;
         }
 
-        this.dependentCategoryAttributesIds = dependentCategoryAttributes.stream()
+        this.dependsOnCategoryAttributesIds = dependsOnCategoryAttributes.stream()
                 .map(BaseUuidEntity::getId)
                 .collect(Collectors.toList());
 
-        this.dependentCategoryAttributes = dependentCategoryAttributes;
+        this.dependsOnCategoryAttributes = dependsOnCategoryAttributes;
     }
 
     public Boolean isReadOnly() {
@@ -264,5 +276,12 @@ public class CategoryAttributeConfiguration extends BaseGenericIdEntity<String> 
             dataManager = AppBeans.get(DataManager.NAME);
         }
         return dataManager;
+    }
+
+    private DynamicAttributesTools getDynamicAttributesTools() {
+        if (dynamicAttributesTools == null) {
+            dynamicAttributesTools = AppBeans.get(DynamicAttributesTools.NAME);
+        }
+        return dynamicAttributesTools;
     }
 }
